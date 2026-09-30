@@ -377,7 +377,7 @@
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
                         <button id="uploadBtn" onclick="uploadDataToGitHub()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
                             <i class="fa-brands fa-github text-yellow-300 text-lg"></i>
-                            <span>同步 / 上載成績到 GitHub (scores.json)</span>
+                            <span>同步 / 上載成績</span>
                         </button>
                     </div>
                     <div id="uploadStatus" class="hidden max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold"></div>
@@ -385,7 +385,7 @@
             </div>
         </section>
 
-        <!-- ================= 3A99 TEACHER DASHBOARD VIEW ================= -->
+        <!-- 3A99 TEACHER DASHBOARD VIEW -->
         <section id="teacherView" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-300 shadow-xl bg-card">
                 
@@ -395,11 +395,11 @@
                         <div class="flex items-center gap-2">
                             <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
                             <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-                                🎓教師管理控制台 (GitHub 數據總覽)
+                                🎓教師管理控制台 (GitHub 雲端數據總覽)
                             </h2>
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
-                            實時彙整本機 (LocalStorage) 與 GitHub 儲存庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄
+                            實時讀取並彙整 GitHub 儲存庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄（已取消讀取本地 LocalStorage 數據）
                         </p>
                     </div>
                     
@@ -587,13 +587,13 @@
         let currentQuestions = [];
         let allStudentsDataList = [];
 
-        // GitHub Storage Configurations stored in LocalStorage
+        // GitHub Storage Configurations with pre-filled default values
         let GH_CONFIG = {
-            owner: localStorage.getItem('gh_owner') || '',
-            repo: localStorage.getItem('gh_repo') || '',
+            owner: localStorage.getItem('gh_owner') || 'leungcw-git',
+            repo: localStorage.getItem('gh_repo') || 'SEN-Chinese-Game-P3-2-',
             branch: localStorage.getItem('gh_branch') || 'main',
             filePath: localStorage.getItem('gh_path') || 'scores.json',
-            token: localStorage.getItem('gh_token') || ''
+            token: localStorage.getItem('gh_token') || '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'
         };
 
         function speakText(text) {
@@ -768,7 +768,7 @@
             if (uploadBtn) {
                 uploadBtn.disabled = true;
                 uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在同步數據到 GitHub...';
+                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在同步數據...';
             }
 
             if (!GH_CONFIG.owner || !GH_CONFIG.repo || !GH_CONFIG.token) {
@@ -783,7 +783,7 @@
                 if (uploadBtn) {
                     uploadBtn.disabled = false;
                     uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績到 GitHub (scores.json)</span>';
+                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績</span>';
                 }
                 return;
             }
@@ -863,7 +863,7 @@
                 if (putRes.ok) {
                     if (uploadStatus) {
                         uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功同步到 GitHub 雲端！(${targetClass} 班 ${targetId} 號 - 完成: ${totalAnsweredCount}題, 得分: ${score})`;
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功同步到雲端！(${targetClass} 班 ${targetId} 號 - 完成: ${totalAnsweredCount}題, 得分: ${score})`;
                         uploadStatus.classList.remove('hidden');
                     }
                     speakText(`成功上載至 GitHub！目前完成 ${totalAnsweredCount} 題，得分 ${score} 分！`);
@@ -885,14 +885,15 @@
                 if (uploadBtn) {
                     uploadBtn.disabled = false;
                     uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績到 GitHub (scores.json)</span>';
+                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績</span>';
                 }
             }
         }
 
-        // Fetch scores on student login
+        // Fetch scores on student login (Directly from GitHub scores.json)
         async function fetchStudentScoresOnLogin() {
-            loadStudentLocalData();
+            totalAnsweredCount = 0;
+            score = 0;
 
             const remoteScores = await fetchGitHubScoresFile();
             if (remoteScores && Array.isArray(remoteScores)) {
@@ -905,9 +906,8 @@
                 );
 
                 if (matched) {
-                    totalAnsweredCount = Math.max(totalAnsweredCount, matched.totalAnsweredCount || 0);
-                    score = Math.max(score, matched.score || 0);
-                    saveStudentLocalData();
+                    totalAnsweredCount = matched.totalAnsweredCount || 0;
+                    score = matched.score || 0;
                 }
             }
 
@@ -919,34 +919,7 @@
         async function fetchAllStudentsForTeacher() {
             const studentMap = new Map();
 
-            // 1. Gather all LocalStorage records
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('magic_student_')) {
-                    try {
-                        const item = JSON.parse(localStorage.getItem(key));
-                        if (item && item.studentClass && item.studentId) {
-                            const formattedClass = item.studentClass.toUpperCase().trim();
-                            const formattedId = item.studentId.toString().padStart(2, '0').trim();
-                            const uniqueKey = `${formattedClass}_${formattedId}`;
-
-                            if (uniqueKey !== '3A_99') {
-                                studentMap.set(uniqueKey, {
-                                    studentClass: formattedClass,
-                                    studentId: formattedId,
-                                    totalAnsweredCount: parseInt(item.totalAnsweredCount, 10) || 0,
-                                    score: parseInt(item.score, 10) || 0,
-                                    source: '本機 (LocalStorage)'
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error reading local storage item", key, e);
-                    }
-                }
-            }
-
-            // 2. Fetch remote scores from GitHub scores.json
+            // Fetch remote scores strictly from GitHub scores.json
             const remoteScores = await fetchGitHubScoresFile();
             if (remoteScores && Array.isArray(remoteScores)) {
                 remoteScores.forEach(item => {
@@ -959,20 +932,13 @@
                         const count = parseInt(item.totalAnsweredCount, 10) || 0;
                         const studentScore = parseInt(item.score, 10) || 0;
 
-                        if (studentMap.has(uniqueKey)) {
-                            const existing = studentMap.get(uniqueKey);
-                            existing.totalAnsweredCount = Math.max(existing.totalAnsweredCount, count);
-                            existing.score = Math.max(existing.score, studentScore);
-                            existing.source = 'GitHub + 本機';
-                        } else {
-                            studentMap.set(uniqueKey, {
-                                studentClass: rawClass,
-                                studentId: rawId,
-                                totalAnsweredCount: count,
-                                score: studentScore,
-                                source: 'GitHub (scores.json)'
-                            });
-                        }
+                        studentMap.set(uniqueKey, {
+                            studentClass: rawClass,
+                            studentId: rawId,
+                            totalAnsweredCount: count,
+                            score: studentScore,
+                            source: 'GitHub (scores.json)'
+                        });
                     }
                 });
             }
