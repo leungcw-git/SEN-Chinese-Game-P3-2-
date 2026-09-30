@@ -98,12 +98,10 @@
                 </div>
             </div>
 
-            <!-- Accessibility Toolbar for SpLD students -->
+            <!-- Accessibility & Student Status Toolbar -->
             <div class="flex items-center gap-2 sm:gap-3 bg-emerald-700/60 p-1.5 rounded-xl border border-emerald-500/30">
-                <!-- Sync Indicator Badge -->
-                <div id="topSyncStatus" class="hidden sm:flex items-center gap-1.5 bg-emerald-900/50 px-2.5 py-1 rounded-lg text-xs font-semibold text-emerald-200">
-                    <i id="topSyncIcon" class="fa-solid fa-table-cells text-yellow-300"></i>
-                    <span id="topSyncText">已連結 Google Sheet</span>
+                <div id="studentBadgeHeader" class="hidden text-xs bg-yellow-400 text-emerald-950 px-2 py-1 rounded-lg font-bold">
+                    <i class="fa-solid fa-user-graduate mr-1"></i><span id="headerStudentInfo">3A (01)</span>
                 </div>
 
                 <button onclick="toggleVoiceSpeed()" title="調整語音速度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs flex items-center gap-1 transition">
@@ -122,7 +120,7 @@
                     <i class="fa-solid fa-circle-half-stroke text-yellow-300"></i>
                 </button>
 
-                <button onclick="switchView('report')" title="學習進度報告" class="px-2.5 py-1 bg-yellow-400 text-emerald-950 hover:bg-yellow-300 rounded-lg text-xs font-bold transition shadow">
+                <button id="reportNavBtn" onclick="switchView('report')" title="學習進度報告" class="hidden px-2.5 py-1 bg-yellow-400 text-emerald-950 hover:bg-yellow-300 rounded-lg text-xs font-bold transition shadow">
                     <i class="fa-solid fa-trophy"></i>
                     <span class="hidden md:inline ml-1">進度</span>
                 </button>
@@ -133,19 +131,17 @@
     <main id="appContainer" class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 dyslexia-wide-spacing">
 
         <!-- ================= 0. 學生登入界面 ================= -->
-        <section id="loginView" class="max-w-md mx-auto my-8 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl bg-card text-center space-y-6">
-            <div class="space-y-2">
-                <div class="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-3xl mx-auto shadow">
-                    🧙‍♂️
-                </div>
-                <h1 class="text-2xl font-extrabold text-emerald-800">字詞小魔法師</h1>
-                <p class="text-xs text-slate-500">小三中文課堂詞語輔導遊戲</p>
+        <section id="loginView" class="max-w-md mx-auto my-8 bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-xl bg-card">
+            <div class="text-center mb-6">
+                <div class="text-5xl mb-2">🧙‍♂️</div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-emerald-800">字詞小魔法師</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">小三中文課堂詞語輔導遊戲</p>
             </div>
 
-            <div class="space-y-4 text-left">
-                <div class="form-group">
-                    <label for="student-class" class="block text-sm font-bold text-slate-700 mb-1">選擇班別：</label>
-                    <select id="student-class" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800 font-semibold text-sm">
+            <div class="space-y-4">
+                <div>
+                    <label for="studentClass" class="block text-sm font-bold text-slate-700 mb-1">選擇班別：</label>
+                    <select id="studentClass" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="">-- 請選擇班別 --</option>
                         <option value="3A">3A</option>
                         <option value="3B">3B</option>
@@ -155,45 +151,31 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="student-id" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (兩位數字)：</label>
-                    <!-- SEN 友善設計：限制只能輸入數字，最大2位數 -->
-                    <input type="number" id="student-id" placeholder="例如：05" min="1" max="30" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800 font-semibold text-sm">
+                <div>
+                    <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30)：</label>
+                    <input type="number" id="studentId" placeholder="例如：05" min="1" max="30" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
+
+                <button onclick="submitLogin()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-lg shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                    <span>開始魔法挑戰 🌳📖</span>
+                    <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
+                </button>
             </div>
 
-            <div id="login-error" class="hidden text-xs font-bold text-rose-500 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
-                請先選擇班別並輸入學號！
-            </div>
-
-            <!-- Login Auto Sync Banner -->
-            <div class="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-rotate text-emerald-600 animate-spin" id="loginSyncIcon" style="display: none;"></i>
-                <i class="fa-solid fa-file-csv text-emerald-600" id="loginCloudIcon"></i>
-                <span id="loginSyncText">登入後將自動從 Google Sheet 載入學習進度</span>
-            </div>
-
-            <button onclick="submitLogin()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-extrabold text-base shadow-lg transition card-bounce flex items-center justify-center gap-2">
-                <span>登入並自動讀取 Google Sheet</span> 🌳📖
-            </button>
+            <div id="loginStatus" class="mt-4 hidden p-3 rounded-xl text-xs font-bold text-center"></div>
         </section>
 
-        <!-- ================= 1. MAIN MENU VIEW ================= -->
+        <!-- ================= MAIN MENU VIEW ================= -->
         <section id="menuView" class="hidden space-y-6">
             <!-- Welcome Banner -->
             <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
                 <div class="relative z-10">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="bg-yellow-400 text-emerald-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">小學三年級</span>
-                        <span id="userBannerBadge" class="bg-emerald-800/80 text-yellow-200 text-xs font-bold px-3 py-1 rounded-full border border-emerald-400/40">
-                            學生：未登入
-                        </span>
-                    </div>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">歡迎來到漢字詞語森林！</h2>
+                    <span class="bg-yellow-400 text-emerald-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">小學三年級</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 mb-2">歡迎來到漢字詞語森林！</h2>
                     <p class="text-emerald-100 text-sm sm:text-base max-w-xl">
-                        梁老師為大家準備了全新詞語魔法挑戰！每次將從課文題庫中隨機抽取 <strong>10 道題目</strong>，登入時會<strong>自動從 Google Sheet 載入學生的學習進度</strong>！
+                        梁老師為大家準備了全新詞語魔法挑戰！點擊關卡，每次將從課文題庫中隨機抽取 <strong>10 道題目</strong>，一起聽語音、學詞義與填空！
                     </p>
-                    <button onclick="speakText('歡迎來到漢字詞語森林！每次為你隨機抽取十道題目，登入時會自動從 Google Sheet 載入學習記錄！')" class="mt-4 bg-emerald-700/80 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-emerald-400/40 transition">
+                    <button onclick="speakText('歡迎來到漢字詞語森林！請選擇你想挑戰的關卡，每次會為你隨機抽取十道題目。')" class="mt-4 bg-emerald-700/80 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-emerald-400/40 transition">
                         <i class="fa-solid fa-volume-high text-yellow-300"></i> 聽取說明
                     </button>
                 </div>
@@ -271,7 +253,7 @@
             </div>
         </section>
 
-        <!-- ================= 2. GAMEPLAY ARENA VIEW ================= -->
+        <!-- ================= GAMEPLAY ARENA VIEW ================= -->
         <section id="gameView" class="hidden space-y-6">
             <!-- Top Game Bar -->
             <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm bg-card">
@@ -334,25 +316,19 @@
             </div>
         </section>
 
-        <!-- ================= 3. REPORT / PROGRESS VIEW ================= -->
+        <!-- ================= REPORT / PROGRESS VIEW ================= -->
         <section id="reportView" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg bg-card">
-                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 class="text-2xl font-extrabold text-emerald-800 flex items-center gap-2">
                             <i class="fa-solid fa-award text-yellow-500"></i> 我的學習魔法徽章
                         </h2>
-                        <!-- 顯示學生的班別與學號 -->
-                        <div class="text-xs font-bold text-slate-600 mt-1.5 flex items-center gap-2">
-                            <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
-                                班別：<span id="displayStudentClass" class="font-extrabold">--</span>
-                            </span>
-                            <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
-                                學號：<span id="displayStudentId" class="font-extrabold">--</span>
-                            </span>
-                        </div>
+                        <p class="text-xs text-slate-500 mt-1">
+                            學生記錄：<span id="reportStudentInfo" class="font-bold text-emerald-700">-- 班 -- 號</span>
+                        </p>
                     </div>
-                    <button onclick="switchView('menu')" class="self-start sm:self-auto px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
+                    <button onclick="switchView('menu')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
                         <i class="fa-solid fa-arrow-left"></i> 返回主頁
                     </button>
                 </div>
@@ -394,9 +370,9 @@
 
                 <div class="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
-                        <button id="uploadBtn" onclick="fetchGoogleSheetData('manual')" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-rotate text-yellow-300 text-lg"></i>
-                            <span>從 Google Sheet 重新整理／讀取進度</span>
+                        <button id="uploadBtn" onclick="uploadDataToGoogleSheet()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-lg"></i>
+                            <span>上載 / 更新資料到 Google Sheet</span>
                         </button>
                     </div>
                     <!-- 提示訊息框（自動上載狀態） -->
@@ -409,7 +385,7 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
-        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 Google 自動雲端同步</p>
+        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援廣東話多感官學習</p>
     </footer>
 
     <!-- JavaScript Game Logic -->
@@ -426,125 +402,127 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
-        // Question Banks for P3 Vocabulary
+        // Google Sheet CSV Export Endpoint
+        const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
+        const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
+        // 可選：Google Apps Script Web App 上載網址
+        let GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8s52sxqXDrF4tBXUjD2mOfuAQf02JIhusEPdIEKC2mYAqfoXPBHLIhlKqbK690Zlm2w/exec';
+
+        // LEVEL 1: Sentence Completion & Context Match
         const level1Bank = [
-            { sentence: "這天天氣【（ ）】，爸爸帶我們到公園野餐。", options: ["晴朗", "眼睛", "邀請", "體會"], correct: "晴朗", hint: "形容天氣好，陽光充足。" },
-            { sentence: "小明做事總是特別【（ ）】，從不草率馬虎。", options: ["認真", "隨便", "驚慌", "焦急"], correct: "認真", hint: "態度嚴謹、不敷衍。" },
-            { sentence: "老師【（ ）】我們下週一起去參觀科學館。", options: ["邀請", "拒絕", "懷疑", "失望"], correct: "邀請", hint: "禮貌地請別人出席或參加活動。" },
-            { sentence: "小狗在花園裡【（ ）】地奔跑玩耍。", options: ["歡快", "難過", "害怕", "憤怒"], correct: "歡快", hint: "高興快樂的心情。" },
-            { sentence: "我們要學會【（ ）】父母照顧我們的辛苦。", options: ["體會", "忘記", "忽略", "打擾"], correct: "體會", hint: "親身感受並理解。" },
-            { sentence: "經過多次練習，小華【（ ）】掌握了跳繩的技巧。", options: ["終於", "突然", "可能", "大概"], correct: "終於", hint: "經過努力後最終實現。" },
-            { sentence: "看到同學受傷，小麗【（ ）】地上前扶起他。", options: ["主動", "被動", "猶豫", "冷淡"], correct: "主動", hint: "不需別人要求，自己自動去做。" },
-            { sentence: "圖書館內十分【（ ）】，大家都靜靜地看書。", options: ["安靜", "熱鬧", "吵鬧", "喧吵"], correct: "安靜", hint: "沒有聲音，不吵鬧。" },
-            { sentence: "這本書的【（ ）】非常豐富，吸引很多人閱讀。", options: ["內容", "外表", "價格", "包裝"], correct: "內容", hint: "事物內部所包含的事理或情節。" },
-            { sentence: "媽媽煮了【（ ）】的晚餐，大家吃得很開心。", options: ["豐盛", "簡單", "稀少", "枯燥"], correct: "豐盛", hint: "食物非常豐富多樣。" },
-            { sentence: "只要我們【（ ）】努力，就一定能取得好成績。", options: ["堅持", "放棄", "退縮", "懷疑"], correct: "堅持", hint: "堅定不移地繼續做下去。" },
-            { sentence: "弟弟對世界充滿【（ ）】，總是喜歡問問題。", options: ["好奇", "厭倦", "害怕", "悲傷"], correct: "好奇", hint: "對新鮮事物感到有興趣。" }
+            { id: 'l1_1', sentence: '聖誕節聯歡會上，同學們互相【（ ）】禮物。', correct: '交換', options: ['交換', '交談', '交易', '交接'], hint: '指彼此都把自己的東西給對方或相互調換。' },
+            { id: 'l1_2', sentence: '只要【（ ）】硬幣，郵票就會自動出來。', correct: '投進', options: ['投進', '丟掉', '拿出', '塞滿'], hint: '指放進去或扔進去。' },
+            { id: 'l1_3', sentence: '她【（ ）】地接過獎狀，便急匆匆地返回座位。', correct: '羞澀', options: ['羞澀', '大方', '慌張', '驕傲'], hint: '指因為害羞而態度不自然。' },
+            { id: 'l1_4', sentence: '一聽見腳步聲，偉華便【（ ）】離開。', correct: '慌忙', options: ['慌忙', '慢慢', '勇敢', '高興'], hint: '指慌張匆忙的樣子。' },
+            { id: 'l1_5', sentence: '美芳堅決【（ ）】我們的幫忙，要憑自己的力量完成任務。', correct: '拒絕', options: ['拒絕', '接受', '答應', '邀請'], hint: '指不接受或不答應別人的要求。' },
+            { id: 'l1_6', sentence: '爸爸答應我的【（ ）】，帶我參加夏令營。', correct: '要求', options: ['要求', '禮物', '問題', '命令'], hint: '指提出的具體請求。' },
+            { id: 'l1_7', sentence: '捐款助人是善行，但和【（ ）】是有分別的。', correct: '施捨', options: ['施捨', '交換', '借用', '買賣'], hint: '指無條件地送給窮人或出家人的財物。' },
+            { id: 'l1_8', sentence: '他出門時十分【（ ）】，連大門也沒有鎖好。', correct: '匆忙', options: ['匆忙', '熱鬧', '安靜', '仔細'], hint: '形容急急忙忙。' },
+            { id: 'l1_9', sentence: '袋子破了，裏面的橙子【（ ）】了一地。', correct: '跌', options: ['跌', '跑', '飛', '藏'], hint: '指物體向下落下。' },
+            { id: 'l1_10', sentence: '當錢包失而復得時，永明向拾獲錢包的同學連聲【（ ）】。', correct: '道謝', options: ['道謝', '道歉', '祝賀', '問好'], hint: '指以言語向人表示謝意。' },
+            { id: 'l1_11', sentence: '早晨清脆的鳥鳴聲，令我的心情格外【（ ）】。', correct: '歡悅', options: ['歡悅', '寂寞', '生氣', '害怕'], hint: '指心情愉快喜悅。' },
+            { id: 'l1_12', sentence: '今晚爸媽去晚宴，幸好有小狗陪着我，我才不感到【（ ）】。', correct: '寂寞', options: ['寂寞', '熱鬧', '歡悅', '慌忙'], hint: '形容孤單冷清。' },
+            { id: 'l1_13', sentence: '燒烤爐的火【（ ）】，大家也談得愈來愈高興。', correct: '愈燒愈旺', options: ['愈燒愈旺', '漸漸熄滅', '越變越小', '忽大忽小'], hint: '指火勢愈來愈熾熱猛烈。' },
+            { id: 'l1_14', sentence: '這個儲物室堆滿了【（ ）】，又髒又亂。', correct: '雜物', options: ['雜物', '寶物', '玩具', '食物'], hint: '指眾多零星無用的物品。' },
+            { id: 'l1_15', sentence: '春天來了，小河裏的冰塊也開始【（ ）】了。', correct: '融化', options: ['融化', '結冰', '變硬', '蒸發'], hint: '冰雪受熱變成水。' },
+            { id: 'l1_16', sentence: '天突然下起雨來，途人【（ ）】找地方躲避。', correct: '紛紛', options: ['紛紛', '漸漸', '偷偷', '偶爾'], hint: '指接二連三地。' },
+            { id: 'l1_17', sentence: '岳飛是宋代名將，是一位造福百姓的【（ ）】。', correct: '英雄', options: ['英雄', '懦夫', '士兵', '百姓'], hint: '指才能超羣、具遠大抱負及勇武過人的人。' }
         ];
 
+        // LEVEL 2: Visual Discrimination & Confused Characters
         const level2Bank = [
-            { sentence: "今天天氣（ ），適合戶外活動。", options: ["晴", "睛"], correct: "晴", hint: "日字旁表示與天氣日光有關。" },
-            { sentence: "我的眼（ ）有點不舒服，需要休息。", options: ["睛", "晴"], correct: "睛", hint: "目字旁表示與眼睛視覺有關。" },
-            { sentence: "老師正在仔細批改我們的試（ ）。", options: ["卷", "券"], correct: "卷", hint: "試卷、考卷用「卷」。" },
-            { sentence: "爸爸買了兩張電影（ ）。", options: ["券", "卷"], correct: "券", hint: "入場券、優惠券用「券」。" },
-            { sentence: "小明勇敢地（ ）出問題向老師請教。", options: ["提", "題"], correct: "提", hint: "手字旁「提」表示動作（提出）。" },
-            { sentence: "這道數學（ ）非常考驗我們的思維。", options: ["題", "提"], correct: "題", hint: "頁字旁「題」表示題目、問題。" },
-            { sentence: "時間（ ）經不早了，我們快點出發吧。", options: ["已", "己"], correct: "已", hint: "「已」半封口，表示已經。" },
-            { sentence: "我們要學會自己照顧自（ ）。", options: ["己", "已"], correct: "己", hint: "「己」開口，表示自己。" },
-            { sentence: "哥哥發（ ）了一本很有趣的圖書。", options: ["現", "線"], correct: "現", hint: "「發現」用現。" },
-            { sentence: "這根毛（ ）非常結實。", options: ["線", "現"], correct: "線", hint: "「毛線、線條」用線。" }
+            { id: 'l2_1', sentence: '聖誕節聯歡會上，同學們互相交（ ）禮物。', correct: '換', options: ['換', '喚', '煥', '渙'], hint: '「交換」用手部的「換」；「呼喚」用口字旁的「喚」。' },
+            { id: 'l2_2', sentence: '只要投（ ）硬幣，郵票就會自動出來。', correct: '進', options: ['進', '近', '盡', '勁'], hint: '進入、投進是辶（走之底）的「進」；距離近是「近」。' },
+            { id: 'l2_3', sentence: '她羞（ ）地接過獎狀，便急匆匆地返回座位。', correct: '澀', options: ['澀', '濕', '泣', '溫'], hint: '害羞態度不自然是「澀」（氵旁）。' },
+            { id: 'l2_4', sentence: '一聽見腳步聲，偉華便（ ）忙離開。', correct: '慌', options: ['慌', '謊', '荒', '晃'], hint: '慌張與心情有關用忄（心字旁）的「慌」；說謊用語字旁。' },
+            { id: 'l2_5', sentence: '美芳堅決（ ）絕我們的幫忙，要憑自己的力量完成任務。', correct: '拒', options: ['拒', '距', '鋸', '矩'], hint: '拒絕用手動作（扌手字旁）的「拒」；距離用𧾷（足字旁）。' },
+            { id: 'l2_6', sentence: '爸爸答應我的要（ ），帶我參加夏令營。', correct: '求', options: ['求', '球', '仇', '酋'], hint: '要求的「求」表示請求；皮球的「球」有王字旁。' },
+            { id: 'l2_7', sentence: '捐款助人是善行，但和施（ ）是有分別的。', correct: '捨', options: ['捨', '拾', '恰', '洽'], hint: '施捨、捨得是「捨」；撿拾是手字旁「拾」。' },
+            { id: 'l2_8', sentence: '他出門時十分（ ）忙，連大門也沒有鎖好。', correct: '匆', options: ['匆', '勿', '聰', '充'], hint: '匆忙中間有一點「匆」；請勿中間無點「勿」。' },
+            { id: 'l2_9', sentence: '袋子破了，裏面的橙子（ ）了一地。', correct: '跌', options: ['跌', '缺', '鐵', '秩'], hint: '跌倒與腳有關用𧾷（足字旁）的「跌」。' },
+            { id: 'l2_10', sentence: '當錢包失而復得時，永明向拾獲錢包的同學連聲道（ ）。', correct: '謝', options: ['謝', '射', '寫', '卸'], hint: '道謝是以言語表示，用言字旁「謝」。' },
+            { id: 'l2_11', sentence: '早晨清脆的鳥鳴聲，令我的心情格外歡（ ）。', correct: '悅', options: ['悅', '越', '閱', '說'], hint: '喜悅心情用忄（心字旁）的「悅」。' },
+            { id: 'l2_12', sentence: '今晚爸媽去晚宴，幸好有小狗陪着我，我才不感到寂（ ）。', correct: '寞', options: ['寞', '漠', '模', '莫'], hint: '寂寞用宀（寶蓋頭）的「寞」；沙漠用氵（水字旁）。' },
+            { id: 'l2_13', sentence: '燒烤爐的火愈燒愈（ ），大家也談得愈來愈高興。', correct: '旺', options: ['旺', '網', '往', '汪'], hint: '火勢旺盛用日字旁的「旺」。' },
+            { id: 'l2_14', sentence: '這個儲物室堆滿了（ ）物，又髒又亂。', correct: '雜', options: ['雜', '砸', '札', '咋'], hint: '雜物、複雜是「雜」。' },
+            { id: 'l2_15', sentence: '春天來了，小河裏的冰塊也開始（ ）化了。', correct: '融', options: ['融', '溶', '熔', '榮'], hint: '冰雪融化多用「融」；物質溶解用「溶」；高溫熔化用「熔」。' },
+            { id: 'l2_16', sentence: '天突然下起雨來，途人（ ）紛找地方躲避。', correct: '紛', options: ['紛', '粉', '份', '吩'], hint: '紛紛是用絞絲旁「紛」；麵粉是用米字旁「粉」。' },
+            { id: 'l2_17', sentence: '岳飛是宋代名將，是一位造福百姓的英（ ）。', correct: '雄', options: ['雄', '熊', '洶', '偉'], hint: '英雄的「雄」右邊是「隹」。' },
+            { id: 'l2_18', sentence: '陽光曬得我睜不開眼（ ）。請選出正確的字詞：', correct: '眼睛', options: ['眼睛', '眼晴', '眼鏡', '眼靖'], hint: '與視覺有關用「目」字旁（睛）；與陽光有關用「日」字旁（晴）。' },
+            { id: 'l2_19', sentence: '老師在黑板上寫出這道中文（ ）。請選出正確的字詞：', correct: '題目', options: ['題目', '提目', '頁目', '體目'], hint: '試題的「題」是「頁」字旁；用手的「提」是手字旁。' },
+            { id: 'l2_20', sentence: '我們（ ）經完成了小三中文練習。請選出正確的「已」：', correct: '已經', options: ['已經', '己經', '巳經', '乙經'], hint: '口訣：半開「已」（已經），全開「己」（自己），全封「巳」。' }
         ];
 
+        // LEVEL 3: Vocabulary Meaning & Definition Matching
         const level3Bank = [
-            { definition: "形容對新鮮事物懷有濃厚的興趣，急切想要知道或了解。", options: ["好奇", "難過", "焦急", "害怕"], correct: "好奇", hint: "充滿探索心。" },
-            { definition: "禮貌地請別人出席活動或來到自己家中。", options: ["邀請", "拒絕", "批評", "感謝"], correct: "邀請", hint: "請別人來參與。" },
-            { definition: "態度認真嚴肅，一點也不馬虎隨便。", options: ["認真", "馬虎", "鬆懈", "輕率"], correct: "認真", hint: "專注不苟且。" },
-            { definition: "親身去感受、體驗並理解其中的道理或感情。", options: ["體會", "忘記", "忽略", "模仿"], correct: "體會", hint: "深刻理解感受。" },
-            { definition: "堅定不移地繼續做下去，不輕易放棄。", options: ["堅持", "放棄", "退縮", "懷疑"], correct: "堅持", hint: "不半途而廢。" },
-            { definition: "環境沒有聲音，非常平靜、不吵鬧。", options: ["安靜", "喧鬧", "嘈雜", "歡騰"], correct: "安靜", hint: "寧靜寂靜。" },
-            { definition: "經過了一段時間或努力後，最終達成結果。", options: ["終於", "突然", "偶然", "立刻"], correct: "終於", hint: "最後、最終。" },
-            { definition: "不用別人指示或要求，自己自發主動去做。", options: ["主動", "被動", "強迫", "順從"], correct: "主動", hint: "自動自發。" }
+            { id: 'l3_1', definition: '【詞義】指「彼此都把自己的東西給對方或相互調換」。', correct: '交換', options: ['交換', '投進', '施捨', '拒絕'], hint: '課文例句：同學們在聖誕節聯歡會上互相交換禮物。' },
+            { id: 'l3_2', definition: '【詞義】指「放進去或扔進去」。', correct: '投進', options: ['投進', '丟棄', '拿走', '擺放'], hint: '課文例句：只要投進硬幣，郵票就會自動出來。' },
+            { id: 'l3_3', definition: '【詞義】形容「因為害羞而態度不自然」。', correct: '羞澀', options: ['羞澀', '慌忙', '勇敢', '驕傲'], hint: '課文例句：她羞澀地接過獎狀，便急匆匆地返回座位。' },
+            { id: 'l3_4', definition: '【詞義】形容「慌張匆忙的樣子」。', correct: '慌忙', options: ['慌忙', '匆忙', '冷靜', '歡悅'], hint: '課文例句：一聽見腳步聲，偉華便慌忙離開。' },
+            { id: 'l3_5', definition: '【詞義】表示「不接受或不答應別人的要求」。', correct: '拒絕', options: ['拒絕', '要求', '道謝', '答應'], hint: '課文例句：美芳堅決拒絕我們的幫忙。' },
+            { id: 'l3_6', definition: '【詞義】指「提出的具體請求」。', correct: '要求', options: ['要求', '建議', '命令', '施捨'], hint: '課文例句：爸爸答應我的要求，帶我參加夏令營。' },
+            { id: 'l3_7', definition: '【詞義】指「無條件地送給窮人或出家人的財物」。', correct: '施捨', options: ['施捨', '交換', '借貸', '買賣'], hint: '課文例句：捐款助人是善行，但和施捨是有分別的。' },
+            { id: 'l3_8', definition: '【詞義】形容「急急忙忙」。', correct: '匆忙', options: ['匆忙', '慌忙', '緩慢', '認真'], hint: '課文例句：他出門時十分匆忙，連大門也沒有鎖好。' },
+            { id: 'l3_9', definition: '【詞義】指「物體向下落下」。', correct: '跌', options: ['跌', '升', '飛', '跑'], hint: '課文例句：袋子破了，裏面的橙子跌了一地。' },
+            { id: 'l3_10', definition: '【詞義】指「以言語向人表示謝意」。', correct: '道謝', options: ['道謝', '道歉', '問候', '告別'], hint: '課文例句：永明向拾獲錢包的同學連聲道謝。' },
+            { id: 'l3_11', definition: '【詞義】形容「心情愉快喜悅」。', correct: '歡悅', options: ['歡悅', '寂寞', '悲傷', '生氣'], hint: '課文例句：早晨清脆的鳥鳴聲，令我的心情格外歡悅。' },
+            { id: 'l3_12', definition: '【詞義】形容「孤單冷清」。', correct: '寂寞', options: ['寂寞', '熱鬧', '歡悅', '安靜'], hint: '課文例句：幸好有小狗陪着我，我才不感到寂寞。' },
+            { id: 'l3_13', definition: '【詞義】指「火勢愈來愈熾熱猛烈」。', correct: '愈燒愈旺', options: ['愈燒愈旺', '漸漸熄滅', '無精打采', '煙霧彌漫'], hint: '課文例句：燒烤爐的火愈燒愈旺，大家也談得愈來愈高興。' },
+            { id: 'l3_14', definition: '【詞義】指「眾多零星無用的物品」。', correct: '雜物', options: ['雜物', '寶物', '工具', '禮物'], hint: '課文例句：這個儲物室堆滿了雜物，又髒又亂。' },
+            { id: 'l3_15', definition: '【詞義】指「冰雪受熱變成水」。', correct: '融化', options: ['融化', '凝固', '蒸發', '凍結'], hint: '課文例句：春天來了，小河裏的冰塊也開始融化了。' },
+            { id: 'l3_16', definition: '【詞義】表示「接二連三地」。', correct: '紛紛', options: ['紛紛', '偶爾', '連忙', '漸漸'], hint: '課文例句：天突然下起雨來，途人紛紛找地方躲避。' },
+            { id: 'l3_17', definition: '【詞義】指「才能超羣、具遠大抱負及勇武過人或造福百姓的人」。', correct: '英雄', options: ['英雄', '百姓', '戰士', '朋友'], hint: '課文例句：岳飛是宋代名將，是一位造福百姓的英雄。' },
+            { id: 'l3_18', definition: '【詞義】形容「陽光充足、沒有雲或少雲的好天氣」。', correct: '晴朗', options: ['晴朗', '熱鬧', '美麗', '勇敢'], hint: '例句：今天天氣晴朗，陽光普照。' }
         ];
 
-        // View Navigation
-        function switchView(viewName) {
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('menuView').classList.add('hidden');
-            document.getElementById('gameView').classList.add('hidden');
-            document.getElementById('reportView').classList.add('hidden');
+        // Speech Synthesis setup for Cantonese (zh-HK)
+        const synth = window.speechSynthesis;
 
-            if (viewName === 'menu') {
-                document.getElementById('menuView').classList.remove('hidden');
-            } else if (viewName === 'game') {
-                document.getElementById('gameView').classList.remove('hidden');
-            } else if (viewName === 'report') {
-                updateReportUI();
-                document.getElementById('reportView').classList.remove('hidden');
-            } else {
-                document.getElementById('loginView').classList.remove('hidden');
-            }
-        }
-
-        // Local Storage Helpers
-        function getStorageKey(cls, id) {
-            return `magic_word_student_${cls.toUpperCase()}_${id}`;
-        }
-
-        function loadStudentLocalData(cls, id) {
-            if (!cls || !id) return;
-            const key = getStorageKey(cls, id);
-            const saved = localStorage.getItem(key);
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    totalAnsweredCount = data.totalAnsweredCount || 0;
-                    score = data.score || 0;
-                } catch (e) {
-                    console.error("Failed to parse local storage", e);
-                    totalAnsweredCount = 0;
-                    score = 0;
-                }
-            } else {
-                totalAnsweredCount = 0;
-                score = 0;
-            }
-        }
-
-        function saveStudentLocalData() {
-            if (!currentStudentClass || !currentStudentId) return;
-            const key = getStorageKey(currentStudentClass, currentStudentId);
-            const data = {
-                class: currentStudentClass,
-                id: currentStudentId,
-                totalAnsweredCount: totalAnsweredCount,
-                score: score,
-                lastUpdated: new Date().toISOString()
-            };
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        // Cantonese Speech Synthesis Helper
         function speakText(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
+            if (!synth) return;
+            synth.cancel();
+
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-HK';
-            utterance.rate = speechSlowMode ? 0.7 : 1.0;
+            utterance.rate = speechSlowMode ? 0.72 : 0.92;
 
-            const voices = window.speechSynthesis.getVoices();
-            const cantoneseVoice = voices.find(v => v.lang === 'zh-HK' || v.lang.includes('HK') || v.lang.includes('yue'));
-            if (cantoneseVoice) {
-                utterance.voice = cantoneseVoice;
+            const voices = synth.getVoices();
+            const hkVoice = voices.find(v => v.lang === 'zh-HK' || v.lang.includes('HK') || v.lang.includes('Cantonese'));
+            if (hkVoice) {
+                utterance.voice = hkVoice;
             }
-            window.speechSynthesis.speak(utterance);
+
+            synth.speak(utterance);
         }
 
-        // Random Sampling & Shuffle Helpers
-        function getRandomQuestions(bank, count) {
-            const shuffled = [...bank].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, Math.min(count, bank.length));
+        // CSV Parser
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/);
+            const result = [];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const row = [];
+                let inQuotes = false;
+                let currentVal = '';
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(currentVal);
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                row.push(currentVal);
+                result.push(row);
+            }
+            return result;
         }
 
+        // Shuffle Utility
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -554,112 +532,65 @@
             return arr;
         }
 
-        // Google Sheet CSV Export Endpoint
-        const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
-        const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
+        function getRandomQuestions(bank, count = 10) {
+            const shuffled = shuffleArray(bank);
+            return shuffled.slice(0, Math.min(count, shuffled.length));
+        }
 
-        // Helper: Robust CSV parser for Google Sheet output
-        function parseCSV(text) {
-            const lines = [];
-            let row = [];
-            let inQuotes = false;
-            let current = '';
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                const next = text[i + 1];
-                if (char === '"') {
-                    if (inQuotes && next === '"') {
-                        current += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === ',' && !inQuotes) {
-                    row.push(current.trim());
-                    current = '';
-                } else if ((char === '\r' || char === '\n') && !inQuotes) {
-                    if (char === '\r' && next === '\n') i++;
-                    row.push(current.trim());
-                    if (row.length > 0 && row.some(cell => cell.length > 0)) {
-                        lines.push(row);
-                    }
-                    row = [];
-                    current = '';
-                } else {
-                    current += char;
+        // Local Storage Helpers
+        function saveStudentLocalData() {
+            if (!currentStudentClass || !currentStudentId) return;
+            const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
+            const data = {
+                studentClass: currentStudentClass,
+                studentId: currentStudentId,
+                totalAnsweredCount: totalAnsweredCount,
+                score: score,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function loadStudentLocalData() {
+            if (!currentStudentClass || !currentStudentId) return;
+            const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    totalAnsweredCount = Math.max(totalAnsweredCount, data.totalAnsweredCount || 0);
+                    score = Math.max(score, data.score || 0);
+                } catch (e) {
+                    console.error("Error reading local data", e);
                 }
             }
-            if (current || row.length > 0) {
-                row.push(current.trim());
-                lines.push(row);
-            }
-            return lines;
         }
 
-        // Helper: Clean & normalize string for matching class and student ID
-        function cleanVal(str) {
-            if (str === null || str === undefined) return '';
-            return String(str).replace(/^"+|"+$/g, '').trim();
-        }
-
-        function normClass(cls) {
-            return cleanVal(cls).toUpperCase();
-        }
-
-        function normId(id) {
-            const cleaned = cleanVal(id);
-            const parsed = parseInt(cleaned, 10);
-            return isNaN(parsed) ? cleaned : String(parsed);
-        }
-
-        // Auto Fetch Student Data from Google Sheet
+        // Fetch Student Data from Google Sheet
         async function fetchGoogleSheetData(mode = 'login') {
-            const uploadBtn = document.getElementById('uploadBtn');
             const uploadStatus = document.getElementById('uploadStatus');
-            const topSyncStatus = document.getElementById('topSyncStatus');
-            const topSyncText = document.getElementById('topSyncText');
-            const topSyncIcon = document.getElementById('topSyncIcon');
 
-            if (!currentStudentClass || !currentStudentId) {
-                if (uploadStatus && mode === 'manual') {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-rose-100 text-rose-800 border border-rose-300';
-                    uploadStatus.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> 請先選擇班別並輸入學號！';
-                    uploadStatus.classList.remove('hidden');
-                }
-                return false;
-            }
+            if (!currentStudentClass || !currentStudentId) return false;
 
-            if (topSyncStatus) topSyncStatus.classList.remove('hidden');
-            if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-rotate text-yellow-300 animate-spin';
-            if (topSyncText) topSyncText.innerText = '正在讀取 Google Sheet...';
-
-            if (mode === 'manual' && uploadBtn) {
-                uploadBtn.disabled = true;
-                uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 讀取 Google Sheet 中...';
-            }
+            loadStudentLocalData();
 
             try {
-                // Add cache-busting parameter to ensure fresh spreadsheet data
-                const fetchUrl = `${GOOGLE_SHEET_CSV_URL}&_t=${Date.now()}`;
-                const response = await fetch(fetchUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const csvText = await response.text();
+                const res = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime());
+                if (!res.ok) throw new Error("Network response was not ok");
+
+                const csvText = await res.text();
                 const rows = parseCSV(csvText);
 
-                // Row format:
-                // Column A (index 0): 班別
-                // Column B (index 1): 學號
-                // Column C (index 2): 已完成題目數
-                // Column D (index 3): 累計得分
-                // Column E (index 4): 最後更新
-                let foundMatch = false;
+                const cleanVal = (v) => (v || '').toString().replace(/["']/g, '').trim();
+                const normClass = (c) => cleanVal(c).toUpperCase();
+                const normId = (id) => parseInt(cleanVal(id), 10) || 0;
+
                 const targetClass = normClass(currentStudentClass);
                 const targetId = normId(currentStudentId);
 
-                // Skip header (row 0)
+                let foundMatch = false;
+
+                // Skip header row 0
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (row.length < 2) continue;
@@ -672,9 +603,9 @@
                         const questionsCount = parseInt(cleanVal(row[2]), 10) || 0;
                         const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
 
-                        // Update current game state with records from Google Sheet
-                        totalAnsweredCount = questionsCount;
-                        score = studentScore;
+                        // Merge logic: use Math.max to prevent wiping local progress
+                        totalAnsweredCount = Math.max(totalAnsweredCount, questionsCount);
+                        score = Math.max(score, studentScore);
 
                         saveStudentLocalData();
                         updateReportUI();
@@ -683,111 +614,162 @@
                 }
 
                 if (foundMatch) {
-                    if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-table-cells text-yellow-300';
-                    if (topSyncText) topSyncText.innerText = '已同步 Google Sheet';
-
                     if (uploadStatus) {
                         uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功載入！學生 (${currentStudentClass} 班 ${currentStudentId} 號) - 完成題數: ${totalAnsweredCount}，得分: ${score}`;
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功同步最新紀錄！學生 (${currentStudentClass} 班 ${currentStudentId} 號) - 完成題數: ${totalAnsweredCount}，得分: ${score}`;
                         uploadStatus.classList.remove('hidden');
                     }
-
                     if (mode === 'manual') {
-                        speakText(`成功載入！你目前已完成 ${totalAnsweredCount} 道題目，累積得分 ${score} 分！`);
+                        speakText(`成功！你目前已完成 ${totalAnsweredCount} 道題目，累積得分 ${score} 分！`);
                         triggerConfetti();
                     }
                     return true;
                 } else {
-                    // Student not listed yet in Google Sheet -> Fallback to local storage
-                    loadStudentLocalData(currentStudentClass, currentStudentId);
+                    saveStudentLocalData();
                     updateReportUI();
-
-                    if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-triangle-exclamation text-yellow-300';
-                    if (topSyncText) topSyncText.innerText = 'Google Sheet 未有記錄';
-
-                    if (uploadStatus) {
-                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-info text-amber-600 mr-1.5"></i> Google Sheet 暫未找到此學生記錄，已自動為你載入本機記錄 (完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                    if (mode === 'manual' && uploadStatus) {
+                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-800 border border-amber-300';
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5"></i> 雲端尚無此學生舊紀錄，已自動為你建立本機最新檔案！`;
                         uploadStatus.classList.remove('hidden');
                     }
                     return false;
                 }
+
             } catch (err) {
-                console.error("Fetch Google Sheet Error:", err);
-                // On network error, load local storage
-                loadStudentLocalData(currentStudentClass, currentStudentId);
+                console.warn("Fetch Google Sheet failed, using local backup:", err);
+                saveStudentLocalData();
                 updateReportUI();
+                return false;
+            }
+        }
 
-                if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-triangle-exclamation text-amber-300';
-                if (topSyncText) topSyncText.innerText = '讀取失敗 (用本機)';
+        // Upload / Sync Data to Google Sheet
+        async function uploadDataToGoogleSheet() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadStatus = document.getElementById('uploadStatus');
 
+            if (!currentStudentClass || !currentStudentId) {
                 if (uploadStatus) {
                     uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-rose-100 text-rose-800 border border-rose-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1.5"></i> 無法連接 Google Sheet，已為你恢復本機學習記錄。`;
+                    uploadStatus.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> 請先選擇班別並輸入學號！';
                     uploadStatus.classList.remove('hidden');
                 }
-                return false;
+                return;
+            }
+
+            saveStudentLocalData();
+
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在上載／更新資料中...';
+            }
+
+            try {
+                if (GOOGLE_APPS_SCRIPT_URL) {
+                    await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            studentClass: currentStudentClass,
+                            studentId: currentStudentId,
+                            totalQuestions: totalAnsweredCount,
+                            score: score,
+                            updatedAt: new Date().toISOString()
+                        })
+                    });
+                }
+
+                await fetchGoogleSheetData('sync');
+
+                if (uploadStatus) {
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功更新並保存最新進度！(${currentStudentClass} 班 ${currentStudentId} 號 - 完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                    uploadStatus.classList.remove('hidden');
+                }
+
+                speakText(`成功上載！目前最新完成題數為 ${totalAnsweredCount} 題，總得分 ${score} 分！`);
+                triggerConfetti();
+
+            } catch (err) {
+                console.error("Upload error:", err);
+                if (uploadStatus) {
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 最新進度已成功儲存！(完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                    uploadStatus.classList.remove('hidden');
+                }
+                speakText(`最新進度已成功儲存！`);
+                triggerConfetti();
             } finally {
-                if (mode === 'manual' && uploadBtn) {
+                if (uploadBtn) {
                     uploadBtn.disabled = false;
                     uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-solid fa-rotate text-yellow-300 text-lg"></i> 從 Google Sheet 重新整理／讀取進度';
+                    uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-lg"></i> <span>上載 / 更新資料到 Google Sheet</span>';
                 }
             }
         }
 
-        // Login Handler with Automatic Google Sheet Fetching
+        // Login Handler
         async function submitLogin() {
-            const studentClass = document.getElementById('student-class').value;
-            const studentId = document.getElementById('student-id').value;
-            const errorEl = document.getElementById('login-error');
+            const classSelect = document.getElementById('studentClass');
+            const idInput = document.getElementById('studentId');
+            const loginStatus = document.getElementById('loginStatus');
 
-            if (!studentClass || !studentId) {
-                if (errorEl) errorEl.classList.remove('hidden');
-                speakText('請先選擇班別並輸入學號！');
+            const selectedClass = classSelect.value.trim();
+            const rawId = idInput.value.trim();
+
+            if (!selectedClass || !rawId) {
+                loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-300';
+                loginStatus.innerText = '請選擇班別並輸入學號（1-30）！';
+                loginStatus.classList.remove('hidden');
+                speakText('請選擇班別並輸入學號！');
                 return;
             }
 
-            if (errorEl) errorEl.classList.add('hidden');
+            const formattedId = rawId.padStart(2, '0');
+
+            currentStudentClass = selectedClass;
+            currentStudentId = formattedId;
             isLoggedIn = true;
-            currentStudentClass = studentClass;
-            currentStudentId = studentId;
 
-            // UI sync feedback
-            const loginSyncIcon = document.getElementById('loginSyncIcon');
-            const loginCloudIcon = document.getElementById('loginCloudIcon');
-            const loginSyncText = document.getElementById('loginSyncText');
+            loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
+            loginStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在載入 ${selectedClass} 班 ${formattedId} 號 的學習記錄...`;
+            loginStatus.classList.remove('hidden');
 
-            if (loginSyncIcon) loginSyncIcon.style.display = 'inline-block';
-            if (loginCloudIcon) loginCloudIcon.style.display = 'none';
-            if (loginSyncText) loginSyncText.innerText = '正在從 Google Sheet 讀取學生學習進度...';
+            await fetchGoogleSheetData('login');
 
-            // 1. First restore student local record
-            loadStudentLocalData(studentClass, studentId);
+            // Update Header & Report Student Badge
+            document.getElementById('headerStudentInfo').innerText = `${currentStudentClass} (${currentStudentId})`;
+            document.getElementById('studentBadgeHeader').classList.remove('hidden');
+            document.getElementById('reportNavBtn').classList.remove('hidden');
+            document.getElementById('reportStudentInfo').innerText = `${currentStudentClass} 班 ${currentStudentId} 號`;
 
-            // 2. Update Top Banner UI
-            const userBannerBadge = document.getElementById('userBannerBadge');
-            if (userBannerBadge) {
-                userBannerBadge.innerText = `學生：${studentClass} 班 ${studentId} 號`;
+            speakText(`歡迎 ${currentStudentClass} 班 ${formattedId} 號同學！讓我們開始魔法挑戰吧！`);
+            switchView('menu');
+        }
+
+        // View Controller
+        function switchView(viewName) {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('menuView').classList.add('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('reportView').classList.add('hidden');
+
+            if (viewName === 'login') {
+                document.getElementById('loginView').classList.remove('hidden');
+            } else if (viewName === 'menu') {
+                if (!isLoggedIn) {
+                    document.getElementById('loginView').classList.remove('hidden');
+                } else {
+                    document.getElementById('menuView').classList.remove('hidden');
+                }
+            } else if (viewName === 'game') {
+                document.getElementById('gameView').classList.remove('hidden');
+            } else if (viewName === 'report') {
+                updateReportUI();
+                document.getElementById('reportView').classList.remove('hidden');
             }
-
-            // 3. Fetch data live from Google Sheet
-            const success = await fetchGoogleSheetData('login');
-
-            if (loginSyncIcon) loginSyncIcon.style.display = 'none';
-            if (loginCloudIcon) loginCloudIcon.style.display = 'inline-block';
-
-            if (success) {
-                if (loginSyncText) loginSyncText.innerText = `登入成功！已從 Google Sheet 載入 (完成題數: ${totalAnsweredCount}, 得分: ${score})`;
-                speakText(`歡迎 ${studentClass} 班 ${studentId} 號同學！已成功從 Google Sheet 載入進度！`);
-            } else {
-                if (loginSyncText) loginSyncText.innerText = '登入成功！使用本機學習記錄';
-                speakText(`歡迎 ${studentClass} 班 ${studentId} 號同學！開始魔法挑戰吧！`);
-            }
-
-            setTimeout(() => {
-                switchView('menu');
-            }, 600);
         }
 
         // Accessibility Functions
@@ -843,20 +825,15 @@
             const nextBtn = document.getElementById('nextBtn');
             const progressText = document.getElementById('progressText');
 
-            // Shuffle options each time so correct answer is NOT always first!
             q.shuffledOptions = shuffleArray(q.options);
-
-            // Update Progress Bar
             progressText.innerText = `第 ${currentQuestionIndex + 1} / ${currentQuestions.length} 題`;
 
-            // Reset Feedback UI
             feedbackBox.innerHTML = '';
             feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2';
             hintBox.classList.add('hidden');
             nextBtn.classList.add('hidden');
 
             if (currentLevel === 1) {
-                // Level 1: Sentence completion
                 promptBox.innerHTML = `
                     <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
                         ${q.sentence.replace('【（ ）】', '<span class="inline-block border-b-4 border-amber-500 px-3 text-amber-600 font-extrabold">【 ？ 】</span>')}
@@ -874,7 +851,6 @@
                 `;
 
             } else if (currentLevel === 2) {
-                // Level 2: Visual Discrimination
                 promptBox.innerHTML = `
                     <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
                         ${q.sentence.replace('（ ）', '<span class="inline-block border-b-4 border-blue-500 px-3 text-blue-600 font-extrabold">（ ？ ）</span>')}
@@ -892,7 +868,6 @@
                 `;
 
             } else if (currentLevel === 3) {
-                // Level 3: Definition matching
                 promptBox.innerHTML = `
                     <div class="text-lg sm:text-xl leading-relaxed text-purple-900 bg-purple-50 p-4 rounded-2xl border border-purple-200">
                         ${q.definition}
@@ -911,14 +886,12 @@
             }
         }
 
-        // Answer Checking Logic & Dynamic Sentence Filling
         function checkAnswer(selected) {
             const q = currentQuestions[currentQuestionIndex];
             speakText(selected);
 
             const isCorrect = (selected === q.correct);
 
-            // Auto fill student's selection into sentence placeholder
             const sentenceEl = document.getElementById('sentenceDisplay');
             if (sentenceEl) {
                 const badgeColor = isCorrect 
@@ -985,20 +958,15 @@
             if (currentQuestionIndex < currentQuestions.length) {
                 renderQuestion();
             } else {
-                // Completed 10-Question Game Level
                 speakText('恭喜你完成了這十道題目！你的中文詞語進步神速！');
-                saveStudentLocalData();
+                uploadDataToGoogleSheet();
                 switchView('report');
             }
         }
 
         function triggerConfetti() {
             if (typeof confetti === 'function') {
-                confetti({
-                    particleCount: 45,
-                    spread: 55,
-                    origin: { y: 0.7 }
-                });
+                confetti({ particleCount: 45, spread: 55, origin: { y: 0.7 } });
             }
         }
 
@@ -1006,30 +974,30 @@
             document.getElementById('totalQuestionsAnswered').innerText = totalAnsweredCount;
             document.getElementById('totalScoreAccumulated').innerText = score;
 
-            // 更新顯示學生的班別與學號
-            document.getElementById('displayStudentClass').innerText = currentStudentClass || '未登入';
-            document.getElementById('displayStudentId').innerText = currentStudentId || '未登入';
-
             const titleEl = document.getElementById('magicTitle');
-            if (score >= 2000) {
+            if (score >= 100) {
                 titleEl.innerText = "🧙‍♂️ 詞語大魔法師";
-            } else if (score >= 500) {
+            } else if (score >= 50) {
                 titleEl.innerText = "⭐ 詞語探險家";
             } else {
                 titleEl.innerText = "🌱 詞語小見習生";
             }
 
-            // Unlock badges dynamically
             const badges = document.getElementById('badgesContainer').children;
-            if (score >= 200) badges[0].classList.remove('opacity-50');
-            if (score >= 500) badges[1].classList.remove('opacity-50');
-            if (score >= 800) badges[2].classList.remove('opacity-50');
-            if (score >= 3000) badges[3].classList.remove('opacity-50');
+            if (score >= 20) badges[0].classList.remove('opacity-50');
+            if (score >= 50) badges[1].classList.remove('opacity-50');
+            if (score >= 80) badges[2].classList.remove('opacity-50');
+            if (score >= 100) badges[3].classList.remove('opacity-50');
         }
 
-        // Speech synthesis warm-up
+        // Voice Engine Warmup
         window.speechSynthesis.onvoiceschanged = function() {
             window.speechSynthesis.getVoices();
+        };
+
+        // Initialize Application View on Load
+        window.onload = function() {
+            switchView('login');
         };
     </script>
 </body>
