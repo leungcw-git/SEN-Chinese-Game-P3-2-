@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字詞小魔法師：小三中文詞語學習遊戲</title>
+    <title>字詞小魔法師：小三中文詞語學習遊戲 (GitHub 數據版)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -94,7 +94,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">字詞小魔法師</h1>
-                    <p class="text-xs text-emerald-100 hidden sm:block">小三中文課堂詞語輔導遊戲</p>
+                    <p class="text-xs text-emerald-100 hidden sm:block">小三中文課堂詞語輔導遊戲 (GitHub 雲端存儲版)</p>
                 </div>
             </div>
 
@@ -375,9 +375,9 @@
 
                 <div class="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
-                        <button id="uploadBtn" onclick="uploadDataToGoogleSheet()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-lg"></i>
-                            <span>上載 / 更新資料到 Google Sheet</span>
+                        <button id="uploadBtn" onclick="uploadDataToGitHub()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-github text-yellow-300 text-lg"></i>
+                            <span>同步 / 上載成績到 GitHub (scores.json)</span>
                         </button>
                     </div>
                     <div id="uploadStatus" class="hidden max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold"></div>
@@ -395,11 +395,11 @@
                         <div class="flex items-center gap-2">
                             <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
                             <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-                                🎓教師管理控制台 (成績總覽)
+                                🎓教師管理控制台 (GitHub 數據總覽)
                             </h2>
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
-                            實時彙整本機 (LocalStorage) 與 Google Sheet 雲端的所有同學學習紀錄
+                            實時彙整本機 (LocalStorage) 與 GitHub 儲存庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄
                         </p>
                     </div>
                     
@@ -413,22 +413,64 @@
                     </div>
                 </div>
 
-                <!-- Google Apps Script Web App Configuration Panel -->
-                <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="w-full md:w-auto flex-1">
-                        <label for="gasUrlInput" class="block text-xs font-bold text-amber-900 mb-1">
-                            <i class="fa-solid fa-link text-amber-600 mr-1"></i> Google Sheet 上載與修改 Web App 網址:
+                <!-- GitHub Storage Configuration Panel -->
+                <div class="bg-amber-50/90 p-5 rounded-2xl border border-amber-200 mb-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+                            <i class="fa-brands fa-github text-amber-700 text-lg"></i> GitHub 儲存庫寫入設定 (取代 Google Sheet)
+                        </h3>
+                        <button onclick="openGitHubModal()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold px-3 py-1 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info"></i> 設定教學
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label for="ghOwner" class="block font-bold text-slate-700 mb-1">GitHub 帳號 (Owner):</label>
+                            <input type="text" id="ghOwner" placeholder="例如：your-username" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="ghRepo" class="block font-bold text-slate-700 mb-1">儲存庫名稱 (Repo):</label>
+                            <input type="text" id="ghRepo" placeholder="例如：chinese-word-game" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="ghBranch" class="block font-bold text-slate-700 mb-1">分支名稱 (Branch):</label>
+                            <input type="text" id="ghBranch" value="main" placeholder="main" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+
+                        <div>
+                            <label for="ghFilePath" class="block font-bold text-slate-700 mb-1">檔案路徑 (Path):</label>
+                            <input type="text" id="ghFilePath" value="scores.json" placeholder="scores.json" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="ghToken" class="block font-bold text-slate-700 mb-1">
+                            GitHub Personal Access Token (PAT): <span class="text-amber-700 font-normal">(寫入 scores.json 權限)</span>
                         </label>
                         <div class="flex gap-2">
-                            <input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner">
-                            <button onclick="saveGasUrl()" class="px-3.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
-                                儲存網址
+                            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <button onclick="saveGitHubConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> 儲存設定
                             </button>
                         </div>
                     </div>
-                    <button onclick="openGasScriptModal()" class="w-full md:w-auto px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 whitespace-nowrap">
-                        <i class="fa-solid fa-code text-yellow-300"></i> 查看 / 複製寫入腳本程式碼
-                    </button>
+
+                    <!-- Export / Import Backup Bar -->
+                    <div class="pt-2 border-t border-amber-200/60 flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs text-amber-800 font-semibold">成績檔案備份：</span>
+                        <div class="flex gap-2">
+                            <button onclick="exportScoresJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> 導出 scores.json
+                            </button>
+                            <label class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1">
+                                <i class="fa-solid fa-upload"></i> 導入 scores.json
+                                <input type="file" id="importJsonInput" accept=".json" onchange="importScoresJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stats Overview Cards -->
@@ -500,70 +542,27 @@
 
     </main>
 
-    <!-- GAS Apps Script Instruction Modal -->
-    <div id="gasModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- GitHub Token Setup Instruction Modal -->
+    <div id="githubModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border-2 border-amber-400 shadow-2xl relative">
-            <button onclick="closeGasScriptModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            <button onclick="closeGitHubModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
             <h3 class="text-xl font-bold text-amber-900 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-key text-amber-500"></i> Google Sheet 數據寫入與修改設定指南
+                <i class="fa-brands fa-github text-amber-500"></i> 如何設定 GitHub API 數據寫入？
             </h3>
             <p class="text-xs text-slate-600 leading-relaxed mb-4">
-                Google 試算表預設只允許「公開讀取 (CSV)」。若要讓同學的學習紀錄能<strong>成功上載並更新（修改舊成績）</strong>，請按以下 4 個步驟完成免費設定：
+                透過 GitHub API，學生在遊戲中的成績會自動發送 Commit，直接寫入你儲存庫內的 <code class="bg-slate-100 px-1 font-mono">scores.json</code> 檔案：
             </p>
             <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 mb-4 font-semibold leading-relaxed">
-                <li>打開你的 Google Sheet 試算表（確保第一列欄位為：<code class="bg-slate-100 px-1 rounded">班別</code> | <code class="bg-slate-100 px-1 rounded">學號</code> | <code class="bg-slate-100 px-1 rounded">完成題數</code> | <code class="bg-slate-100 px-1 rounded">得分</code> | <code class="bg-slate-100 px-1 rounded">更新時間</code>）。</li>
-                <li>點擊上方選單的 <strong>「擴充功能 (Extensions)」 ➔ 「Apps Script」</strong>。</li>
-                <li>清空原有內容，將下方程式碼複製貼上：</li>
-            </ol>
-            
-            <div class="relative bg-slate-900 text-emerald-400 p-4 rounded-2xl text-xs font-mono overflow-x-auto mb-4 leading-relaxed shadow-inner border border-slate-700">
-                <button onclick="copyGasScriptCode()" class="absolute top-2 right-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold shadow flex items-center gap-1">
-                    <i class="fa-regular fa-copy"></i> 複製腳本
-                </button>
-                <pre id="gasCodeBlock">
-function doPost(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-    
-    var rows = sheet.getDataRange().getValues();
-    var targetClass = String(data.studentClass).trim().toUpperCase();
-    var targetId = String(data.studentId).trim();
-    var foundRow = -1;
-    
-    for (var i = 1; i < rows.length; i++) {
-      var rowClass = String(rows[i][0]).trim().toUpperCase();
-      var rowId = String(rows[i][1]).trim();
-      if (rowClass === targetClass && rowId === targetId) {
-        foundRow = i + 1;
-        break;
-      }
-    }
-    
-    if (foundRow > 0) {
-      sheet.getRange(foundRow, 3).setValue(data.totalQuestions);
-      sheet.getRange(foundRow, 4).setValue(data.score);
-      sheet.getRange(foundRow, 5).setValue(data.updatedAt || new Date().toISOString());
-    } else {
-      sheet.appendRow([data.studentClass, data.studentId, data.totalQuestions, data.score, data.updatedAt || new Date().toISOString()]);
-    }
-    return ContentService.createTextOutput("SUCCESS").setMimeType(ContentService.MimeType.TEXT);
-  } catch(err) {
-    return ContentService.createTextOutput("ERROR: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
-                </pre>
-            </div>
-
-            <ol start="4" class="list-decimal list-inside text-xs text-slate-700 space-y-2 mb-4 font-semibold leading-relaxed">
-                <li>點擊右上角 <strong>「部署 (Deploy)」 ➔ 「新增部署 (New deployment)」</strong>。</li>
-                <li>類型選擇 <strong>「網頁應用程式 (Web app)」</strong>，且「誰可以存取 (Who has access)」務必選擇 <strong>「任何人 (Anyone)」</strong>。</li>
-                <li>完成部署後，將獲得的 <strong>網頁應用程式網址 (Web App URL)</strong> 複製並貼回本控制台頂部的「Web App 網址」欄位即完成！</li>
+                <li>確保 GitHub 儲存庫根目錄下有一個叫 <code class="bg-slate-100 px-1 font-mono">scores.json</code> 的檔案，初始內容可填入 <code class="bg-slate-100 px-1 font-mono">[]</code>。</li>
+                <li>前往你的 GitHub 帳號 ➔ <strong>Settings ➔ Developer Settings ➔ Personal Access Tokens (Tokens classic / Fine-grained)</strong>。</li>
+                <li>點擊 <strong>Generate new token</strong>，在權限中勾選 <strong>repo</strong> (Contents: Read & Write)。</li>
+                <li>將生成的 Token (例如 <code class="bg-slate-100 px-1 font-mono">ghp_xxxxx</code>) 複製並貼上到教師控制台的 Token 欄位並點擊「儲存設定」。</li>
+                <li>學生每次遊戲完成後點擊「同步」，數據即會發送 COMMIT 自動寫入 GitHub！</li>
             </ol>
             
             <div class="text-right">
-                <button onclick="closeGasScriptModal()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
-                    我知道了
+                <button onclick="closeGitHubModal()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
+                    我明白了
                 </button>
             </div>
         </div>
@@ -571,7 +570,7 @@ function doPost(e) {
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
-        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援廣東話多感官學習</p>
+        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 數據同步</p>
     </footer>
 
     <script>
@@ -588,9 +587,14 @@ function doPost(e) {
         let currentQuestions = [];
         let allStudentsDataList = [];
 
-        const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
-        const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
-        let GOOGLE_APPS_SCRIPT_URL = localStorage.getItem('magic_apps_script_url') || 'https://script.google.com/macros/s/AKfycbw8s52sxqXDrF4tBXUjD2mOfuAQf02JIhusEPdIEKC2mYAqfoXPBHLIhlKqbK690Zlm2w/exec';
+        // GitHub Storage Configurations stored in LocalStorage
+        let GH_CONFIG = {
+            owner: localStorage.getItem('gh_owner') || '',
+            repo: localStorage.getItem('gh_repo') || '',
+            branch: localStorage.getItem('gh_branch') || 'main',
+            filePath: localStorage.getItem('gh_path') || 'scores.json',
+            token: localStorage.getItem('gh_token') || ''
+        };
 
         function speakText(text) {
             if (!('speechSynthesis' in window)) return;
@@ -601,62 +605,30 @@ function doPost(e) {
             window.speechSynthesis.speak(utterance);
         }
 
-        function saveGasUrl() {
-            const input = document.getElementById('gasUrlInput').value.trim();
-            if (input) {
-                GOOGLE_APPS_SCRIPT_URL = input;
-                localStorage.setItem('magic_apps_script_url', input);
-                speakText("Google Apps Script 網址已成功儲存！");
-                alert("Apps Script Web App 網址已更新並儲存！");
-            } else {
-                alert("請先輸入有效的 Apps Script 網址！");
-            }
+        function saveGitHubConfig() {
+            GH_CONFIG.owner = document.getElementById('ghOwner').value.trim();
+            GH_CONFIG.repo = document.getElementById('ghRepo').value.trim();
+            GH_CONFIG.branch = document.getElementById('ghBranch').value.trim() || 'main';
+            GH_CONFIG.filePath = document.getElementById('ghFilePath').value.trim() || 'scores.json';
+            GH_CONFIG.token = document.getElementById('ghToken').value.trim();
+
+            localStorage.setItem('gh_owner', GH_CONFIG.owner);
+            localStorage.setItem('gh_repo', GH_CONFIG.repo);
+            localStorage.setItem('gh_branch', GH_CONFIG.branch);
+            localStorage.setItem('gh_path', GH_CONFIG.filePath);
+            localStorage.setItem('gh_token', GH_CONFIG.token);
+
+            speakText("GitHub 數據庫設定已更新並儲存！");
+            alert("GitHub 設定已成功儲存到本機瀏覽器！");
+            refreshTeacherDashboard();
         }
 
-        function openGasScriptModal() {
-            document.getElementById('gasModal').classList.remove('hidden');
+        function openGitHubModal() {
+            document.getElementById('githubModal').classList.remove('hidden');
         }
 
-        function closeGasScriptModal() {
-            document.getElementById('gasModal').classList.add('hidden');
-        }
-
-        function copyGasScriptCode() {
-            const codeText = document.getElementById('gasCodeBlock').innerText;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = codeText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            speakText("已複製程式碼！");
-            alert("已複製 Apps Script 程式碼！請前往 Google Sheet 貼上。");
-        }
-
-        function parseCSV(text) {
-            const lines = text.split(/\r\n|\n/);
-            const result = [];
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                const row = [];
-                let inQuotes = false;
-                let currentVal = '';
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        row.push(currentVal);
-                        currentVal = '';
-                    } else {
-                        currentVal += char;
-                    }
-                }
-                row.push(currentVal);
-                result.push(row);
-            }
-            return result;
+        function closeGitHubModal() {
+            document.getElementById('githubModal').classList.add('hidden');
         }
 
         function shuffleArray(array) {
@@ -673,6 +645,7 @@ function doPost(e) {
             return shuffled.slice(0, Math.min(count, shuffled.length));
         }
 
+        // ================= Question Banks =================
         const level1Bank = [
             { sentence: "經過一個月的努力，小明【（ ）】考取了優異的成績。", correct: "終於", options: ["終於", "總是", "經常", "突然"], hint: "表示經過一番努力或長時間後，預期的結果實現了。" },
             { sentence: "花園裡開滿了【（ ）】的花朵，非常吸引人。", correct: "五顏六色", options: ["五顏六色", "七上八下", "三心兩意", "一心一意"], hint: "形容色彩繁多絢麗。" },
@@ -712,6 +685,8 @@ function doPost(e) {
             { definition: "指時間過得極快，轉眼即逝。", correct: "光陰似箭", options: ["光陰似箭", "度日如年", "漫長歲月", "持之以恆"], hint: "形容時光如飛箭過隙。" }
         ];
 
+        // ================= Local & GitHub Storage Logic =================
+
         function saveStudentLocalData() {
             if (!currentStudentClass || !currentStudentId) return;
             const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
@@ -740,81 +715,42 @@ function doPost(e) {
             }
         }
 
-        async function fetchGoogleSheetData(mode = 'login') {
-            const uploadStatus = document.getElementById('uploadStatus');
+        // Fetch scores.json from GitHub
+        async function fetchGitHubScoresFile() {
+            if (!GH_CONFIG.owner || !GH_CONFIG.repo) {
+                return null;
+            }
 
-            if (!currentStudentClass || !currentStudentId) return false;
-
-            loadStudentLocalData();
+            const url = `https://raw.githubusercontent.com/${GH_CONFIG.owner}/${GH_CONFIG.repo}/${GH_CONFIG.branch}/${GH_CONFIG.filePath}?_=` + new Date().getTime();
 
             try {
-                const res = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime());
-                if (!res.ok) throw new Error("Network response was not ok");
-
-                const csvText = await res.text();
-                const rows = parseCSV(csvText);
-
-                const cleanVal = (v) => (v || '').toString().replace(/["']/g, '').trim();
-                const normClass = (c) => cleanVal(c).toUpperCase();
-                const normId = (id) => parseInt(cleanVal(id), 10) || 0;
-
-                const targetClass = normClass(currentStudentClass);
-                const targetId = normId(currentStudentId);
-
-                let foundMatch = false;
-
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (row.length < 2) continue;
-
-                    const rowClass = normClass(row[0]);
-                    const rowId = normId(row[1]);
-
-                    if (rowClass === targetClass && rowId === targetId) {
-                        foundMatch = true;
-                        const questionsCount = parseInt(cleanVal(row[2]), 10) || 0;
-                        const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
-
-                        totalAnsweredCount = Math.max(totalAnsweredCount, questionsCount);
-                        score = Math.max(score, studentScore);
-
-                        saveStudentLocalData();
-                        updateReportUI();
-                        break;
-                    }
-                }
-
-                if (foundMatch) {
-                    if (uploadStatus) {
-                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功同步最新紀錄！學生 (${currentStudentClass} 班 ${currentStudentId} 號) - 完成題數: ${totalAnsweredCount}，得分: ${score}`;
-                        uploadStatus.classList.remove('hidden');
-                    }
-                    if (mode === 'manual') {
-                        speakText(`成功！你目前已完成 ${totalAnsweredCount} 道題目，累積得分 ${score} 分！`);
-                        triggerConfetti();
-                    }
-                    return true;
-                } else {
-                    saveStudentLocalData();
-                    updateReportUI();
-                    if (mode === 'manual' && uploadStatus) {
-                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-800 border border-amber-300';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5"></i> 雲端尚無此學生舊紀錄，已自動為你建立本機最新檔案！`;
-                        uploadStatus.classList.remove('hidden');
-                    }
-                    return false;
-                }
-
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Could not fetch file from GitHub raw");
+                const json = await res.json();
+                return Array.isArray(json) ? json : [];
             } catch (err) {
-                console.warn("Fetch Google Sheet failed, using local backup:", err);
-                saveStudentLocalData();
-                updateReportUI();
-                return false;
+                console.warn("GitHub Raw fetch failed, attempting REST API...", err);
+                try {
+                    const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
+                    const headers = {};
+                    if (GH_CONFIG.token) headers['Authorization'] = `token ${GH_CONFIG.token}`;
+                    
+                    const apiRes = await fetch(apiUrl, { headers });
+                    if (!apiRes.ok) return null;
+                    
+                    const fileData = await apiRes.json();
+                    const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+                    const json = JSON.parse(content);
+                    return Array.isArray(json) ? json : [];
+                } catch (e) {
+                    console.error("Failed to fetch GitHub scores via API", e);
+                    return null;
+                }
             }
         }
 
-        async function uploadDataToGoogleSheet() {
+        // Synchronize or upload data directly to GitHub scores.json via REST API
+        async function uploadDataToGitHub() {
             const uploadBtn = document.getElementById('uploadBtn');
             const uploadStatus = document.getElementById('uploadStatus');
 
@@ -832,70 +768,172 @@ function doPost(e) {
             if (uploadBtn) {
                 uploadBtn.disabled = true;
                 uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在上載／更新資料中...';
+                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在同步數據到 GitHub...';
+            }
+
+            if (!GH_CONFIG.owner || !GH_CONFIG.repo || !GH_CONFIG.token) {
+                if (uploadStatus) {
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-hard-drive text-amber-600 mr-1.5"></i> 已成功儲存於本機！(若要上載至 GitHub 雲端，請請老師在控制台設定 Token)`;
+                    uploadStatus.classList.remove('hidden');
+                }
+                speakText("成績已成功儲存於本機！");
+                triggerConfetti();
+
+                if (uploadBtn) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績到 GitHub (scores.json)</span>';
+                }
+                return;
             }
 
             try {
-                if (GOOGLE_APPS_SCRIPT_URL) {
-                    const payload = {
-                        studentClass: currentStudentClass,
-                        studentId: currentStudentId,
-                        totalQuestions: totalAnsweredCount,
+                // 1. Fetch current file content and sha
+                const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
+                const getRes = await fetch(apiUrl, {
+                    headers: { 'Authorization': `token ${GH_CONFIG.token}` }
+                });
+
+                let sha = '';
+                let currentScoresList = [];
+
+                if (getRes.ok) {
+                    const fileInfo = await getRes.json();
+                    sha = fileInfo.sha;
+                    try {
+                        const content = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+                        currentScoresList = JSON.parse(content);
+                        if (!Array.isArray(currentScoresList)) currentScoresList = [];
+                    } catch (e) {
+                        currentScoresList = [];
+                    }
+                }
+
+                // 2. Update or insert current student record
+                const targetClass = currentStudentClass.toUpperCase().trim();
+                const targetId = currentStudentId.toString().padStart(2, '0').trim();
+
+                const existingIdx = currentScoresList.findIndex(item => 
+                    item.studentClass && item.studentClass.toUpperCase().trim() === targetClass &&
+                    item.studentId && item.studentId.toString().padStart(2, '0').trim() === targetId
+                );
+
+                if (existingIdx >= 0) {
+                    currentScoresList[existingIdx].totalAnsweredCount = Math.max(currentScoresList[existingIdx].totalAnsweredCount || 0, totalAnsweredCount);
+                    currentScoresList[existingIdx].score = Math.max(currentScoresList[existingIdx].score || 0, score);
+                    currentScoresList[existingIdx].updatedAt = new Date().toISOString();
+                } else {
+                    currentScoresList.push({
+                        studentClass: targetClass,
+                        studentId: targetId,
+                        totalAnsweredCount: totalAnsweredCount,
                         score: score,
                         updatedAt: new Date().toISOString()
-                    };
-
-                    await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify(payload)
                     });
                 }
 
-                await fetchGoogleSheetData('sync');
+                // Sort list by class and studentId
+                currentScoresList.sort((a, b) => {
+                    if (a.studentClass !== b.studentClass) return a.studentClass.localeCompare(b.studentClass);
+                    return parseInt(a.studentId, 10) - parseInt(b.studentId, 10);
+                });
 
-                if (uploadStatus) {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功上載並更新雲端進度！(${currentStudentClass} 班 ${currentStudentId} 號 - 完成題數: ${totalAnsweredCount}，得分: ${score})`;
-                    uploadStatus.classList.remove('hidden');
+                // 3. Encode back to UTF-8 base64
+                const updatedJSONStr = JSON.stringify(currentScoresList, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(updatedJSONStr)));
+
+                // 4. PUT commit to GitHub REST API
+                const putBody = {
+                    message: `Update score for ${targetClass} (${targetId}) - Score: ${score}`,
+                    content: base64Content,
+                    branch: GH_CONFIG.branch
+                };
+                if (sha) putBody.sha = sha;
+
+                const putRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GH_CONFIG.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(putBody)
+                });
+
+                if (putRes.ok) {
+                    if (uploadStatus) {
+                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功同步到 GitHub 雲端！(${targetClass} 班 ${targetId} 號 - 完成: ${totalAnsweredCount}題, 得分: ${score})`;
+                        uploadStatus.classList.remove('hidden');
+                    }
+                    speakText(`成功上載至 GitHub！目前完成 ${totalAnsweredCount} 題，得分 ${score} 分！`);
+                    triggerConfetti();
+                } else {
+                    throw new Error("GitHub API Commit Failed");
                 }
-
-                speakText(`成功上載！目前最新完成題數為 ${totalAnsweredCount} 題，總得分 ${score} 分！`);
-                triggerConfetti();
 
             } catch (err) {
-                console.error("Upload error:", err);
+                console.error("GitHub Sync error:", err);
                 if (uploadStatus) {
                     uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 最新進度已成功儲存！(完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功保存於本機！（完成: ${totalAnsweredCount}題, 得分: ${score}）`;
                     uploadStatus.classList.remove('hidden');
                 }
-                speakText(`最新進度已成功儲存！`);
+                speakText("進度已成功儲存！");
                 triggerConfetti();
             } finally {
                 if (uploadBtn) {
                     uploadBtn.disabled = false;
                     uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-lg"></i> <span>上載 / 更新資料到 Google Sheet</span>';
+                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績到 GitHub (scores.json)</span>';
                 }
             }
         }
 
+        // Fetch scores on student login
+        async function fetchStudentScoresOnLogin() {
+            loadStudentLocalData();
+
+            const remoteScores = await fetchGitHubScoresFile();
+            if (remoteScores && Array.isArray(remoteScores)) {
+                const targetClass = currentStudentClass.toUpperCase().trim();
+                const targetId = currentStudentId.toString().padStart(2, '0').trim();
+
+                const matched = remoteScores.find(item => 
+                    item.studentClass && item.studentClass.toUpperCase().trim() === targetClass &&
+                    item.studentId && item.studentId.toString().padStart(2, '0').trim() === targetId
+                );
+
+                if (matched) {
+                    totalAnsweredCount = Math.max(totalAnsweredCount, matched.totalAnsweredCount || 0);
+                    score = Math.max(score, matched.score || 0);
+                    saveStudentLocalData();
+                }
+            }
+
+            updateReportUI();
+        }
+
+        // ================= Teacher Dashboard Logic =================
+
         async function fetchAllStudentsForTeacher() {
             const studentMap = new Map();
 
+            // 1. Gather all LocalStorage records
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith('magic_student_')) {
                     try {
                         const item = JSON.parse(localStorage.getItem(key));
                         if (item && item.studentClass && item.studentId) {
-                            const uniqueKey = `${item.studentClass.toUpperCase()}_${item.studentId.toString().padStart(2, '0')}`;
+                            const formattedClass = item.studentClass.toUpperCase().trim();
+                            const formattedId = item.studentId.toString().padStart(2, '0').trim();
+                            const uniqueKey = `${formattedClass}_${formattedId}`;
+
                             if (uniqueKey !== '3A_99') {
                                 studentMap.set(uniqueKey, {
-                                    studentClass: item.studentClass.toUpperCase(),
-                                    studentId: item.studentId.toString().padStart(2, '0'),
+                                    studentClass: formattedClass,
+                                    studentId: formattedId,
                                     totalAnsweredCount: parseInt(item.totalAnsweredCount, 10) || 0,
                                     score: parseInt(item.score, 10) || 0,
                                     source: '本機 (LocalStorage)'
@@ -908,47 +946,35 @@ function doPost(e) {
                 }
             }
 
-            try {
-                const res = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime());
-                if (res.ok) {
-                    const csvText = await res.text();
-                    const rows = parseCSV(csvText);
-                    const cleanVal = (v) => (v || '').toString().replace(/["']/g, '').trim();
+            // 2. Fetch remote scores from GitHub scores.json
+            const remoteScores = await fetchGitHubScoresFile();
+            if (remoteScores && Array.isArray(remoteScores)) {
+                remoteScores.forEach(item => {
+                    if (item.studentClass && item.studentId) {
+                        const rawClass = item.studentClass.toUpperCase().trim();
+                        const rawId = item.studentId.toString().padStart(2, '0').trim();
+                        if (rawId === '99') return;
 
-                    for (let i = 1; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (row.length < 2) continue;
-
-                        const rawClass = cleanVal(row[0]).toUpperCase();
-                        const rawId = parseInt(cleanVal(row[1]), 10) || 0;
-                        if (!rawClass || !rawId) continue;
-
-                        const formattedId = rawId.toString().padStart(2, '0');
-                        const uniqueKey = `${rawClass}_${formattedId}`;
-
-                        if (formattedId === '99') continue;
-
-                        const count = parseInt(cleanVal(row[2]), 10) || 0;
-                        const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
+                        const uniqueKey = `${rawClass}_${rawId}`;
+                        const count = parseInt(item.totalAnsweredCount, 10) || 0;
+                        const studentScore = parseInt(item.score, 10) || 0;
 
                         if (studentMap.has(uniqueKey)) {
                             const existing = studentMap.get(uniqueKey);
                             existing.totalAnsweredCount = Math.max(existing.totalAnsweredCount, count);
                             existing.score = Math.max(existing.score, studentScore);
-                            existing.source = '雲端 + 本機';
+                            existing.source = 'GitHub + 本機';
                         } else {
                             studentMap.set(uniqueKey, {
                                 studentClass: rawClass,
-                                studentId: formattedId,
+                                studentId: rawId,
                                 totalAnsweredCount: count,
                                 score: studentScore,
-                                source: '雲端 Google Sheet'
+                                source: 'GitHub (scores.json)'
                             });
                         }
                     }
-                }
-            } catch (err) {
-                console.warn("Could not fetch remote sheet for teacher view, displaying local data only.", err);
+                });
             }
 
             allStudentsDataList = Array.from(studentMap.values()).sort((a, b) => {
@@ -1004,7 +1030,7 @@ function doPost(e) {
                 if (s.score >= 100) titleBadge = '🧙‍♂️ 詞語大魔法師';
                 else if (s.score >= 50) titleBadge = '⭐ 詞語探險家';
 
-                const sourceBadge = s.source.includes('雲端') 
+                const sourceBadge = s.source.includes('GitHub') 
                     ? `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`
                     : `<span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`;
 
@@ -1029,6 +1055,58 @@ function doPost(e) {
             speakText("正在刷新所有同學的學習進度數據！");
             await fetchAllStudentsForTeacher();
         }
+
+        function exportScoresJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allStudentsDataList, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "scores.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            speakText("已導出成績檔案 scores.json！");
+        }
+
+        function importScoresJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedList = JSON.parse(e.target.result);
+                    if (Array.isArray(importedList)) {
+                        importedList.forEach(item => {
+                            if (item.studentClass && item.studentId) {
+                                const key = `magic_student_${item.studentClass.toUpperCase().trim()}_${item.studentId.toString().padStart(2, '0').trim()}`;
+                                const existing = localStorage.getItem(key);
+                                let count = item.totalAnsweredCount || 0;
+                                let sc = item.score || 0;
+                                if (existing) {
+                                    const exData = JSON.parse(existing);
+                                    count = Math.max(count, exData.totalAnsweredCount || 0);
+                                    sc = Math.max(sc, exData.score || 0);
+                                }
+                                localStorage.setItem(key, JSON.stringify({
+                                    studentClass: item.studentClass.toUpperCase().trim(),
+                                    studentId: item.studentId.toString().padStart(2, '0').trim(),
+                                    totalAnsweredCount: count,
+                                    score: sc,
+                                    updatedAt: new Date().toISOString()
+                                }));
+                            }
+                        });
+                        alert("成功導入成績數據！");
+                        refreshTeacherDashboard();
+                    }
+                } catch (err) {
+                    alert("JSON 格式不正確，請檢查檔案！");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ================= Navigation & User Actions =================
 
         async function submitLogin() {
             const classSelect = document.getElementById('studentClass');
@@ -1076,7 +1154,7 @@ function doPost(e) {
             loginStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在載入 ${selectedClass} 班 ${formattedId} 號 的學習記錄...`;
             loginStatus.classList.remove('hidden');
 
-            await fetchGoogleSheetData('login');
+            await fetchStudentScoresOnLogin();
 
             document.getElementById('headerStudentInfo').innerText = `${currentStudentClass} (${currentStudentId})`;
             document.getElementById('studentBadgeHeader').classList.remove('hidden');
@@ -1139,6 +1217,8 @@ function doPost(e) {
         function toggleContrast() {
             document.body.classList.toggle('high-contrast');
         }
+
+        // ================= Gameplay Logic =================
 
         function startGame(level) {
             currentLevel = level;
@@ -1302,7 +1382,7 @@ function doPost(e) {
                 renderQuestion();
             } else {
                 speakText('恭喜你完成了這十道題目！你的中文詞語進步神速！');
-                uploadDataToGoogleSheet();
+                uploadDataToGitHub();
                 switchView('report');
             }
         }
@@ -1339,11 +1419,14 @@ function doPost(e) {
             };
         }
 
+        // Initialize saved GitHub values in teacher form
         window.onload = function() {
-            const gasInput = document.getElementById('gasUrlInput');
-            if (gasInput && GOOGLE_APPS_SCRIPT_URL) {
-                gasInput.value = GOOGLE_APPS_SCRIPT_URL;
-            }
+            if (document.getElementById('ghOwner')) document.getElementById('ghOwner').value = GH_CONFIG.owner;
+            if (document.getElementById('ghRepo')) document.getElementById('ghRepo').value = GH_CONFIG.repo;
+            if (document.getElementById('ghBranch')) document.getElementById('ghBranch').value = GH_CONFIG.branch;
+            if (document.getElementById('ghFilePath')) document.getElementById('ghFilePath').value = GH_CONFIG.filePath;
+            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = GH_CONFIG.token;
+
             switchView('login');
         };
     </script>
