@@ -417,7 +417,7 @@
                 <div class="bg-amber-50/90 p-5 rounded-2xl border border-amber-200 mb-6 space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
-                            <i class="fa-brands fa-github text-amber-700 text-lg"></i> GitHub 儲存庫寫入設定 (取代 Google Sheet)
+                            <i class="fa-brands fa-github text-amber-700 text-lg"></i> GitHub 儲存庫寫入設定
                         </h3>
                         <button onclick="openGitHubModal()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold px-3 py-1 rounded-lg transition flex items-center gap-1">
                             <i class="fa-solid fa-circle-info"></i> 設定教學
@@ -570,7 +570,7 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
-        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 數據同步</p>
+        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 數據同步 | 版本 1.0</p>
     </footer>
 
     <script>
@@ -993,8 +993,8 @@
             emptyNotice.classList.add('hidden');
             tableBody.innerHTML = filteredList.map(s => {
                 let titleBadge = '🌱 詞語小見習生';
-                if (s.score >= 100) titleBadge = '🧙‍♂️ 詞語大魔法師';
-                else if (s.score >= 50) titleBadge = '⭐ 詞語探險家';
+                if (s.score >= 10000) titleBadge = '🧙‍♂️ 詞語大魔法師';
+                else if (s.score >= 5000) titleBadge = '⭐ 詞語探險家';
 
                 const sourceBadge = s.source.includes('GitHub') 
                     ? `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`
@@ -1364,19 +1364,19 @@
             document.getElementById('totalScoreAccumulated').innerText = score;
 
             const titleEl = document.getElementById('magicTitle');
-            if (score >= 100) {
+            if (score >= 10000) {
                 titleEl.innerText = "🧙‍♂️ 詞語大魔法師";
-            } else if (score >= 50) {
+            } else if (score >= 5000) {
                 titleEl.innerText = "⭐ 詞語探險家";
             } else {
                 titleEl.innerText = "🌱 詞語小見習生";
             }
 
             const badges = document.getElementById('badgesContainer').children;
-            if (score >= 20) badges[0].classList.remove('opacity-50');
-            if (score >= 50) badges[1].classList.remove('opacity-50');
-            if (score >= 80) badges[2].classList.remove('opacity-50');
-            if (score >= 100) badges[3].classList.remove('opacity-50');
+            if (score >= 200) badges[0].classList.remove('opacity-50');
+            if (score >= 500) badges[1].classList.remove('opacity-50');
+            if (score >= 800) badges[2].classList.remove('opacity-50');
+            if (score >= 1000) badges[3].classList.remove('opacity-50');
         }
 
         if ('speechSynthesis' in window) {
