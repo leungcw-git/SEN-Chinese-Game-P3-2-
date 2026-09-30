@@ -104,9 +104,9 @@
                     <i class="fa-solid fa-user-graduate mr-1"></i><span id="headerStudentInfo">3A (01)</span>
                 </div>
 
-                <button id="teacherNavBtn" onclick="switchView('teacher')" title="老師控制台" class="hidden px-2.5 py-1 bg-amber-400 text-amber-950 hover:bg-amber-300 rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
+                <button id="teacherNavBtn" onclick="switchView('teacher')" title="教師控制台" class="hidden px-2.5 py-1 bg-amber-400 text-amber-950 hover:bg-amber-300 rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
                     <i class="fa-solid fa-chalkboard-user"></i>
-                    <span class="hidden md:inline">老師管理面板</span>
+                    <span class="hidden md:inline">教師管理面板</span>
                 </button>
 
                 <button onclick="toggleVoiceSpeed()" title="調整語音速度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs flex items-center gap-1 transition">
@@ -157,8 +157,8 @@
                 </div>
 
                 <div>
-                    <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30，老師版請輸入 99)：</label>
-                    <input type="number" id="studentId" placeholder="例如：05 (老師輸入 99)" min="1" max="99" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30)：</label>
+                    <input type="number" id="studentId" placeholder="例如：05" min="1" max="99" oninput="if(this.value.length>2)this.value=this.value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <button onclick="submitLogin()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-lg shadow-lg transition card-bounce flex items-center justify-center gap-2">
@@ -380,7 +380,6 @@
                             <span>上載 / 更新資料到 Google Sheet</span>
                         </button>
                     </div>
-                    <!-- 提示訊息框（自動上載狀態） -->
                     <div id="uploadStatus" class="hidden max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold"></div>
                 </div>
             </div>
@@ -396,7 +395,7 @@
                         <div class="flex items-center gap-2">
                             <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
                             <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-                                🎓 老師管理控制台 (成績總覽)
+                                🎓教師管理控制台 (成績總覽)
                             </h2>
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
@@ -412,6 +411,24 @@
                             <i class="fa-solid fa-house mr-1"></i> 返回主頁
                         </button>
                     </div>
+                </div>
+
+                <!-- Google Apps Script Web App Configuration Panel -->
+                <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="w-full md:w-auto flex-1">
+                        <label for="gasUrlInput" class="block text-xs font-bold text-amber-900 mb-1">
+                            <i class="fa-solid fa-link text-amber-600 mr-1"></i> Google Sheet 上載與修改 Web App 網址:
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner">
+                            <button onclick="saveGasUrl()" class="px-3.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
+                                儲存網址
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="openGasScriptModal()" class="w-full md:w-auto px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <i class="fa-solid fa-code text-yellow-300"></i> 查看 / 複製寫入腳本程式碼
+                    </button>
                 </div>
 
                 <!-- Stats Overview Cards -->
@@ -483,14 +500,81 @@
 
     </main>
 
+    <!-- GAS Apps Script Instruction Modal -->
+    <div id="gasModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border-2 border-amber-400 shadow-2xl relative">
+            <button onclick="closeGasScriptModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            <h3 class="text-xl font-bold text-amber-900 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-key text-amber-500"></i> Google Sheet 數據寫入與修改設定指南
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                Google 試算表預設只允許「公開讀取 (CSV)」。若要讓同學的學習紀錄能<strong>成功上載並更新（修改舊成績）</strong>，請按以下 4 個步驟完成免費設定：
+            </p>
+            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 mb-4 font-semibold leading-relaxed">
+                <li>打開你的 Google Sheet 試算表（確保第一列欄位為：<code class="bg-slate-100 px-1 rounded">班別</code> | <code class="bg-slate-100 px-1 rounded">學號</code> | <code class="bg-slate-100 px-1 rounded">完成題數</code> | <code class="bg-slate-100 px-1 rounded">得分</code> | <code class="bg-slate-100 px-1 rounded">更新時間</code>）。</li>
+                <li>點擊上方選單的 <strong>「擴充功能 (Extensions)」 ➔ 「Apps Script」</strong>。</li>
+                <li>清空原有內容，將下方程式碼複製貼上：</li>
+            </ol>
+            
+            <div class="relative bg-slate-900 text-emerald-400 p-4 rounded-2xl text-xs font-mono overflow-x-auto mb-4 leading-relaxed shadow-inner border border-slate-700">
+                <button onclick="copyGasScriptCode()" class="absolute top-2 right-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold shadow flex items-center gap-1">
+                    <i class="fa-regular fa-copy"></i> 複製腳本
+                </button>
+                <pre id="gasCodeBlock">
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    var rows = sheet.getDataRange().getValues();
+    var targetClass = String(data.studentClass).trim().toUpperCase();
+    var targetId = String(data.studentId).trim();
+    var foundRow = -1;
+    
+    for (var i = 1; i < rows.length; i++) {
+      var rowClass = String(rows[i][0]).trim().toUpperCase();
+      var rowId = String(rows[i][1]).trim();
+      if (rowClass === targetClass && rowId === targetId) {
+        foundRow = i + 1;
+        break;
+      }
+    }
+    
+    if (foundRow > 0) {
+      sheet.getRange(foundRow, 3).setValue(data.totalQuestions);
+      sheet.getRange(foundRow, 4).setValue(data.score);
+      sheet.getRange(foundRow, 5).setValue(data.updatedAt || new Date().toISOString());
+    } else {
+      sheet.appendRow([data.studentClass, data.studentId, data.totalQuestions, data.score, data.updatedAt || new Date().toISOString()]);
+    }
+    return ContentService.createTextOutput("SUCCESS").setMimeType(ContentService.MimeType.TEXT);
+  } catch(err) {
+    return ContentService.createTextOutput("ERROR: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+                </pre>
+            </div>
+
+            <ol start="4" class="list-decimal list-inside text-xs text-slate-700 space-y-2 mb-4 font-semibold leading-relaxed">
+                <li>點擊右上角 <strong>「部署 (Deploy)」 ➔ 「新增部署 (New deployment)」</strong>。</li>
+                <li>類型選擇 <strong>「網頁應用程式 (Web app)」</strong>，且「誰可以存取 (Who has access)」務必選擇 <strong>「任何人 (Anyone)」</strong>。</li>
+                <li>完成部署後，將獲得的 <strong>網頁應用程式網址 (Web App URL)</strong> 複製並貼回本控制台頂部的「Web App 網址」欄位即完成！</li>
+            </ol>
+            
+            <div class="text-right">
+                <button onclick="closeGasScriptModal()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
+                    我知道了
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
         <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援廣東話多感官學習</p>
     </footer>
 
-    <!-- JavaScript Game Logic -->
     <script>
-        // Global State Variables
         let isLoggedIn = false;
         let isTeacherMode = false;
         let currentStudentClass = '';
@@ -502,102 +586,53 @@
         let currentLevel = 1;
         let currentQuestionIndex = 0;
         let currentQuestions = [];
-        let allStudentsDataList = []; // Array of aggregated student records for Teacher Dashboard
+        let allStudentsDataList = [];
 
-        // Google Sheet CSV Export Endpoint
         const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
         const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
-        // 可選：Google Apps Script Web App 上載網址
-        let GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8s52sxqXDrF4tBXUjD2mOfuAQf02JIhusEPdIEKC2mYAqfoXPBHLIhlKqbK690Zlm2w/exec';
-
-        // LEVEL 1: Sentence Completion & Context Match
-        const level1Bank = [
-            { id: 'l1_1', sentence: '聖誕節聯歡會上，同學們互相【（ ）】禮物。', correct: '交換', options: ['交換', '交談', '交易', '交接'], hint: '指彼此都把自己的東西給對方或相互調換。' },
-            { id: 'l1_2', sentence: '只要【（ ）】硬幣，郵票就會自動出來。', correct: '投進', options: ['投進', '丟掉', '拿出', '塞滿'], hint: '指放進去或扔進去。' },
-            { id: 'l1_3', sentence: '她【（ ）】地接過獎狀，便急匆匆地返回座位。', correct: '羞澀', options: ['羞澀', '大方', '慌張', '驕傲'], hint: '指因為害羞而態度不自然。' },
-            { id: 'l1_4', sentence: '一聽見腳步聲，偉華便【（ ）】離開。', correct: '慌忙', options: ['慌忙', '慢慢', '勇敢', '高興'], hint: '指慌張匆忙的樣子。' },
-            { id: 'l1_5', sentence: '美芳堅決【（ ）】我們的幫忙，要憑自己的力量完成任務。', correct: '拒絕', options: ['拒絕', '接受', '答應', '邀請'], hint: '指不接受或不答應別人的要求。' },
-            { id: 'l1_6', sentence: '爸爸答應我的【（ ）】，帶我參加夏令營。', correct: '要求', options: ['要求', '禮物', '問題', '命令'], hint: '指提出的具體請求。' },
-            { id: 'l1_7', sentence: '捐款助人是善行，但和【（ ）】是有分別的。', correct: '施捨', options: ['施捨', '交換', '借用', '買賣'], hint: '指無條件地送給窮人或出家人的財物。' },
-            { id: 'l1_8', sentence: '他出門時十分【（ ）】，連大門也沒有鎖好。', correct: '匆忙', options: ['匆忙', '熱鬧', '安靜', '仔細'], hint: '形容急急忙忙。' },
-            { id: 'l1_9', sentence: '袋子破了，裏面的橙子【（ ）】了一地。', correct: '跌', options: ['跌', '跑', '飛', '藏'], hint: '指物體向下落下。' },
-            { id: 'l1_10', sentence: '當錢包失而復得時，永明向拾獲錢包的同學連聲【（ ）】。', correct: '道謝', options: ['道謝', '道歉', '祝賀', '問好'], hint: '指以言語向人表示謝意。' },
-            { id: 'l1_11', sentence: '早晨清脆的鳥鳴聲，令我的心情格外【（ ）】。', correct: '歡悅', options: ['歡悅', '寂寞', '生氣', '害怕'], hint: '指心情愉快喜悅。' },
-            { id: 'l1_12', sentence: '今晚爸媽去晚宴，幸好有小狗陪着我，我才不感到【（ ）】。', correct: '寂寞', options: ['寂寞', '熱鬧', '歡悅', '慌忙'], hint: '形容孤單冷清。' },
-            { id: 'l1_13', sentence: '燒烤爐的火【（ ）】，大家也談得愈來愈高興。', correct: '愈燒愈旺', options: ['愈燒愈旺', '漸漸熄滅', '越變越小', '忽大忽小'], hint: '指火勢愈來愈熾熱猛烈。' },
-            { id: 'l1_14', sentence: '這個儲物室堆滿了【（ ）】，又髒又亂。', correct: '雜物', options: ['雜物', '寶物', '玩具', '食物'], hint: '指眾多零星無用的物品。' },
-            { id: 'l1_15', sentence: '春天來了，小河裏的冰塊也開始【（ ）】了。', correct: '融化', options: ['融化', '結冰', '變硬', '蒸發'], hint: '冰雪受熱變成水。' },
-            { id: 'l1_16', sentence: '天突然下起雨來，途人【（ ）】找地方躲避。', correct: '紛紛', options: ['紛紛', '漸漸', '偷偷', '偶爾'], hint: '指接二連三地。' },
-            { id: 'l1_17', sentence: '岳飛是宋代名將，是一位造福百姓的【（ ）】。', correct: '英雄', options: ['英雄', '懦夫', '士兵', '百姓'], hint: '指才能超羣、具遠大抱負及勇武過人的人。' }
-        ];
-
-        // LEVEL 2: Visual Discrimination & Confused Characters
-        const level2Bank = [
-            { id: 'l2_1', sentence: '聖誕節聯歡會上，同學們互相交（ ）禮物。', correct: '換', options: ['換', '喚', '煥', '渙'], hint: '「交換」用手部的「換」；「呼喚」用口字旁的「喚」。' },
-            { id: 'l2_2', sentence: '只要投（ ）硬幣，郵票就會自動出來。', correct: '進', options: ['進', '近', '盡', '勁'], hint: '進入、投進是辶（走之底）的「進」；距離近是「近」。' },
-            { id: 'l2_3', sentence: '她羞（ ）地接過獎狀，便急匆匆地返回座位。', correct: '澀', options: ['澀', '濕', '泣', '溫'], hint: '害羞態度不自然是「澀」（氵旁）。' },
-            { id: 'l2_4', sentence: '一聽見腳步聲，偉華便（ ）忙離開。', correct: '慌', options: ['慌', '謊', '荒', '晃'], hint: '慌張與心情有關用忄（心字旁）的「慌」；說謊用語字旁。' },
-            { id: 'l2_5', sentence: '美芳堅決（ ）絕我們的幫忙，要憑自己的力量完成任務。', correct: '拒', options: ['拒', '距', '鋸', '矩'], hint: '拒絕用手動作（扌手字旁）的「拒」；距離用𧾷（足字旁）。' },
-            { id: 'l2_6', sentence: '爸爸答應我的要（ ），帶我參加夏令營。', correct: '求', options: ['求', '球', '仇', '酋'], hint: '要求的「求」表示請求；皮球的「球」有王字旁。' },
-            { id: 'l2_7', sentence: '捐款助人是善行，但和施（ ）是有分別的。', correct: '捨', options: ['捨', '拾', '恰', '洽'], hint: '施捨、捨得是「捨」；撿拾是手字旁「拾」。' },
-            { id: 'l2_8', sentence: '他出門時十分（ ）忙，連大門也沒有鎖好。', correct: '匆', options: ['匆', '勿', '聰', '充'], hint: '匆忙中間有一點「匆」；請勿中間無點「勿」。' },
-            { id: 'l2_9', sentence: '袋子破了，裏面的橙子（ ）了一地。', correct: '跌', options: ['跌', '缺', '鐵', '秩'], hint: '跌倒與腳有關用𧾷（足字旁）的「跌」。' },
-            { id: 'l2_10', sentence: '當錢包失而復得時，永明向拾獲錢包的同學連聲道（ ）。', correct: '謝', options: ['謝', '射', '寫', '卸'], hint: '道謝是以言語表示，用言字旁「謝」。' },
-            { id: 'l2_11', sentence: '早晨清脆的鳥鳴聲，令我的心情格外歡（ ）。', correct: '悅', options: ['悅', '越', '閱', '說'], hint: '喜悅心情用忄（心字旁）的「悅」。' },
-            { id: 'l2_12', sentence: '今晚爸媽去晚宴，幸好有小狗陪着我，我才不感到寂（ ）。', correct: '寞', options: ['寞', '漠', '模', '莫'], hint: '寂寞用宀（寶蓋頭）的「寞」；沙漠用氵（水字旁）。' },
-            { id: 'l2_13', sentence: '燒烤爐的火愈燒愈（ ），大家也談得愈來愈高興。', correct: '旺', options: ['旺', '網', '往', '汪'], hint: '火勢旺盛用日字旁的「旺」。' },
-            { id: 'l2_14', sentence: '這個儲物室堆滿了（ ）物，又髒又亂。', correct: '雜', options: ['雜', '砸', '札', '咋'], hint: '雜物、複雜是「雜」。' },
-            { id: 'l2_15', sentence: '春天來了，小河裏的冰塊也開始（ ）化了。', correct: '融', options: ['融', '溶', '熔', '榮'], hint: '冰雪融化多用「融」；物質溶解用「溶」；高溫熔化用「熔」。' },
-            { id: 'l2_16', sentence: '天突然下起雨來，途人（ ）紛找地方躲避。', correct: '紛', options: ['紛', '粉', '份', '吩'], hint: '紛紛是用絞絲旁「紛」；麵粉是用米字旁「粉」。' },
-            { id: 'l2_17', sentence: '岳飛是宋代名將，是一位造福百姓的英（ ）。', correct: '雄', options: ['雄', '熊', '洶', '偉'], hint: '英雄的「雄」右邊是「隹」。' },
-            { id: 'l2_18', sentence: '陽光曬得我睜不開眼（ ）。請選出正確的字詞：', correct: '眼睛', options: ['眼睛', '眼晴', '眼鏡', '眼靖'], hint: '與視覺有關用「目」字旁（睛）；與陽光有關用「日」字旁（晴）。' },
-            { id: 'l2_19', sentence: '老師在黑板上寫出這道中文（ ）。請選出正確的字詞：', correct: '題目', options: ['題目', '提目', '頁目', '體目'], hint: '試題的「題」是「頁」字旁；用手的「提」是手字旁。' },
-            { id: 'l2_20', sentence: '我們（ ）經完成了小三中文練習。請選出正確的「已」：', correct: '已經', options: ['已經', '己經', '巳經', '乙經'], hint: '口訣：半開「已」（已經），全開「己」（自己），全封「巳」。' }
-        ];
-
-        // LEVEL 3: Vocabulary Meaning & Definition Matching
-        const level3Bank = [
-            { id: 'l3_1', definition: '【詞義】指「彼此都把自己的東西給對方或相互調換」。', correct: '交換', options: ['交換', '投進', '施捨', '拒絕'], hint: '課文例句：同學們在聖誕節聯歡會上互相交換禮物。' },
-            { id: 'l3_2', definition: '【詞義】指「放進去或扔進去」。', correct: '投進', options: ['投進', '丟棄', '拿走', '擺放'], hint: '課文例句：只要投進硬幣，郵票就會自動出來。' },
-            { id: 'l3_3', definition: '【詞義】形容「因為害羞而態度不自然」。', correct: '羞澀', options: ['羞澀', '慌忙', '勇敢', '驕傲'], hint: '課文例句：她羞澀地接過獎狀，便急匆匆地返回座位。' },
-            { id: 'l3_4', definition: '【詞義】形容「慌張匆忙的樣子」。', correct: '慌忙', options: ['慌忙', '匆忙', '冷靜', '歡悅'], hint: '課文例句：一聽見腳步聲，偉華便慌忙離開。' },
-            { id: 'l3_5', definition: '【詞義】表示「不接受或不答應別人的要求」。', correct: '拒絕', options: ['拒絕', '要求', '道謝', '答應'], hint: '課文例句：美芳堅決拒絕我們的幫忙。' },
-            { id: 'l3_6', definition: '【詞義】指「提出的具體請求」。', correct: '要求', options: ['要求', '建議', '命令', '施捨'], hint: '課文例句：爸爸答應我的要求，帶我參加夏令營。' },
-            { id: 'l3_7', definition: '【詞義】指「無條件地送給窮人或出家人的財物」。', correct: '施捨', options: ['施捨', '交換', '借貸', '買賣'], hint: '課文例句：捐款助人是善行，但和施捨是有分別的。' },
-            { id: 'l3_8', definition: '【詞義】形容「急急忙忙」。', correct: '匆忙', options: ['匆忙', '慌忙', '緩慢', '認真'], hint: '課文例句：他出門時十分匆忙，連大門也沒有鎖好。' },
-            { id: 'l3_9', definition: '【詞義】指「物體向下落下」。', correct: '跌', options: ['跌', '升', '飛', '跑'], hint: '課文例句：袋子破了，裏面的橙子跌了一地。' },
-            { id: 'l3_10', definition: '【詞義】指「以言語向人表示謝意」。', correct: '道謝', options: ['道謝', '道歉', '問候', '告別'], hint: '課文例句：永明向拾獲錢包的同學連聲道謝。' },
-            { id: 'l3_11', definition: '【詞義】形容「心情愉快喜悅」。', correct: '歡悅', options: ['歡悅', '寂寞', '悲傷', '生氣'], hint: '課文例句：早晨清脆的鳥鳴聲，令我的心情格外歡悅。' },
-            { id: 'l3_12', definition: '【詞義】形容「孤單冷清」。', correct: '寂寞', options: ['寂寞', '熱鬧', '歡悅', '安靜'], hint: '課文例句：幸好有小狗陪着我，我才不感到寂寞。' },
-            { id: 'l3_13', definition: '【詞義】指「火勢愈來愈熾熱猛烈」。', correct: '愈燒愈旺', options: ['愈燒愈旺', '漸漸熄滅', '無精打采', '煙霧彌漫'], hint: '課文例句：燒烤爐的火愈燒愈旺，大家也談得愈來愈高興。' },
-            { id: 'l3_14', definition: '【詞義】指「眾多零星無用的物品」。', correct: '雜物', options: ['雜物', '寶物', '工具', '禮物'], hint: '課文例句：這個儲物室堆滿了雜物，又髒又亂。' },
-            { id: 'l3_15', definition: '【詞義】指「冰雪受熱變成水」。', correct: '融化', options: ['融化', '凝固', '蒸發', '凍結'], hint: '課文例句：春天來了，小河裏的冰塊也開始融化了。' },
-            { id: 'l3_16', definition: '【詞義】表示「接二連三地」。', correct: '紛紛', options: ['紛紛', '偶爾', '連忙', '漸漸'], hint: '課文例句：天突然下起雨來，途人紛紛找地方躲避。' },
-            { id: 'l3_17', definition: '【詞義】指「才能超羣、具遠大抱負及勇武過人或造福百姓的人」。', correct: '英雄', options: ['英雄', '百姓', '戰士', '朋友'], hint: '課文例句：岳飛是宋代名將，是一位造福百姓的英雄。' },
-            { id: 'l3_18', definition: '【詞義】形容「陽光充足、沒有雲或少雲的好天氣」。', correct: '晴朗', options: ['晴朗', '熱鬧', '美麗', '勇敢'], hint: '例句：今天天氣晴朗，陽光普照。' }
-        ];
-
-        // Speech Synthesis setup for Cantonese (zh-HK)
-        const synth = window.speechSynthesis;
+        let GOOGLE_APPS_SCRIPT_URL = localStorage.getItem('magic_apps_script_url') || 'https://script.google.com/macros/s/AKfycbw8s52sxqXDrF4tBXUjD2mOfuAQf02JIhusEPdIEKC2mYAqfoXPBHLIhlKqbK690Zlm2w/exec';
 
         function speakText(text) {
-            if (!synth) return;
-            synth.cancel();
-
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-HK';
-            utterance.rate = speechSlowMode ? 0.72 : 0.92;
-
-            const voices = synth.getVoices();
-            const hkVoice = voices.find(v => v.lang === 'zh-HK' || v.lang.includes('HK') || v.lang.includes('Cantonese'));
-            if (hkVoice) {
-                utterance.voice = hkVoice;
-            }
-
-            synth.speak(utterance);
+            utterance.rate = speechSlowMode ? 0.7 : 0.95;
+            window.speechSynthesis.speak(utterance);
         }
 
-        // CSV Parser
+        function saveGasUrl() {
+            const input = document.getElementById('gasUrlInput').value.trim();
+            if (input) {
+                GOOGLE_APPS_SCRIPT_URL = input;
+                localStorage.setItem('magic_apps_script_url', input);
+                speakText("Google Apps Script 網址已成功儲存！");
+                alert("Apps Script Web App 網址已更新並儲存！");
+            } else {
+                alert("請先輸入有效的 Apps Script 網址！");
+            }
+        }
+
+        function openGasScriptModal() {
+            document.getElementById('gasModal').classList.remove('hidden');
+        }
+
+        function closeGasScriptModal() {
+            document.getElementById('gasModal').classList.add('hidden');
+        }
+
+        function copyGasScriptCode() {
+            const codeText = document.getElementById('gasCodeBlock').innerText;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = codeText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            speakText("已複製程式碼！");
+            alert("已複製 Apps Script 程式碼！請前往 Google Sheet 貼上。");
+        }
+
         function parseCSV(text) {
             const lines = text.split(/\r\n|\n/);
             const result = [];
@@ -624,7 +659,6 @@
             return result;
         }
 
-        // Shuffle Utility
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -639,7 +673,45 @@
             return shuffled.slice(0, Math.min(count, shuffled.length));
         }
 
-        // Local Storage Helpers
+        const level1Bank = [
+            { sentence: "經過一個月的努力，小明【（ ）】考取了優異的成績。", correct: "終於", options: ["終於", "總是", "經常", "突然"], hint: "表示經過一番努力或長時間後，預期的結果實現了。" },
+            { sentence: "花園裡開滿了【（ ）】的花朵，非常吸引人。", correct: "五顏六色", options: ["五顏六色", "七上八下", "三心兩意", "一心一意"], hint: "形容色彩繁多絢麗。" },
+            { sentence: "媽媽提醒我要【（ ）】時間，不要沉迷打機。", correct: "珍惜", options: ["珍惜", "浪費", "破壞", "丟棄"], hint: "重視並愛惜資源或光陰。" },
+            { sentence: "警察叔叔【（ ）】地維護社區的治安與秩序。", correct: "勇敢", options: ["勇敢", "膽小", "懶惰", "隨便"], hint: "不怕困難、危險或挑戰。" },
+            { sentence: "圖書館內非常【（ ）】，大家都在安靜地閱讀。", correct: "靜謐", options: ["靜謐", "熱鬧", "吵鬧", "喧嘩"], hint: "形容極度安靜。" },
+            { sentence: "小狗見到主人回家，高興地【（ ）】著尾巴。", correct: "搖晃", options: ["搖晃", "停止", "冰凍", "飛翔"], hint: "擺動、搖動。" },
+            { sentence: "我們應該多吃蔬菜水果，保持健康的【（ ）】。", correct: "體魄", options: ["體魄", "衣服", "玩具", "名譽"], hint: "指身體與體格。" },
+            { sentence: "同學們在課堂上【（ ）】發言，討論氣氛十分熱烈。", correct: "踴躍", options: ["踴躍", "冷淡", "沉沒", "悄悄"], hint: "反應熱烈，爭先恐後。" },
+            { sentence: "這座新建的大樓造型【（ ）】，吸引不少人拍照。", correct: "獨特", options: ["獨特", "普通", "常見", "陳舊"], hint: "獨一無二，別具特色。" },
+            { sentence: "老師【（ ）】地指導同學如何改寫文章。", correct: "耐心", options: ["耐心", "急躁", "生氣", "冷酷"], hint: "不急躁、不厭煩地對待事物。" },
+            { sentence: "雨後的彩虹【（ ）】在天空中，美麗極了。", correct: "懸掛", options: ["懸掛", "沉沒", "藏匿", "跌落"], hint: "吊掛在空中。" },
+            { sentence: "這本字典內容【（ ）】，是學習語文的好幫手。", correct: "豐富", options: ["豐富", "貧乏", "單調", "簡陋"], hint: "種類多，內容充實。" }
+        ];
+
+        const level2Bank = [
+            { sentence: "今天天氣十分（ ）朗，非常適合去郊遊。", correct: "晴", options: ["晴", "睛", "晶", "清"], hint: "與天氣日光有關，字旁是「日」。" },
+            { sentence: "老師提出了一個有趣的（ ）目，大家都在認真思考。", correct: "題", options: ["題", "提", "堤", "緹"], hint: "代表題目、問題，右邊是「頁」。" },
+            { sentence: "我（ ）經完成了今天的中文科功課。", correct: "已", options: ["已", "己", "巳", "巴"], hint: "表示已經完成，半封口為「已」。" },
+            { sentence: "做事情要有（ ）心，不能半途而廢。", correct: "恆", options: ["恆", "桓", "垣", "宣"], hint: "持久不變的心，字旁是「忄」（心部）。" },
+            { sentence: "小狗在花園裡高興地（ ）跑。", correct: "奔", options: ["奔", "卉", "莽", "弄"], hint: "快速奔跑，上面是「大」。" },
+            { sentence: "這包洋芋片的味（ ）非常香辣。", correct: "道", options: ["道", "首", "導", "導"], hint: "味道、道理，字包含「辶」旁。" },
+            { sentence: "請你幫我（ ）起地上的鉛筆。", correct: "撿", options: ["撿", "檢", "劍", "臉"], hint: "用手拾起，字旁是手部「扌」。" },
+            { sentence: "這本故事書的（ ）頁畫著一隻可愛的小熊。", correct: "扉", options: ["扉", "飛", "非", "緋"], hint: "指門扇或書頁，字頭是戶部「戶」。" },
+            { sentence: "我們應該養成（ ）擇健康食物的好習慣。", correct: "選", options: ["選", "先", "冼", "眩"], hint: "挑選，字包含「辶」旁。" },
+            { sentence: "經過長途跋涉，我們（ ）於到達了山頂。", correct: "終", options: ["終", "鐘", "眾", "衷"], hint: "最後、最終，字旁是「纟」（絞絲旁）。" }
+        ];
+
+        const level3Bank = [
+            { definition: "形容對事物充滿好奇，迫不及待想要了解或學習的心情。", correct: "求知慾", options: ["求知慾", "同理心", "勝負欲", "好奇心"], hint: "與追求知識的慾望有關。" },
+            { definition: "指態度誠懇，對人不虛偽。", correct: "真誠", options: ["真誠", "虛偽", "驕傲", "冷淡"], hint: "真心實意，沒有偽裝。" },
+            { definition: "形容彼此關係非常親密，沒有隔閡。", correct: "親密", options: ["親密", "疏遠", "陌生", "敵對"], hint: "感情深厚，關係接近。" },
+            { definition: "遇到困難或危險時不害怕，能勇敢面對。", correct: "堅強", options: ["堅強", "軟弱", "膽小", "退縮"], hint: "意志堅定不屈。" },
+            { definition: "指做事情很有秩序，不混亂。", correct: "井井有條", options: ["井井有條", "亂七八糟", "七手八腳", "雜亂無章"], hint: "條理分明，整齊有序。" },
+            { definition: "形容色彩豐富繁多，非常漂亮。", correct: "五彩繽紛", options: ["五彩繽紛", "黑白分明", "暗淡無光", "千篇一律"], hint: "顏色多樣精彩。" },
+            { definition: "用心照顧、愛護，使健康成長。", correct: "呵護", options: ["呵護", "打擊", "冷落", "破壞"], hint: "精心愛護照顧。" },
+            { definition: "指時間過得極快，轉眼即逝。", correct: "光陰似箭", options: ["光陰似箭", "度日如年", "漫長歲月", "持之以恆"], hint: "形容時光如飛箭過隙。" }
+        ];
+
         function saveStudentLocalData() {
             if (!currentStudentClass || !currentStudentId) return;
             const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
@@ -668,7 +740,6 @@
             }
         }
 
-        // Fetch Student Data from Google Sheet
         async function fetchGoogleSheetData(mode = 'login') {
             const uploadStatus = document.getElementById('uploadStatus');
 
@@ -692,7 +763,6 @@
 
                 let foundMatch = false;
 
-                // Skip header row 0
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (row.length < 2) continue;
@@ -705,7 +775,6 @@
                         const questionsCount = parseInt(cleanVal(row[2]), 10) || 0;
                         const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
 
-                        // Merge logic: use Math.max to prevent wiping local progress
                         totalAnsweredCount = Math.max(totalAnsweredCount, questionsCount);
                         score = Math.max(score, studentScore);
 
@@ -745,7 +814,6 @@
             }
         }
 
-        // Upload / Sync Data to Google Sheet
         async function uploadDataToGoogleSheet() {
             const uploadBtn = document.getElementById('uploadBtn');
             const uploadStatus = document.getElementById('uploadStatus');
@@ -769,17 +837,19 @@
 
             try {
                 if (GOOGLE_APPS_SCRIPT_URL) {
+                    const payload = {
+                        studentClass: currentStudentClass,
+                        studentId: currentStudentId,
+                        totalQuestions: totalAnsweredCount,
+                        score: score,
+                        updatedAt: new Date().toISOString()
+                    };
+
                     await fetch(GOOGLE_APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            studentClass: currentStudentClass,
-                            studentId: currentStudentId,
-                            totalQuestions: totalAnsweredCount,
-                            score: score,
-                            updatedAt: new Date().toISOString()
-                        })
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(payload)
                     });
                 }
 
@@ -787,7 +857,7 @@
 
                 if (uploadStatus) {
                     uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功更新並保存最新進度！(${currentStudentClass} 班 ${currentStudentId} 號 - 完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功上載並更新雲端進度！(${currentStudentClass} 班 ${currentStudentId} 號 - 完成題數: ${totalAnsweredCount}，得分: ${score})`;
                     uploadStatus.classList.remove('hidden');
                 }
 
@@ -812,11 +882,9 @@
             }
         }
 
-        // Aggregate all student records from local storage AND Google Sheet CSV
         async function fetchAllStudentsForTeacher() {
             const studentMap = new Map();
 
-            // 1. Scan LocalStorage for all 'magic_student_*' entries
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith('magic_student_')) {
@@ -824,7 +892,6 @@
                         const item = JSON.parse(localStorage.getItem(key));
                         if (item && item.studentClass && item.studentId) {
                             const uniqueKey = `${item.studentClass.toUpperCase()}_${item.studentId.toString().padStart(2, '0')}`;
-                            // Exclude teacher's own record 3A99 from student list
                             if (uniqueKey !== '3A_99') {
                                 studentMap.set(uniqueKey, {
                                     studentClass: item.studentClass.toUpperCase(),
@@ -841,7 +908,6 @@
                 }
             }
 
-            // 2. Fetch cloud data from Google Sheet CSV
             try {
                 const res = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime());
                 if (res.ok) {
@@ -849,7 +915,6 @@
                     const rows = parseCSV(csvText);
                     const cleanVal = (v) => (v || '').toString().replace(/["']/g, '').trim();
 
-                    // Skip header row
                     for (let i = 1; i < rows.length; i++) {
                         const row = rows[i];
                         if (row.length < 2) continue;
@@ -861,14 +926,12 @@
                         const formattedId = rawId.toString().padStart(2, '0');
                         const uniqueKey = `${rawClass}_${formattedId}`;
 
-                        // Exclude teacher ID 99
                         if (formattedId === '99') continue;
 
                         const count = parseInt(cleanVal(row[2]), 10) || 0;
                         const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
 
                         if (studentMap.has(uniqueKey)) {
-                            // Merge: Keep max score & count
                             const existing = studentMap.get(uniqueKey);
                             existing.totalAnsweredCount = Math.max(existing.totalAnsweredCount, count);
                             existing.score = Math.max(existing.score, studentScore);
@@ -888,7 +951,6 @@
                 console.warn("Could not fetch remote sheet for teacher view, displaying local data only.", err);
             }
 
-            // Convert map to array and sort by Class then Student ID
             allStudentsDataList = Array.from(studentMap.values()).sort((a, b) => {
                 if (a.studentClass !== b.studentClass) {
                     return a.studentClass.localeCompare(b.studentClass);
@@ -899,7 +961,6 @@
             renderTeacherTable();
         }
 
-        // Render Teacher Dashboard Table & Summary Statistics
         function renderTeacherTable() {
             const tableBody = document.getElementById('teacherTableBody');
             const emptyNotice = document.getElementById('teacherTableEmpty');
@@ -912,7 +973,6 @@
                 return matchClass && matchSearch;
             });
 
-            // Update Summary Statistics
             document.getElementById('statStudentCount').innerText = filteredList.length;
 
             if (filteredList.length > 0) {
@@ -924,7 +984,6 @@
                 document.getElementById('statAvgQuestions').innerText = avgQ;
                 document.getElementById('statAvgScore').innerText = avgS;
 
-                // Find Top Student
                 const topStudent = [...filteredList].sort((a, b) => b.score - a.score)[0];
                 document.getElementById('statTopStudent').innerText = `${topStudent.studentClass} (${topStudent.studentId}) - ${topStudent.score}分`;
             } else {
@@ -933,7 +992,6 @@
                 document.getElementById('statTopStudent').innerText = '--';
             }
 
-            // Render Table Rows
             if (filteredList.length === 0) {
                 tableBody.innerHTML = '';
                 emptyNotice.classList.remove('hidden');
@@ -972,7 +1030,6 @@
             await fetchAllStudentsForTeacher();
         }
 
-        // Login Handler
         async function submitLogin() {
             const classSelect = document.getElementById('studentClass');
             const idInput = document.getElementById('studentId');
@@ -983,7 +1040,7 @@
 
             if (!selectedClass || !rawId) {
                 loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-300';
-                loginStatus.innerText = '請選擇班別並輸入學號（1-30，老師版請輸入 99）！';
+                loginStatus.innerText = '請選擇班別並輸入學號（1-30）！';
                 loginStatus.classList.remove('hidden');
                 speakText('請選擇班別並輸入學號！');
                 return;
@@ -995,25 +1052,23 @@
             currentStudentId = formattedId;
             isLoggedIn = true;
 
-            // Check if login is 3A99 (Teacher Mode)
             if (selectedClass === '3A' && formattedId === '99') {
                 isTeacherMode = true;
                 loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-900 border border-amber-300 animate-pulse';
-                loginStatus.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-1 text-amber-600"></i> 正在開啟 3A99 老師管理控制台...`;
+                loginStatus.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-1 text-amber-600"></i> 正在開啟教師管理控制台...`;
                 loginStatus.classList.remove('hidden');
 
-                document.getElementById('headerStudentInfo').innerText = `3A99 (老師版)`;
+                document.getElementById('headerStudentInfo').innerText = `3A99 (教師版)`;
                 document.getElementById('studentBadgeHeader').classList.remove('hidden');
                 document.getElementById('teacherNavBtn').classList.remove('hidden');
                 document.getElementById('reportNavBtn').classList.remove('hidden');
 
                 await fetchAllStudentsForTeacher();
-                speakText(`歡迎梁老師！已進入 3A99 老師管理控制台！`);
+                speakText(`已進入教師管理控制台！`);
                 switchView('teacher');
                 return;
             }
 
-            // Normal Student Login
             isTeacherMode = false;
             document.getElementById('teacherNavBtn').classList.add('hidden');
 
@@ -1023,7 +1078,6 @@
 
             await fetchGoogleSheetData('login');
 
-            // Update Header & Report Student Badge
             document.getElementById('headerStudentInfo').innerText = `${currentStudentClass} (${currentStudentId})`;
             document.getElementById('studentBadgeHeader').classList.remove('hidden');
             document.getElementById('reportNavBtn').classList.remove('hidden');
@@ -1033,7 +1087,6 @@
             switchView('menu');
         }
 
-        // View Controller
         function switchView(viewName) {
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('menuView').classList.add('hidden');
@@ -1064,7 +1117,6 @@
             }
         }
 
-        // Accessibility Functions
         function toggleVoiceSpeed() {
             speechSlowMode = !speechSlowMode;
             const btnLabel = document.getElementById('speedLabel');
@@ -1088,7 +1140,6 @@
             document.body.classList.toggle('high-contrast');
         }
 
-        // Game Engine
         function startGame(level) {
             currentLevel = level;
             currentQuestionIndex = 0;
@@ -1282,13 +1333,17 @@
             if (score >= 100) badges[3].classList.remove('opacity-50');
         }
 
-        // Voice Engine Warmup
-        window.speechSynthesis.onvoiceschanged = function() {
-            window.speechSynthesis.getVoices();
-        };
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                window.speechSynthesis.getVoices();
+            };
+        }
 
-        // Initialize Application View on Load
         window.onload = function() {
+            const gasInput = document.getElementById('gasUrlInput');
+            if (gasInput && GOOGLE_APPS_SCRIPT_URL) {
+                gasInput.value = GOOGLE_APPS_SCRIPT_URL;
+            }
             switchView('login');
         };
     </script>
