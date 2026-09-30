@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字詞小魔法師：小三中文詞語學習遊戲</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+        }
+
+        /* Dyslexia friendly spacing options for SpLD learners */
+        .dyslexia-wide-spacing {
+            letter-spacing: 0.16em !important;
+            line-height: 2.2 !important;
+        }
+
+        .dyslexia-large-text {
+            font-size: 1.25rem;
+        }
+
+        .dyslexia-xlarge-text {
+            font-size: 1.4rem;
+        }
+
+        /* High contrast mode */
+        .high-contrast {
+            background-color: #121212 !important;
+            color: #ffffff !important;
+        }
+
+        .high-contrast .bg-card {
+            background-color: #1e1e1e !important;
+            border-color: #333333 !important;
+            color: #ffffff !important;
+        }
+
+        .high-contrast .text-slate-800,
+        .high-contrast .text-slate-700,
+        .high-contrast .text-slate-600 {
+            color: #f1f5f9 !important;
+        }
+
+        /* Interactive animations */
+        .card-bounce {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-bounce:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .correct-anim {
+            animation: pulse-green 0.6s ease-in-out;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: #bbf7d0; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #86efac;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 transition-colors duration-300">
+
+    <!-- Navbar / Header -->
+    <header class="bg-emerald-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('menu')">
+                <div class="bg-yellow-400 text-emerald-900 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow">
+                    🧙‍♂️
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">字詞小魔法師</h1>
+                    <p class="text-xs text-emerald-100 hidden sm:block">小三中文課堂詞語輔導遊戲</p>
+                </div>
+            </div>
+
+            <!-- Accessibility Toolbar for SpLD students -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-emerald-700/60 p-1.5 rounded-xl border border-emerald-500/30">
+                <!-- Sync Indicator Badge -->
+                <div id="topSyncStatus" class="hidden sm:flex items-center gap-1.5 bg-emerald-900/50 px-2.5 py-1 rounded-lg text-xs font-semibold text-emerald-200">
+                    <i id="topSyncIcon" class="fa-solid fa-table-cells text-yellow-300"></i>
+                    <span id="topSyncText">已連結 Google Sheet</span>
+                </div>
+
+                <button onclick="toggleVoiceSpeed()" title="調整語音速度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs flex items-center gap-1 transition">
+                    <i class="fa-solid fa-gauge-high text-yellow-300"></i>
+                    <span id="speedLabel" class="hidden md:inline">慢速語音</span>
+                </button>
+
+                <button onclick="adjustFontSize(1)" title="放大字體" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs font-bold transition">
+                    A+
+                </button>
+                <button onclick="adjustFontSize(-1)" title="縮小字體" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs font-bold transition">
+                    A-
+                </button>
+
+                <button onclick="toggleContrast()" title="切換高對比度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs transition">
+                    <i class="fa-solid fa-circle-half-stroke text-yellow-300"></i>
+                </button>
+
+                <button onclick="switchView('report')" title="學習進度報告" class="px-2.5 py-1 bg-yellow-400 text-emerald-950 hover:bg-yellow-300 rounded-lg text-xs font-bold transition shadow">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span class="hidden md:inline ml-1">進度</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="appContainer" class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 dyslexia-wide-spacing">
+
+        <!-- ================= 0. 學生登入界面 ================= -->
+        <section id="loginView" class="max-w-md mx-auto my-8 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl bg-card text-center space-y-6">
+            <div class="space-y-2">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-3xl mx-auto shadow">
+                    🧙‍♂️
+                </div>
+                <h1 class="text-2xl font-extrabold text-emerald-800">字詞小魔法師</h1>
+                <p class="text-xs text-slate-500">小三中文課堂詞語輔導遊戲</p>
+            </div>
+
+            <div class="space-y-4 text-left">
+                <div class="form-group">
+                    <label for="student-class" class="block text-sm font-bold text-slate-700 mb-1">選擇班別：</label>
+                    <select id="student-class" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800 font-semibold text-sm">
+                        <option value="">-- 請選擇班別 --</option>
+                        <option value="3A">3A</option>
+                        <option value="3B">3B</option>
+                        <option value="3C">3C</option>
+                        <option value="3D">3D</option>
+                        <option value="3E">3E</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="student-id" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (兩位數字)：</label>
+                    <!-- SEN 友善設計：限制只能輸入數字，最大2位數 -->
+                    <input type="number" id="student-id" placeholder="例如：05" min="1" max="30" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800 font-semibold text-sm">
+                </div>
+            </div>
+
+            <div id="login-error" class="hidden text-xs font-bold text-rose-500 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+                請先選擇班別並輸入學號！
+            </div>
+
+            <!-- Login Auto Sync Banner -->
+            <div class="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate text-emerald-600 animate-spin" id="loginSyncIcon" style="display: none;"></i>
+                <i class="fa-solid fa-file-csv text-emerald-600" id="loginCloudIcon"></i>
+                <span id="loginSyncText">登入後將自動從 Google Sheet 載入學習進度</span>
+            </div>
+
+            <button onclick="submitLogin()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-extrabold text-base shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                <span>登入並自動讀取 Google Sheet</span> 🌳📖
+            </button>
+        </section>
+
+        <!-- ================= 1. MAIN MENU VIEW ================= -->
+        <section id="menuView" class="hidden space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-yellow-400 text-emerald-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">小學三年級</span>
+                        <span id="userBannerBadge" class="bg-emerald-800/80 text-yellow-200 text-xs font-bold px-3 py-1 rounded-full border border-emerald-400/40">
+                            學生：未登入
+                        </span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">歡迎來到漢字詞語森林！</h2>
+                    <p class="text-emerald-100 text-sm sm:text-base max-w-xl">
+                        梁老師為大家準備了全新詞語魔法挑戰！每次將從課文題庫中隨機抽取 <strong>10 道題目</strong>，登入時會<strong>自動從 Google Sheet 載入學生的學習進度</strong>！
+                    </p>
+                    <button onclick="speakText('歡迎來到漢字詞語森林！每次為你隨機抽取十道題目，登入時會自動從 Google Sheet 載入學習記錄！')" class="mt-4 bg-emerald-700/80 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-emerald-400/40 transition">
+                        <i class="fa-solid fa-volume-high text-yellow-300"></i> 聽取說明
+                    </button>
+                </div>
+                <div class="absolute -right-4 -bottom-6 text-8xl opacity-20 pointer-events-none">
+                    🌳📖✨
+                </div>
+            </div>
+
+            <!-- Game Mode Cards -->
+            <div class="grid md:grid-cols-3 gap-5">
+                <!-- Level 1 -->
+                <div onclick="startGame(1)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
+                    <div>
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
+                            📝
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">第一關：詞語填空與句子辨識</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            根據句子上下文，選出最合適的小三課文詞語填入括號中！（每次隨機抽 10 題）
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                        <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg">語境運用</span>
+                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
+                    </div>
+                </div>
+
+                <!-- Level 2 -->
+                <div onclick="startGame(2)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
+                    <div>
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
+                            🔍
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">第二關：火眼辨形字與錯別字</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            分辨容易混淆的形近字與同音字（例：「晴／睛」、「題／提」、「已／己」）！（每次隨機抽 10 題）
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">視覺辨析</span>
+                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
+                    </div>
+                </div>
+
+                <!-- Level 3 -->
+                <div onclick="startGame(3)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
+                    <div>
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
+                            💡
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">第三關：詞義解對對碰</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            閱讀或聽取詞義解釋說明，選出正確對應的詞語！（每次隨機抽 10 題）
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                        <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">詞義理解</span>
+                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guidance Box -->
+            <div class="bg-amber-50 rounded-2xl p-5 border border-amber-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl">🔊</div>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm md:text-base">讀寫困難輔導提示（給家長與同學）</h4>
+                        <p class="text-xs text-amber-800 mt-0.5">所有題目均設有標準廣東話發音按鈕，配合「多感官學習法」，邊聽邊讀能顯著增強詞語記憶！</p>
+                    </div>
+                </div>
+                <button onclick="speakText('點擊任何喇叭圖示，都可以聽到標準廣東話發音，多聽多讀能加強記憶！')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition whitespace-nowrap shadow">
+                    <i class="fa-solid fa-volume-high"></i> 試聽語音
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= 2. GAMEPLAY ARENA VIEW ================= -->
+        <section id="gameView" class="hidden space-y-6">
+            <!-- Top Game Bar -->
+            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm bg-card">
+                <button onclick="switchView('menu')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-left"></i> 主頁
+                </button>
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">
+                        <span id="levelTitle">關卡名稱</span>
+                    </div>
+                    <div class="text-xs sm:text-sm font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-lg">
+                        <span id="progressText">第 1 / 10 題</span>
+                    </div>
+                    <div class="text-xs sm:text-sm font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg flex items-center gap-1">
+                        <i class="fa-solid fa-star text-amber-400"></i>
+                        <span id="scoreText">得分: 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card Area -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-100 shadow-lg text-center relative bg-card">
+                
+                <!-- Audio Cue Button for Question -->
+                <div class="mb-4 flex justify-center">
+                    <button id="readQuestionBtn" onclick="readCurrentQuestion()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 border border-emerald-300 shadow-sm transition">
+                        <i class="fa-solid fa-volume-high text-emerald-600 text-lg"></i>
+                        <span>點擊聽題 (廣東話)</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Question Text -->
+                <div id="questionPrompt" class="text-xl sm:text-2xl font-bold text-slate-800 my-4 leading-relaxed">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <!-- Visual Hint Box -->
+                <div id="hintBox" class="hidden mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-xs sm:text-sm text-yellow-800">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <!-- Interactive Game Play Area -->
+                <div id="gameInteractiveArea" class="my-6">
+                    <!-- Options buttons injected dynamically -->
+                </div>
+
+                <!-- Feedback Message Box -->
+                <div id="feedbackBox" class="min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2">
+                </div>
+
+                <!-- Action Button Container -->
+                <div class="mt-6 flex justify-center gap-3">
+                    <button id="hintBtn" onclick="showHint()" class="px-4 py-2 bg-amber-100 text-amber-800 hover:bg-amber-200 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb"></i> 魔法提示
+                    </button>
+                    <button id="nextBtn" onclick="nextQuestion()" class="hidden px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2">
+                        下一題 <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 3. REPORT / PROGRESS VIEW ================= -->
+        <section id="reportView" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg bg-card">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-emerald-800 flex items-center gap-2">
+                            <i class="fa-solid fa-award text-yellow-500"></i> 我的學習魔法徽章
+                        </h2>
+                        <!-- 顯示學生的班別與學號 -->
+                        <div class="text-xs font-bold text-slate-600 mt-1.5 flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
+                                班別：<span id="displayStudentClass" class="font-extrabold">--</span>
+                            </span>
+                            <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
+                                學號：<span id="displayStudentId" class="font-extrabold">--</span>
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="switchView('menu')" class="self-start sm:self-auto px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-arrow-left"></i> 返回主頁
+                    </button>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-emerald-50 p-4 rounded-2xl text-center border border-emerald-100">
+                        <div class="text-xs text-emerald-600 font-bold mb-1">完成題數</div>
+                        <div id="totalQuestionsAnswered" class="text-3xl font-extrabold text-emerald-900">0</div>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-2xl text-center border border-amber-100">
+                        <div class="text-xs text-amber-600 font-bold mb-1">累積得分</div>
+                        <div id="totalScoreAccumulated" class="text-3xl font-extrabold text-amber-900">0</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl text-center border border-purple-100">
+                        <div class="text-xs text-purple-600 font-bold mb-1">獲得魔法稱號</div>
+                        <div id="magicTitle" class="text-lg font-extrabold text-purple-900 mt-2">詞語小見習生</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-3">已解鎖徽章</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="badgesContainer">
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
+                        <div class="text-3xl mb-1">📝</div>
+                        <div class="text-xs font-bold text-slate-600">語句運用達人</div>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
+                        <div class="text-3xl mb-1">🔍</div>
+                        <div class="text-xs font-bold text-slate-600">火眼辨形星</div>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
+                        <div class="text-3xl mb-1">💡</div>
+                        <div class="text-xs font-bold text-slate-600">詞義解讀大師</div>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
+                        <div class="text-3xl mb-1">🌟</div>
+                        <div class="text-xs font-bold text-slate-600">小三詞語學霸</div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
+                        <button id="uploadBtn" onclick="fetchGoogleSheetData('manual')" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate text-yellow-300 text-lg"></i>
+                            <span>從 Google Sheet 重新整理／讀取進度</span>
+                        </button>
+                    </div>
+                    <!-- 提示訊息框（自動上載狀態） -->
+                    <div id="uploadStatus" class="hidden max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
+        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 Google 自動雲端同步</p>
+    </footer>
+
+    <!-- JavaScript Game Logic -->
+    <script>
+        // Global State Variables
+        let isLoggedIn = false;
+        let currentStudentClass = '';
+        let currentStudentId = '';
+        let totalAnsweredCount = 0;
+        let score = 0;
+        let speechSlowMode = false;
+        let fontSizeLevel = 0;
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let currentQuestions = [];
+
+        // Question Banks for P3 Vocabulary
+        const level1Bank = [
+            { sentence: "這天天氣【（ ）】，爸爸帶我們到公園野餐。", options: ["晴朗", "眼睛", "邀請", "體會"], correct: "晴朗", hint: "形容天氣好，陽光充足。" },
+            { sentence: "小明做事總是特別【（ ）】，從不草率馬虎。", options: ["認真", "隨便", "驚慌", "焦急"], correct: "認真", hint: "態度嚴謹、不敷衍。" },
+            { sentence: "老師【（ ）】我們下週一起去參觀科學館。", options: ["邀請", "拒絕", "懷疑", "失望"], correct: "邀請", hint: "禮貌地請別人出席或參加活動。" },
+            { sentence: "小狗在花園裡【（ ）】地奔跑玩耍。", options: ["歡快", "難過", "害怕", "憤怒"], correct: "歡快", hint: "高興快樂的心情。" },
+            { sentence: "我們要學會【（ ）】父母照顧我們的辛苦。", options: ["體會", "忘記", "忽略", "打擾"], correct: "體會", hint: "親身感受並理解。" },
+            { sentence: "經過多次練習，小華【（ ）】掌握了跳繩的技巧。", options: ["終於", "突然", "可能", "大概"], correct: "終於", hint: "經過努力後最終實現。" },
+            { sentence: "看到同學受傷，小麗【（ ）】地上前扶起他。", options: ["主動", "被動", "猶豫", "冷淡"], correct: "主動", hint: "不需別人要求，自己自動去做。" },
+            { sentence: "圖書館內十分【（ ）】，大家都靜靜地看書。", options: ["安靜", "熱鬧", "吵鬧", "喧吵"], correct: "安靜", hint: "沒有聲音，不吵鬧。" },
+            { sentence: "這本書的【（ ）】非常豐富，吸引很多人閱讀。", options: ["內容", "外表", "價格", "包裝"], correct: "內容", hint: "事物內部所包含的事理或情節。" },
+            { sentence: "媽媽煮了【（ ）】的晚餐，大家吃得很開心。", options: ["豐盛", "簡單", "稀少", "枯燥"], correct: "豐盛", hint: "食物非常豐富多樣。" },
+            { sentence: "只要我們【（ ）】努力，就一定能取得好成績。", options: ["堅持", "放棄", "退縮", "懷疑"], correct: "堅持", hint: "堅定不移地繼續做下去。" },
+            { sentence: "弟弟對世界充滿【（ ）】，總是喜歡問問題。", options: ["好奇", "厭倦", "害怕", "悲傷"], correct: "好奇", hint: "對新鮮事物感到有興趣。" }
+        ];
+
+        const level2Bank = [
+            { sentence: "今天天氣（ ），適合戶外活動。", options: ["晴", "睛"], correct: "晴", hint: "日字旁表示與天氣日光有關。" },
+            { sentence: "我的眼（ ）有點不舒服，需要休息。", options: ["睛", "晴"], correct: "睛", hint: "目字旁表示與眼睛視覺有關。" },
+            { sentence: "老師正在仔細批改我們的試（ ）。", options: ["卷", "券"], correct: "卷", hint: "試卷、考卷用「卷」。" },
+            { sentence: "爸爸買了兩張電影（ ）。", options: ["券", "卷"], correct: "券", hint: "入場券、優惠券用「券」。" },
+            { sentence: "小明勇敢地（ ）出問題向老師請教。", options: ["提", "題"], correct: "提", hint: "手字旁「提」表示動作（提出）。" },
+            { sentence: "這道數學（ ）非常考驗我們的思維。", options: ["題", "提"], correct: "題", hint: "頁字旁「題」表示題目、問題。" },
+            { sentence: "時間（ ）經不早了，我們快點出發吧。", options: ["已", "己"], correct: "已", hint: "「已」半封口，表示已經。" },
+            { sentence: "我們要學會自己照顧自（ ）。", options: ["己", "已"], correct: "己", hint: "「己」開口，表示自己。" },
+            { sentence: "哥哥發（ ）了一本很有趣的圖書。", options: ["現", "線"], correct: "現", hint: "「發現」用現。" },
+            { sentence: "這根毛（ ）非常結實。", options: ["線", "現"], correct: "線", hint: "「毛線、線條」用線。" }
+        ];
+
+        const level3Bank = [
+            { definition: "形容對新鮮事物懷有濃厚的興趣，急切想要知道或了解。", options: ["好奇", "難過", "焦急", "害怕"], correct: "好奇", hint: "充滿探索心。" },
+            { definition: "禮貌地請別人出席活動或來到自己家中。", options: ["邀請", "拒絕", "批評", "感謝"], correct: "邀請", hint: "請別人來參與。" },
+            { definition: "態度認真嚴肅，一點也不馬虎隨便。", options: ["認真", "馬虎", "鬆懈", "輕率"], correct: "認真", hint: "專注不苟且。" },
+            { definition: "親身去感受、體驗並理解其中的道理或感情。", options: ["體會", "忘記", "忽略", "模仿"], correct: "體會", hint: "深刻理解感受。" },
+            { definition: "堅定不移地繼續做下去，不輕易放棄。", options: ["堅持", "放棄", "退縮", "懷疑"], correct: "堅持", hint: "不半途而廢。" },
+            { definition: "環境沒有聲音，非常平靜、不吵鬧。", options: ["安靜", "喧鬧", "嘈雜", "歡騰"], correct: "安靜", hint: "寧靜寂靜。" },
+            { definition: "經過了一段時間或努力後，最終達成結果。", options: ["終於", "突然", "偶然", "立刻"], correct: "終於", hint: "最後、最終。" },
+            { definition: "不用別人指示或要求，自己自發主動去做。", options: ["主動", "被動", "強迫", "順從"], correct: "主動", hint: "自動自發。" }
+        ];
+
+        // View Navigation
+        function switchView(viewName) {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('menuView').classList.add('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('reportView').classList.add('hidden');
+
+            if (viewName === 'menu') {
+                document.getElementById('menuView').classList.remove('hidden');
+            } else if (viewName === 'game') {
+                document.getElementById('gameView').classList.remove('hidden');
+            } else if (viewName === 'report') {
+                updateReportUI();
+                document.getElementById('reportView').classList.remove('hidden');
+            } else {
+                document.getElementById('loginView').classList.remove('hidden');
+            }
+        }
+
+        // Local Storage Helpers
+        function getStorageKey(cls, id) {
+            return `magic_word_student_${cls.toUpperCase()}_${id}`;
+        }
+
+        function loadStudentLocalData(cls, id) {
+            if (!cls || !id) return;
+            const key = getStorageKey(cls, id);
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    totalAnsweredCount = data.totalAnsweredCount || 0;
+                    score = data.score || 0;
+                } catch (e) {
+                    console.error("Failed to parse local storage", e);
+                    totalAnsweredCount = 0;
+                    score = 0;
+                }
+            } else {
+                totalAnsweredCount = 0;
+                score = 0;
+            }
+        }
+
+        function saveStudentLocalData() {
+            if (!currentStudentClass || !currentStudentId) return;
+            const key = getStorageKey(currentStudentClass, currentStudentId);
+            const data = {
+                class: currentStudentClass,
+                id: currentStudentId,
+                totalAnsweredCount: totalAnsweredCount,
+                score: score,
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // Cantonese Speech Synthesis Helper
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK';
+            utterance.rate = speechSlowMode ? 0.7 : 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const cantoneseVoice = voices.find(v => v.lang === 'zh-HK' || v.lang.includes('HK') || v.lang.includes('yue'));
+            if (cantoneseVoice) {
+                utterance.voice = cantoneseVoice;
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Random Sampling & Shuffle Helpers
+        function getRandomQuestions(bank, count) {
+            const shuffled = [...bank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, Math.min(count, bank.length));
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Google Sheet CSV Export Endpoint
+        const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
+        const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
+
+        // Helper: Robust CSV parser for Google Sheet output
+        function parseCSV(text) {
+            const lines = [];
+            let row = [];
+            let inQuotes = false;
+            let current = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const next = text[i + 1];
+                if (char === '"') {
+                    if (inQuotes && next === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(current.trim());
+                    current = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && next === '\n') i++;
+                    row.push(current.trim());
+                    if (row.length > 0 && row.some(cell => cell.length > 0)) {
+                        lines.push(row);
+                    }
+                    row = [];
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            if (current || row.length > 0) {
+                row.push(current.trim());
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        // Helper: Clean & normalize string for matching class and student ID
+        function cleanVal(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/^"+|"+$/g, '').trim();
+        }
+
+        function normClass(cls) {
+            return cleanVal(cls).toUpperCase();
+        }
+
+        function normId(id) {
+            const cleaned = cleanVal(id);
+            const parsed = parseInt(cleaned, 10);
+            return isNaN(parsed) ? cleaned : String(parsed);
+        }
+
+        // Auto Fetch Student Data from Google Sheet
+        async function fetchGoogleSheetData(mode = 'login') {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const topSyncStatus = document.getElementById('topSyncStatus');
+            const topSyncText = document.getElementById('topSyncText');
+            const topSyncIcon = document.getElementById('topSyncIcon');
+
+            if (!currentStudentClass || !currentStudentId) {
+                if (uploadStatus && mode === 'manual') {
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-rose-100 text-rose-800 border border-rose-300';
+                    uploadStatus.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> 請先選擇班別並輸入學號！';
+                    uploadStatus.classList.remove('hidden');
+                }
+                return false;
+            }
+
+            if (topSyncStatus) topSyncStatus.classList.remove('hidden');
+            if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-rotate text-yellow-300 animate-spin';
+            if (topSyncText) topSyncText.innerText = '正在讀取 Google Sheet...';
+
+            if (mode === 'manual' && uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 讀取 Google Sheet 中...';
+            }
+
+            try {
+                // Add cache-busting parameter to ensure fresh spreadsheet data
+                const fetchUrl = `${GOOGLE_SHEET_CSV_URL}&_t=${Date.now()}`;
+                const response = await fetch(fetchUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const rows = parseCSV(csvText);
+
+                // Row format:
+                // Column A (index 0): 班別
+                // Column B (index 1): 學號
+                // Column C (index 2): 已完成題目數
+                // Column D (index 3): 累計得分
+                // Column E (index 4): 最後更新
+                let foundMatch = false;
+                const targetClass = normClass(currentStudentClass);
+                const targetId = normId(currentStudentId);
+
+                // Skip header (row 0)
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 2) continue;
+
+                    const rowClass = normClass(row[0]);
+                    const rowId = normId(row[1]);
+
+                    if (rowClass === targetClass && rowId === targetId) {
+                        foundMatch = true;
+                        const questionsCount = parseInt(cleanVal(row[2]), 10) || 0;
+                        const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
+
+                        // Update current game state with records from Google Sheet
+                        totalAnsweredCount = questionsCount;
+                        score = studentScore;
+
+                        saveStudentLocalData();
+                        updateReportUI();
+                        break;
+                    }
+                }
+
+                if (foundMatch) {
+                    if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-table-cells text-yellow-300';
+                    if (topSyncText) topSyncText.innerText = '已同步 Google Sheet';
+
+                    if (uploadStatus) {
+                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功載入！學生 (${currentStudentClass} 班 ${currentStudentId} 號) - 完成題數: ${totalAnsweredCount}，得分: ${score}`;
+                        uploadStatus.classList.remove('hidden');
+                    }
+
+                    if (mode === 'manual') {
+                        speakText(`成功載入！你目前已完成 ${totalAnsweredCount} 道題目，累積得分 ${score} 分！`);
+                        triggerConfetti();
+                    }
+                    return true;
+                } else {
+                    // Student not listed yet in Google Sheet -> Fallback to local storage
+                    loadStudentLocalData(currentStudentClass, currentStudentId);
+                    updateReportUI();
+
+                    if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-triangle-exclamation text-yellow-300';
+                    if (topSyncText) topSyncText.innerText = 'Google Sheet 未有記錄';
+
+                    if (uploadStatus) {
+                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-info text-amber-600 mr-1.5"></i> Google Sheet 暫未找到此學生記錄，已自動為你載入本機記錄 (完成題數: ${totalAnsweredCount}，得分: ${score})`;
+                        uploadStatus.classList.remove('hidden');
+                    }
+                    return false;
+                }
+            } catch (err) {
+                console.error("Fetch Google Sheet Error:", err);
+                // On network error, load local storage
+                loadStudentLocalData(currentStudentClass, currentStudentId);
+                updateReportUI();
+
+                if (topSyncIcon) topSyncIcon.className = 'fa-solid fa-triangle-exclamation text-amber-300';
+                if (topSyncText) topSyncText.innerText = '讀取失敗 (用本機)';
+
+                if (uploadStatus) {
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-rose-100 text-rose-800 border border-rose-300';
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1.5"></i> 無法連接 Google Sheet，已為你恢復本機學習記錄。`;
+                    uploadStatus.classList.remove('hidden');
+                }
+                return false;
+            } finally {
+                if (mode === 'manual' && uploadBtn) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    uploadBtn.innerHTML = '<i class="fa-solid fa-rotate text-yellow-300 text-lg"></i> 從 Google Sheet 重新整理／讀取進度';
+                }
+            }
+        }
+
+        // Login Handler with Automatic Google Sheet Fetching
+        async function submitLogin() {
+            const studentClass = document.getElementById('student-class').value;
+            const studentId = document.getElementById('student-id').value;
+            const errorEl = document.getElementById('login-error');
+
+            if (!studentClass || !studentId) {
+                if (errorEl) errorEl.classList.remove('hidden');
+                speakText('請先選擇班別並輸入學號！');
+                return;
+            }
+
+            if (errorEl) errorEl.classList.add('hidden');
+            isLoggedIn = true;
+            currentStudentClass = studentClass;
+            currentStudentId = studentId;
+
+            // UI sync feedback
+            const loginSyncIcon = document.getElementById('loginSyncIcon');
+            const loginCloudIcon = document.getElementById('loginCloudIcon');
+            const loginSyncText = document.getElementById('loginSyncText');
+
+            if (loginSyncIcon) loginSyncIcon.style.display = 'inline-block';
+            if (loginCloudIcon) loginCloudIcon.style.display = 'none';
+            if (loginSyncText) loginSyncText.innerText = '正在從 Google Sheet 讀取學生學習進度...';
+
+            // 1. First restore student local record
+            loadStudentLocalData(studentClass, studentId);
+
+            // 2. Update Top Banner UI
+            const userBannerBadge = document.getElementById('userBannerBadge');
+            if (userBannerBadge) {
+                userBannerBadge.innerText = `學生：${studentClass} 班 ${studentId} 號`;
+            }
+
+            // 3. Fetch data live from Google Sheet
+            const success = await fetchGoogleSheetData('login');
+
+            if (loginSyncIcon) loginSyncIcon.style.display = 'none';
+            if (loginCloudIcon) loginCloudIcon.style.display = 'inline-block';
+
+            if (success) {
+                if (loginSyncText) loginSyncText.innerText = `登入成功！已從 Google Sheet 載入 (完成題數: ${totalAnsweredCount}, 得分: ${score})`;
+                speakText(`歡迎 ${studentClass} 班 ${studentId} 號同學！已成功從 Google Sheet 載入進度！`);
+            } else {
+                if (loginSyncText) loginSyncText.innerText = '登入成功！使用本機學習記錄';
+                speakText(`歡迎 ${studentClass} 班 ${studentId} 號同學！開始魔法挑戰吧！`);
+            }
+
+            setTimeout(() => {
+                switchView('menu');
+            }, 600);
+        }
+
+        // Accessibility Functions
+        function toggleVoiceSpeed() {
+            speechSlowMode = !speechSlowMode;
+            const btnLabel = document.getElementById('speedLabel');
+            btnLabel.innerText = speechSlowMode ? "慢速語音 (已啟動)" : "正常語音";
+            speakText(speechSlowMode ? "已切換至慢速朗讀模式" : "已切換至正常語音模式");
+        }
+
+        function adjustFontSize(delta) {
+            fontSizeLevel = Math.max(-1, Math.min(2, fontSizeLevel + delta));
+            const app = document.getElementById('appContainer');
+            app.classList.remove('dyslexia-large-text', 'dyslexia-xlarge-text');
+            
+            if (fontSizeLevel === 1) {
+                app.classList.add('dyslexia-large-text');
+            } else if (fontSizeLevel === 2) {
+                app.classList.add('dyslexia-xlarge-text');
+            }
+        }
+
+        function toggleContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        // Game Engine
+        function startGame(level) {
+            currentLevel = level;
+            currentQuestionIndex = 0;
+
+            if (level === 1) {
+                currentQuestions = getRandomQuestions(level1Bank, 10);
+                document.getElementById('levelTitle').innerText = '第一關：詞語填空';
+            } else if (level === 2) {
+                currentQuestions = getRandomQuestions(level2Bank, 10);
+                document.getElementById('levelTitle').innerText = '第二關：火眼辨形字';
+            } else if (level === 3) {
+                currentQuestions = getRandomQuestions(level3Bank, 10);
+                document.getElementById('levelTitle').innerText = '第三關：詞義解對對碰';
+            }
+
+            switchView('game');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentQuestionIndex];
+            const promptBox = document.getElementById('questionPrompt');
+            const interactiveArea = document.getElementById('gameInteractiveArea');
+            const feedbackBox = document.getElementById('feedbackBox');
+            const hintBox = document.getElementById('hintBox');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressText = document.getElementById('progressText');
+
+            // Shuffle options each time so correct answer is NOT always first!
+            q.shuffledOptions = shuffleArray(q.options);
+
+            // Update Progress Bar
+            progressText.innerText = `第 ${currentQuestionIndex + 1} / ${currentQuestions.length} 題`;
+
+            // Reset Feedback UI
+            feedbackBox.innerHTML = '';
+            feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2';
+            hintBox.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+
+            if (currentLevel === 1) {
+                // Level 1: Sentence completion
+                promptBox.innerHTML = `
+                    <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
+                        ${q.sentence.replace('【（ ）】', '<span class="inline-block border-b-4 border-amber-500 px-3 text-amber-600 font-extrabold">【 ？ 】</span>')}
+                    </div>
+                `;
+
+                interactiveArea.innerHTML = `
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+                        ${q.shuffledOptions.map(opt => `
+                            <button onclick="checkAnswer('${opt}')" class="py-3.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-950 border-2 border-amber-200 rounded-2xl text-lg font-bold shadow card-bounce flex items-center justify-center gap-2">
+                                <span>🔊</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+
+            } else if (currentLevel === 2) {
+                // Level 2: Visual Discrimination
+                promptBox.innerHTML = `
+                    <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
+                        ${q.sentence.replace('（ ）', '<span class="inline-block border-b-4 border-blue-500 px-3 text-blue-600 font-extrabold">（ ？ ）</span>')}
+                    </div>
+                `;
+
+                interactiveArea.innerHTML = `
+                    <div class="flex flex-wrap justify-center gap-4 my-6">
+                        ${q.shuffledOptions.map(opt => `
+                            <button onclick="checkAnswer('${opt}')" class="px-6 py-4 bg-white border-2 border-blue-200 hover:border-blue-500 text-blue-950 rounded-2xl text-xl font-bold shadow-md card-bounce bg-card flex items-center gap-2">
+                                <span>🔊</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+
+            } else if (currentLevel === 3) {
+                // Level 3: Definition matching
+                promptBox.innerHTML = `
+                    <div class="text-lg sm:text-xl leading-relaxed text-purple-900 bg-purple-50 p-4 rounded-2xl border border-purple-200">
+                        ${q.definition}
+                    </div>
+                `;
+
+                interactiveArea.innerHTML = `
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+                        ${q.shuffledOptions.map(opt => `
+                            <button onclick="checkAnswer('${opt}')" class="py-3.5 px-4 bg-purple-50 hover:bg-purple-100 text-purple-950 border-2 border-purple-200 rounded-2xl text-lg font-bold shadow card-bounce flex items-center justify-center gap-2">
+                                <span>🔊</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // Answer Checking Logic & Dynamic Sentence Filling
+        function checkAnswer(selected) {
+            const q = currentQuestions[currentQuestionIndex];
+            speakText(selected);
+
+            const isCorrect = (selected === q.correct);
+
+            // Auto fill student's selection into sentence placeholder
+            const sentenceEl = document.getElementById('sentenceDisplay');
+            if (sentenceEl) {
+                const badgeColor = isCorrect 
+                    ? 'border-emerald-600 bg-emerald-100 text-emerald-800' 
+                    : 'border-rose-500 bg-rose-100 text-rose-800';
+
+                if (q.sentence.includes('【（ ）】')) {
+                    sentenceEl.innerHTML = q.sentence.replace('【（ ）】', `<span class="inline-block border-b-4 ${badgeColor} px-3 font-extrabold rounded-lg animate-pulse">【 ${selected} 】</span>`);
+                } else if (q.sentence.includes('（ ）')) {
+                    sentenceEl.innerHTML = q.sentence.replace('（ ）', `<span class="inline-block border-b-4 ${badgeColor} px-3 font-extrabold rounded-lg animate-pulse">（ ${selected} ）</span>`);
+                }
+            }
+
+            if (isCorrect) {
+                showFeedback(true, `完全正確！答案就是「${selected}」！`);
+                speakText(`Yeah！你答啱喇！`);
+                score += 10;
+                totalAnsweredCount++;
+                saveStudentLocalData();
+                triggerConfetti();
+            } else {
+                showFeedback(false, `想一想，「${selected}」填在這裡合適嗎？再試一次吧！`);
+                speakText(`想一想，${selected}填在這裡合適嗎？再試一次吧！`);
+            }
+        }
+
+        function showFeedback(isCorrect, message) {
+            const feedbackBox = document.getElementById('feedbackBox');
+            const nextBtn = document.getElementById('nextBtn');
+            document.getElementById('scoreText').innerText = `得分: ${score}`;
+
+            if (isCorrect) {
+                feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300 p-2 correct-anim';
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-2 text-xl"></i> ${message}`;
+                nextBtn.classList.remove('hidden');
+            } else {
+                feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl bg-rose-100 text-rose-800 border border-rose-300 p-2';
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 mr-2 text-xl"></i> ${message}`;
+            }
+        }
+
+        function showHint() {
+            const q = currentQuestions[currentQuestionIndex];
+            const hintBox = document.getElementById('hintBox');
+            hintBox.innerHTML = `<strong>💡 魔法提示：</strong> ${q.hint}`;
+            hintBox.classList.remove('hidden');
+            speakText(`提示：${q.hint}`);
+        }
+
+        function readCurrentQuestion() {
+            const q = currentQuestions[currentQuestionIndex];
+            if (q.sentence) {
+                let textToRead = q.sentence
+                    .replace('【（ ）】', '什麼')
+                    .replace('（ ）', '什麼');
+                speakText(textToRead);
+            } else if (q.definition) {
+                speakText(q.definition);
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                renderQuestion();
+            } else {
+                // Completed 10-Question Game Level
+                speakText('恭喜你完成了這十道題目！你的中文詞語進步神速！');
+                saveStudentLocalData();
+                switchView('report');
+            }
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 45,
+                    spread: 55,
+                    origin: { y: 0.7 }
+                });
+            }
+        }
+
+        function updateReportUI() {
+            document.getElementById('totalQuestionsAnswered').innerText = totalAnsweredCount;
+            document.getElementById('totalScoreAccumulated').innerText = score;
+
+            // 更新顯示學生的班別與學號
+            document.getElementById('displayStudentClass').innerText = currentStudentClass || '未登入';
+            document.getElementById('displayStudentId').innerText = currentStudentId || '未登入';
+
+            const titleEl = document.getElementById('magicTitle');
+            if (score >= 2000) {
+                titleEl.innerText = "🧙‍♂️ 詞語大魔法師";
+            } else if (score >= 500) {
+                titleEl.innerText = "⭐ 詞語探險家";
+            } else {
+                titleEl.innerText = "🌱 詞語小見習生";
+            }
+
+            // Unlock badges dynamically
+            const badges = document.getElementById('badgesContainer').children;
+            if (score >= 200) badges[0].classList.remove('opacity-50');
+            if (score >= 500) badges[1].classList.remove('opacity-50');
+            if (score >= 800) badges[2].classList.remove('opacity-50');
+            if (score >= 3000) badges[3].classList.remove('opacity-50');
+        }
+
+        // Speech synthesis warm-up
+        window.speechSynthesis.onvoiceschanged = function() {
+            window.speechSynthesis.getVoices();
+        };
+    </script>
+</body>
+</html>
