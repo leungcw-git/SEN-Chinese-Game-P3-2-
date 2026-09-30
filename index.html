@@ -395,11 +395,11 @@
                         <div class="flex items-center gap-2">
                             <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
                             <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-                                🎓教師管理控制台 (GitHub 雲端數據總覽)
+                                🎓教師管理控制台 (全班成績總覽)
                             </h2>
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
-                            實時讀取並彙整 GitHub 儲存庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄（已取消讀取本地 LocalStorage 數據）
+                            實時讀取 GitHub 雲端數據庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄
                         </p>
                     </div>
                     
@@ -410,66 +410,6 @@
                         <button onclick="switchView('menu')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
                             <i class="fa-solid fa-house mr-1"></i> 返回主頁
                         </button>
-                    </div>
-                </div>
-
-                <!-- GitHub Storage Configuration Panel -->
-                <div class="bg-amber-50/90 p-5 rounded-2xl border border-amber-200 mb-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
-                            <i class="fa-brands fa-github text-amber-700 text-lg"></i> GitHub 儲存庫寫入設定
-                        </h3>
-                        <button onclick="openGitHubModal()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold px-3 py-1 rounded-lg transition flex items-center gap-1">
-                            <i class="fa-solid fa-circle-info"></i> 設定教學
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                        <div>
-                            <label for="ghOwner" class="block font-bold text-slate-700 mb-1">GitHub 帳號 (Owner):</label>
-                            <input type="text" id="ghOwner" placeholder="例如：your-username" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-
-                        <div>
-                            <label for="ghRepo" class="block font-bold text-slate-700 mb-1">儲存庫名稱 (Repo):</label>
-                            <input type="text" id="ghRepo" placeholder="例如：chinese-word-game" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-
-                        <div>
-                            <label for="ghBranch" class="block font-bold text-slate-700 mb-1">分支名稱 (Branch):</label>
-                            <input type="text" id="ghBranch" value="main" placeholder="main" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-
-                        <div>
-                            <label for="ghFilePath" class="block font-bold text-slate-700 mb-1">檔案路徑 (Path):</label>
-                            <input type="text" id="ghFilePath" value="scores.json" placeholder="scores.json" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="ghToken" class="block font-bold text-slate-700 mb-1">
-                            GitHub Personal Access Token (PAT): <span class="text-amber-700 font-normal">(寫入 scores.json 權限)</span>
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" class="w-full p-2 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <button onclick="saveGitHubConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
-                                <i class="fa-solid fa-floppy-disk mr-1"></i> 儲存設定
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Export / Import Backup Bar -->
-                    <div class="pt-2 border-t border-amber-200/60 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs text-amber-800 font-semibold">成績檔案備份：</span>
-                        <div class="flex gap-2">
-                            <button onclick="exportScoresJSON()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> 導出 scores.json
-                            </button>
-                            <label class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-1">
-                                <i class="fa-solid fa-upload"></i> 導入 scores.json
-                                <input type="file" id="importJsonInput" accept=".json" onchange="importScoresJSON(event)" class="hidden">
-                            </label>
-                        </div>
                     </div>
                 </div>
 
@@ -542,35 +482,9 @@
 
     </main>
 
-    <!-- GitHub Token Setup Instruction Modal -->
-    <div id="githubModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border-2 border-amber-400 shadow-2xl relative">
-            <button onclick="closeGitHubModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
-            <h3 class="text-xl font-bold text-amber-900 mb-2 flex items-center gap-2">
-                <i class="fa-brands fa-github text-amber-500"></i> 如何設定 GitHub API 數據寫入？
-            </h3>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4">
-                透過 GitHub API，學生在遊戲中的成績會自動發送 Commit，直接寫入你儲存庫內的 <code class="bg-slate-100 px-1 font-mono">scores.json</code> 檔案：
-            </p>
-            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 mb-4 font-semibold leading-relaxed">
-                <li>確保 GitHub 儲存庫根目錄下有一個叫 <code class="bg-slate-100 px-1 font-mono">scores.json</code> 的檔案，初始內容可填入 <code class="bg-slate-100 px-1 font-mono">[]</code>。</li>
-                <li>前往你的 GitHub 帳號 ➔ <strong>Settings ➔ Developer Settings ➔ Personal Access Tokens (Tokens classic / Fine-grained)</strong>。</li>
-                <li>點擊 <strong>Generate new token</strong>，在權限中勾選 <strong>repo</strong> (Contents: Read & Write)。</li>
-                <li>將生成的 Token (例如 <code class="bg-slate-100 px-1 font-mono">ghp_xxxxx</code>) 複製並貼上到教師控制台的 Token 欄位並點擊「儲存設定」。</li>
-                <li>學生每次遊戲完成後點擊「同步」，數據即會發送 COMMIT 自動寫入 GitHub！</li>
-            </ol>
-            
-            <div class="text-right">
-                <button onclick="closeGitHubModal()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition">
-                    我明白了
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
-        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 數據同步 | 版本 1.0</p>
+        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 雲端自動同步 | 版本 1.1</p>
     </footer>
 
     <script>
@@ -587,14 +501,23 @@
         let currentQuestions = [];
         let allStudentsDataList = [];
 
-        // GitHub Storage Configurations with pre-filled default values
+        // GitHub Storage Configurations
+        // 老師如有 GitHub Token，可直接寫在下方 token 變數中（例如 'ghp_xxxxx'）
         let GH_CONFIG = {
             owner: localStorage.getItem('gh_owner') || 'leungcw-git',
             repo: localStorage.getItem('gh_repo') || 'SEN-Chinese-Game-P3-2-',
             branch: localStorage.getItem('gh_branch') || 'main',
             filePath: localStorage.getItem('gh_path') || 'scores.json',
-            token: localStorage.getItem('gh_token') || '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'
+            token: localStorage.getItem('gh_token') || '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'
         };
+
+        function refreshGhConfigFromStorage() {
+            GH_CONFIG.owner = localStorage.getItem('gh_owner') || GH_CONFIG.owner;
+            GH_CONFIG.repo = localStorage.getItem('gh_repo') || GH_CONFIG.repo;
+            GH_CONFIG.branch = localStorage.getItem('gh_branch') || GH_CONFIG.branch;
+            GH_CONFIG.filePath = localStorage.getItem('gh_path') || GH_CONFIG.filePath;
+            GH_CONFIG.token = localStorage.getItem('gh_token') || GH_CONFIG.token;
+        }
 
         function speakText(text) {
             if (!('speechSynthesis' in window)) return;
@@ -603,32 +526,6 @@
             utterance.lang = 'zh-HK';
             utterance.rate = speechSlowMode ? 0.7 : 0.95;
             window.speechSynthesis.speak(utterance);
-        }
-
-        function saveGitHubConfig() {
-            GH_CONFIG.owner = document.getElementById('ghOwner').value.trim();
-            GH_CONFIG.repo = document.getElementById('ghRepo').value.trim();
-            GH_CONFIG.branch = document.getElementById('ghBranch').value.trim() || 'main';
-            GH_CONFIG.filePath = document.getElementById('ghFilePath').value.trim() || 'scores.json';
-            GH_CONFIG.token = document.getElementById('ghToken').value.trim();
-
-            localStorage.setItem('gh_owner', GH_CONFIG.owner);
-            localStorage.setItem('gh_repo', GH_CONFIG.repo);
-            localStorage.setItem('gh_branch', GH_CONFIG.branch);
-            localStorage.setItem('gh_path', GH_CONFIG.filePath);
-            localStorage.setItem('gh_token', GH_CONFIG.token);
-
-            speakText("GitHub 數據庫設定已更新並儲存！");
-            alert("GitHub 設定已成功儲存到本機瀏覽器！");
-            refreshTeacherDashboard();
-        }
-
-        function openGitHubModal() {
-            document.getElementById('githubModal').classList.remove('hidden');
-        }
-
-        function closeGitHubModal() {
-            document.getElementById('githubModal').classList.add('hidden');
         }
 
         function shuffleArray(array) {
@@ -717,67 +614,63 @@
 
         // Fetch scores.json from GitHub
         async function fetchGitHubScoresFile() {
+            refreshGhConfigFromStorage();
             if (!GH_CONFIG.owner || !GH_CONFIG.repo) {
-                return null;
+                return [];
             }
-
-            const url = `https://raw.githubusercontent.com/${GH_CONFIG.owner}/${GH_CONFIG.repo}/${GH_CONFIG.branch}/${GH_CONFIG.filePath}?_=` + new Date().getTime();
 
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Could not fetch file from GitHub raw");
-                const json = await res.json();
-                return Array.isArray(json) ? json : [];
-            } catch (err) {
-                console.warn("GitHub Raw fetch failed, attempting REST API...", err);
-                try {
-                    const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
-                    const headers = {};
-                    if (GH_CONFIG.token) headers['Authorization'] = `token ${GH_CONFIG.token}`;
-                    
-                    const apiRes = await fetch(apiUrl, { headers });
-                    if (!apiRes.ok) return null;
-                    
+                const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
+                const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                if (GH_CONFIG.token) headers['Authorization'] = `token ${GH_CONFIG.token}`;
+
+                const apiRes = await fetch(apiUrl + (GH_CONFIG.token ? '' : `&_=${Date.now()}`), { headers, cache: 'no-store' });
+                if (apiRes.ok) {
                     const fileData = await apiRes.json();
-                    const content = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+                    const content = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
                     const json = JSON.parse(content);
                     return Array.isArray(json) ? json : [];
-                } catch (e) {
-                    console.error("Failed to fetch GitHub scores via API", e);
-                    return null;
                 }
+            } catch (err) {
+                console.warn("GitHub API Fetch failed, fallback to raw...", err);
             }
+
+            try {
+                const rawUrl = `https://raw.githubusercontent.com/${GH_CONFIG.owner}/${GH_CONFIG.repo}/${GH_CONFIG.branch}/${GH_CONFIG.filePath}?_=` + Date.now();
+                const res = await fetch(rawUrl, { cache: 'no-store' });
+                if (res.ok) {
+                    const json = await res.json();
+                    return Array.isArray(json) ? json : [];
+                }
+            } catch (err) {
+                console.error("Failed to fetch GitHub raw scores", err);
+            }
+
+            return [];
         }
 
         // Synchronize or upload data directly to GitHub scores.json via REST API
-        async function uploadDataToGitHub() {
+        async function uploadDataToGitHub(isAuto = false) {
             const uploadBtn = document.getElementById('uploadBtn');
             const uploadStatus = document.getElementById('uploadStatus');
 
-            if (!currentStudentClass || !currentStudentId) {
-                if (uploadStatus) {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-rose-100 text-rose-800 border border-rose-300';
-                    uploadStatus.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> 請先選擇班別並輸入學號！';
-                    uploadStatus.classList.remove('hidden');
-                }
-                return;
-            }
+            if (!currentStudentClass || !currentStudentId) return;
 
             saveStudentLocalData();
+            refreshGhConfigFromStorage();
 
             if (uploadBtn) {
                 uploadBtn.disabled = true;
                 uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在同步數據...';
+                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在自動同步數據...';
             }
 
             if (!GH_CONFIG.owner || !GH_CONFIG.repo || !GH_CONFIG.token) {
                 if (uploadStatus) {
                     uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-hard-drive text-amber-600 mr-1.5"></i> 已成功儲存於本機！(若要上載至 GitHub 雲端，請請老師在控制台設定 Token)`;
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成績已成功儲存於本機！`;
                     uploadStatus.classList.remove('hidden');
                 }
-                speakText("成績已成功儲存於本機！");
                 triggerConfetti();
 
                 if (uploadBtn) {
@@ -792,7 +685,11 @@
                 // 1. Fetch current file content and sha
                 const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
                 const getRes = await fetch(apiUrl, {
-                    headers: { 'Authorization': `token ${GH_CONFIG.token}` }
+                    headers: {
+                        'Authorization': `token ${GH_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    cache: 'no-store'
                 });
 
                 let sha = '';
@@ -802,7 +699,7 @@
                     const fileInfo = await getRes.json();
                     sha = fileInfo.sha;
                     try {
-                        const content = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+                        const content = decodeURIComponent(escape(atob(fileInfo.content.replace(/\s/g, ''))));
                         currentScoresList = JSON.parse(content);
                         if (!Array.isArray(currentScoresList)) currentScoresList = [];
                     } catch (e) {
@@ -833,7 +730,6 @@
                     });
                 }
 
-                // Sort list by class and studentId
                 currentScoresList.sort((a, b) => {
                     if (a.studentClass !== b.studentClass) return a.studentClass.localeCompare(b.studentClass);
                     return parseInt(a.studentId, 10) - parseInt(b.studentId, 10);
@@ -855,7 +751,8 @@
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GH_CONFIG.token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify(putBody)
                 });
@@ -863,24 +760,20 @@
                 if (putRes.ok) {
                     if (uploadStatus) {
                         uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成功同步到雲端！(${targetClass} 班 ${targetId} 號 - 完成: ${totalAnsweredCount}題, 得分: ${score})`;
+                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已自動同步至 GitHub 雲端！(${targetClass} 班 ${targetId} 號 - 得分: ${score})`;
                         uploadStatus.classList.remove('hidden');
                     }
-                    speakText(`成功上載至 GitHub！目前完成 ${totalAnsweredCount} 題，得分 ${score} 分！`);
+                    if (!isAuto) speakText(`已成功同步至 GitHub！`);
                     triggerConfetti();
-                } else {
-                    throw new Error("GitHub API Commit Failed");
                 }
 
             } catch (err) {
                 console.error("GitHub Sync error:", err);
                 if (uploadStatus) {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已成功保存於本機！（完成: ${totalAnsweredCount}題, 得分: ${score}）`;
+                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成績已成功儲存於本機！`;
                     uploadStatus.classList.remove('hidden');
                 }
-                speakText("進度已成功儲存！");
-                triggerConfetti();
             } finally {
                 if (uploadBtn) {
                     uploadBtn.disabled = false;
@@ -890,36 +783,33 @@
             }
         }
 
-        // Fetch scores on student login (Directly from GitHub scores.json)
-        async function fetchStudentScoresOnLogin() {
-            totalAnsweredCount = 0;
-            score = 0;
-
-            const remoteScores = await fetchGitHubScoresFile();
-            if (remoteScores && Array.isArray(remoteScores)) {
-                const targetClass = currentStudentClass.toUpperCase().trim();
-                const targetId = currentStudentId.toString().padStart(2, '0').trim();
-
-                const matched = remoteScores.find(item => 
-                    item.studentClass && item.studentClass.toUpperCase().trim() === targetClass &&
-                    item.studentId && item.studentId.toString().padStart(2, '0').trim() === targetId
-                );
-
-                if (matched) {
-                    totalAnsweredCount = matched.totalAnsweredCount || 0;
-                    score = matched.score || 0;
-                }
-            }
-
-            updateReportUI();
-        }
-
-        // ================= Teacher Dashboard Logic =================
-
         async function fetchAllStudentsForTeacher() {
             const studentMap = new Map();
 
-            // Fetch remote scores strictly from GitHub scores.json
+            // 1. Load LocalStorage snapshots first
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('magic_student_')) {
+                    try {
+                        const item = JSON.parse(localStorage.getItem(key));
+                        if (item && item.studentClass && item.studentId) {
+                            const rawClass = item.studentClass.toUpperCase().trim();
+                            const rawId = item.studentId.toString().padStart(2, '0').trim();
+                            if (rawId === '99') continue;
+                            const uniqueKey = `${rawClass}_${rawId}`;
+                            studentMap.set(uniqueKey, {
+                                studentClass: rawClass,
+                                studentId: rawId,
+                                totalAnsweredCount: parseInt(item.totalAnsweredCount, 10) || 0,
+                                score: parseInt(item.score, 10) || 0,
+                                source: '本機快照 (Local)'
+                            });
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            // 2. Fetch remote scores from GitHub scores.json
             const remoteScores = await fetchGitHubScoresFile();
             if (remoteScores && Array.isArray(remoteScores)) {
                 remoteScores.forEach(item => {
@@ -932,13 +822,16 @@
                         const count = parseInt(item.totalAnsweredCount, 10) || 0;
                         const studentScore = parseInt(item.score, 10) || 0;
 
-                        studentMap.set(uniqueKey, {
-                            studentClass: rawClass,
-                            studentId: rawId,
-                            totalAnsweredCount: count,
-                            score: studentScore,
-                            source: 'GitHub (scores.json)'
-                        });
+                        const existing = studentMap.get(uniqueKey);
+                        if (!existing || studentScore >= existing.score) {
+                            studentMap.set(uniqueKey, {
+                                studentClass: rawClass,
+                                studentId: rawId,
+                                totalAnsweredCount: Math.max(count, existing ? existing.totalAnsweredCount : 0),
+                                score: Math.max(studentScore, existing ? existing.score : 0),
+                                source: 'GitHub (scores.json)'
+                            });
+                        }
                     }
                 });
             }
@@ -993,8 +886,8 @@
             emptyNotice.classList.add('hidden');
             tableBody.innerHTML = filteredList.map(s => {
                 let titleBadge = '🌱 詞語小見習生';
-                if (s.score >= 10000) titleBadge = '🧙‍♂️ 詞語大魔法師';
-                else if (s.score >= 5000) titleBadge = '⭐ 詞語探險家';
+                if (s.score >= 1000) titleBadge = '🧙‍♂️ 詞語大魔法師';
+                else if (s.score >= 500) titleBadge = '⭐ 詞語探險家';
 
                 const sourceBadge = s.source.includes('GitHub') 
                     ? `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`
@@ -1347,8 +1240,8 @@
             if (currentQuestionIndex < currentQuestions.length) {
                 renderQuestion();
             } else {
-                speakText('恭喜你完成了這十道題目！你的中文詞語進步神速！');
-                uploadDataToGitHub();
+                speakText('恭喜你完成了這十道題目！已自動為你儲存成績！');
+                uploadDataToGitHub(true);
                 switchView('report');
             }
         }
@@ -1364,9 +1257,9 @@
             document.getElementById('totalScoreAccumulated').innerText = score;
 
             const titleEl = document.getElementById('magicTitle');
-            if (score >= 10000) {
+            if (score >= 1000) {
                 titleEl.innerText = "🧙‍♂️ 詞語大魔法師";
-            } else if (score >= 5000) {
+            } else if (score >= 500) {
                 titleEl.innerText = "⭐ 詞語探險家";
             } else {
                 titleEl.innerText = "🌱 詞語小見習生";
@@ -1385,14 +1278,7 @@
             };
         }
 
-        // Initialize saved GitHub values in teacher form
         window.onload = function() {
-            if (document.getElementById('ghOwner')) document.getElementById('ghOwner').value = GH_CONFIG.owner;
-            if (document.getElementById('ghRepo')) document.getElementById('ghRepo').value = GH_CONFIG.repo;
-            if (document.getElementById('ghBranch')) document.getElementById('ghBranch').value = GH_CONFIG.branch;
-            if (document.getElementById('ghFilePath')) document.getElementById('ghFilePath').value = GH_CONFIG.filePath;
-            if (document.getElementById('ghToken')) document.getElementById('ghToken').value = GH_CONFIG.token;
-
             switchView('login');
         };
     </script>
