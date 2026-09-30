@@ -104,6 +104,11 @@
                     <i class="fa-solid fa-user-graduate mr-1"></i><span id="headerStudentInfo">3A (01)</span>
                 </div>
 
+                <button id="teacherNavBtn" onclick="switchView('teacher')" title="老師控制台" class="hidden px-2.5 py-1 bg-amber-400 text-amber-950 hover:bg-amber-300 rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span class="hidden md:inline">老師管理面板</span>
+                </button>
+
                 <button onclick="toggleVoiceSpeed()" title="調整語音速度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs flex items-center gap-1 transition">
                     <i class="fa-solid fa-gauge-high text-yellow-300"></i>
                     <span id="speedLabel" class="hidden md:inline">慢速語音</span>
@@ -152,8 +157,8 @@
                 </div>
 
                 <div>
-                    <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30)：</label>
-                    <input type="number" id="studentId" placeholder="例如：05" min="1" max="30" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30，老師版請輸入 99)：</label>
+                    <input type="number" id="studentId" placeholder="例如：05 (老師輸入 99)" min="1" max="99" oninput="if(value.length>2)value=value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <button onclick="submitLogin()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-lg shadow-lg transition card-bounce flex items-center justify-center gap-2">
@@ -381,6 +386,101 @@
             </div>
         </section>
 
+        <!-- ================= 3A99 TEACHER DASHBOARD VIEW ================= -->
+        <section id="teacherView" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-300 shadow-xl bg-card">
+                
+                <!-- Dashboard Top Title Bar -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-200">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
+                            <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+                                🎓 老師管理控制台 (成績總覽)
+                            </h2>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">
+                            實時彙整本機 (LocalStorage) 與 Google Sheet 雲端的所有同學學習紀錄
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <button onclick="refreshTeacherDashboard()" class="flex-1 md:flex-initial px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate text-sm"></i> 重新整理數據
+                        </button>
+                        <button onclick="switchView('menu')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                            <i class="fa-solid fa-house mr-1"></i> 返回主頁
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center">
+                        <div class="text-xs font-bold text-emerald-700">總學習人數</div>
+                        <div id="statStudentCount" class="text-2xl md:text-3xl font-extrabold text-emerald-900 mt-1">0</div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
+                        <div class="text-xs font-bold text-blue-700">平均完成題數</div>
+                        <div id="statAvgQuestions" class="text-2xl md:text-3xl font-extrabold text-blue-900 mt-1">0</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center">
+                        <div class="text-xs font-bold text-amber-700">平均得分</div>
+                        <div id="statAvgScore" class="text-2xl md:text-3xl font-extrabold text-amber-900 mt-1">0</div>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl text-center">
+                        <div class="text-xs font-bold text-purple-700">最高得分同學</div>
+                        <div id="statTopStudent" class="text-lg md:text-xl font-extrabold text-purple-900 mt-2 truncate">--</div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Controls -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <label for="teacherClassFilter" class="text-xs font-bold text-slate-700 whitespace-nowrap">班別篩選：</label>
+                        <select id="teacherClassFilter" onchange="filterTeacherTable()" class="p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="ALL">全部班別 (3A - 3E)</option>
+                            <option value="3A">3A 班</option>
+                            <option value="3B">3B 班</option>
+                            <option value="3C">3C 班</option>
+                            <option value="3D">3D 班</option>
+                            <option value="3E">3E 班</option>
+                        </select>
+                    </div>
+
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="teacherSearchInput" onkeyup="filterTeacherTable()" placeholder="搜尋學號 (例如：05)..." class="w-full pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Students Score Table -->
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">班別</th>
+                                <th class="py-3 px-4">學號</th>
+                                <th class="py-3 px-4 text-center">完成題數</th>
+                                <th class="py-3 px-4 text-center">累積得分</th>
+                                <th class="py-3 px-4">魔法稱號</th>
+                                <th class="py-3 px-4 text-center">資料來源</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherTableBody" class="divide-y divide-slate-100 font-semibold text-slate-800 bg-white">
+                            <!-- Injected dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="teacherTableEmpty" class="hidden text-center py-8 text-slate-400 text-xs">
+                    <i class="fa-solid fa-folder-open text-3xl mb-2 block"></i>
+                    暫無符合條件的學生學習記錄
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -392,6 +492,7 @@
     <script>
         // Global State Variables
         let isLoggedIn = false;
+        let isTeacherMode = false;
         let currentStudentClass = '';
         let currentStudentId = '';
         let totalAnsweredCount = 0;
@@ -401,6 +502,7 @@
         let currentLevel = 1;
         let currentQuestionIndex = 0;
         let currentQuestions = [];
+        let allStudentsDataList = []; // Array of aggregated student records for Teacher Dashboard
 
         // Google Sheet CSV Export Endpoint
         const GOOGLE_SHEET_ID = '1B9p7LCwY5FiRg_XJZtm8Ih8aEar_sk3-IkCMBAiboys';
@@ -710,6 +812,166 @@
             }
         }
 
+        // Aggregate all student records from local storage AND Google Sheet CSV
+        async function fetchAllStudentsForTeacher() {
+            const studentMap = new Map();
+
+            // 1. Scan LocalStorage for all 'magic_student_*' entries
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('magic_student_')) {
+                    try {
+                        const item = JSON.parse(localStorage.getItem(key));
+                        if (item && item.studentClass && item.studentId) {
+                            const uniqueKey = `${item.studentClass.toUpperCase()}_${item.studentId.toString().padStart(2, '0')}`;
+                            // Exclude teacher's own record 3A99 from student list
+                            if (uniqueKey !== '3A_99') {
+                                studentMap.set(uniqueKey, {
+                                    studentClass: item.studentClass.toUpperCase(),
+                                    studentId: item.studentId.toString().padStart(2, '0'),
+                                    totalAnsweredCount: parseInt(item.totalAnsweredCount, 10) || 0,
+                                    score: parseInt(item.score, 10) || 0,
+                                    source: '本機 (LocalStorage)'
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error reading local storage item", key, e);
+                    }
+                }
+            }
+
+            // 2. Fetch cloud data from Google Sheet CSV
+            try {
+                const res = await fetch(GOOGLE_SHEET_CSV_URL + '&_=' + new Date().getTime());
+                if (res.ok) {
+                    const csvText = await res.text();
+                    const rows = parseCSV(csvText);
+                    const cleanVal = (v) => (v || '').toString().replace(/["']/g, '').trim();
+
+                    // Skip header row
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (row.length < 2) continue;
+
+                        const rawClass = cleanVal(row[0]).toUpperCase();
+                        const rawId = parseInt(cleanVal(row[1]), 10) || 0;
+                        if (!rawClass || !rawId) continue;
+
+                        const formattedId = rawId.toString().padStart(2, '0');
+                        const uniqueKey = `${rawClass}_${formattedId}`;
+
+                        // Exclude teacher ID 99
+                        if (formattedId === '99') continue;
+
+                        const count = parseInt(cleanVal(row[2]), 10) || 0;
+                        const studentScore = parseInt(cleanVal(row[3]), 10) || 0;
+
+                        if (studentMap.has(uniqueKey)) {
+                            // Merge: Keep max score & count
+                            const existing = studentMap.get(uniqueKey);
+                            existing.totalAnsweredCount = Math.max(existing.totalAnsweredCount, count);
+                            existing.score = Math.max(existing.score, studentScore);
+                            existing.source = '雲端 + 本機';
+                        } else {
+                            studentMap.set(uniqueKey, {
+                                studentClass: rawClass,
+                                studentId: formattedId,
+                                totalAnsweredCount: count,
+                                score: studentScore,
+                                source: '雲端 Google Sheet'
+                            });
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch remote sheet for teacher view, displaying local data only.", err);
+            }
+
+            // Convert map to array and sort by Class then Student ID
+            allStudentsDataList = Array.from(studentMap.values()).sort((a, b) => {
+                if (a.studentClass !== b.studentClass) {
+                    return a.studentClass.localeCompare(b.studentClass);
+                }
+                return parseInt(a.studentId, 10) - parseInt(b.studentId, 10);
+            });
+
+            renderTeacherTable();
+        }
+
+        // Render Teacher Dashboard Table & Summary Statistics
+        function renderTeacherTable() {
+            const tableBody = document.getElementById('teacherTableBody');
+            const emptyNotice = document.getElementById('teacherTableEmpty');
+            const filterClass = document.getElementById('teacherClassFilter').value;
+            const searchInput = document.getElementById('teacherSearchInput').value.trim().toLowerCase();
+
+            let filteredList = allStudentsDataList.filter(s => {
+                const matchClass = (filterClass === 'ALL' || s.studentClass === filterClass);
+                const matchSearch = (!searchInput || s.studentId.includes(searchInput) || `${s.studentClass}${s.studentId}`.toLowerCase().includes(searchInput));
+                return matchClass && matchSearch;
+            });
+
+            // Update Summary Statistics
+            document.getElementById('statStudentCount').innerText = filteredList.length;
+
+            if (filteredList.length > 0) {
+                const totalQ = filteredList.reduce((acc, cur) => acc + cur.totalAnsweredCount, 0);
+                const totalS = filteredList.reduce((acc, cur) => acc + cur.score, 0);
+                const avgQ = (totalQ / filteredList.length).toFixed(1);
+                const avgS = Math.round(totalS / filteredList.length);
+
+                document.getElementById('statAvgQuestions').innerText = avgQ;
+                document.getElementById('statAvgScore').innerText = avgS;
+
+                // Find Top Student
+                const topStudent = [...filteredList].sort((a, b) => b.score - a.score)[0];
+                document.getElementById('statTopStudent').innerText = `${topStudent.studentClass} (${topStudent.studentId}) - ${topStudent.score}分`;
+            } else {
+                document.getElementById('statAvgQuestions').innerText = '0';
+                document.getElementById('statAvgScore').innerText = '0';
+                document.getElementById('statTopStudent').innerText = '--';
+            }
+
+            // Render Table Rows
+            if (filteredList.length === 0) {
+                tableBody.innerHTML = '';
+                emptyNotice.classList.remove('hidden');
+                return;
+            }
+
+            emptyNotice.classList.add('hidden');
+            tableBody.innerHTML = filteredList.map(s => {
+                let titleBadge = '🌱 詞語小見習生';
+                if (s.score >= 100) titleBadge = '🧙‍♂️ 詞語大魔法師';
+                else if (s.score >= 50) titleBadge = '⭐ 詞語探險家';
+
+                const sourceBadge = s.source.includes('雲端') 
+                    ? `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`
+                    : `<span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`;
+
+                return `
+                    <tr class="hover:bg-amber-50/50 transition">
+                        <td class="py-3 px-4 font-bold text-emerald-800">${s.studentClass} 班</td>
+                        <td class="py-3 px-4 font-bold">${s.studentId} 號</td>
+                        <td class="py-3 px-4 text-center font-bold text-blue-700">${s.totalAnsweredCount} 題</td>
+                        <td class="py-3 px-4 text-center font-extrabold text-amber-600">${s.score} 分</td>
+                        <td class="py-3 px-4">${titleBadge}</td>
+                        <td class="py-3 px-4 text-center">${sourceBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterTeacherTable() {
+            renderTeacherTable();
+        }
+
+        async function refreshTeacherDashboard() {
+            speakText("正在刷新所有同學的學習進度數據！");
+            await fetchAllStudentsForTeacher();
+        }
+
         // Login Handler
         async function submitLogin() {
             const classSelect = document.getElementById('studentClass');
@@ -721,7 +983,7 @@
 
             if (!selectedClass || !rawId) {
                 loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-300';
-                loginStatus.innerText = '請選擇班別並輸入學號（1-30）！';
+                loginStatus.innerText = '請選擇班別並輸入學號（1-30，老師版請輸入 99）！';
                 loginStatus.classList.remove('hidden');
                 speakText('請選擇班別並輸入學號！');
                 return;
@@ -732,6 +994,28 @@
             currentStudentClass = selectedClass;
             currentStudentId = formattedId;
             isLoggedIn = true;
+
+            // Check if login is 3A99 (Teacher Mode)
+            if (selectedClass === '3A' && formattedId === '99') {
+                isTeacherMode = true;
+                loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-900 border border-amber-300 animate-pulse';
+                loginStatus.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-1 text-amber-600"></i> 正在開啟 3A99 老師管理控制台...`;
+                loginStatus.classList.remove('hidden');
+
+                document.getElementById('headerStudentInfo').innerText = `3A99 (老師版)`;
+                document.getElementById('studentBadgeHeader').classList.remove('hidden');
+                document.getElementById('teacherNavBtn').classList.remove('hidden');
+                document.getElementById('reportNavBtn').classList.remove('hidden');
+
+                await fetchAllStudentsForTeacher();
+                speakText(`歡迎梁老師！已進入 3A99 老師管理控制台！`);
+                switchView('teacher');
+                return;
+            }
+
+            // Normal Student Login
+            isTeacherMode = false;
+            document.getElementById('teacherNavBtn').classList.add('hidden');
 
             loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
             loginStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在載入 ${selectedClass} 班 ${formattedId} 號 的學習記錄...`;
@@ -755,6 +1039,7 @@
             document.getElementById('menuView').classList.add('hidden');
             document.getElementById('gameView').classList.add('hidden');
             document.getElementById('reportView').classList.add('hidden');
+            document.getElementById('teacherView').classList.add('hidden');
 
             if (viewName === 'login') {
                 document.getElementById('loginView').classList.remove('hidden');
@@ -769,6 +1054,13 @@
             } else if (viewName === 'report') {
                 updateReportUI();
                 document.getElementById('reportView').classList.remove('hidden');
+            } else if (viewName === 'teacher') {
+                if (isTeacherMode) {
+                    refreshTeacherDashboard();
+                    document.getElementById('teacherView').classList.remove('hidden');
+                } else {
+                    switchView('menu');
+                }
             }
         }
 
