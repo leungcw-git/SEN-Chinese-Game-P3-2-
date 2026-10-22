@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字詞小魔法師：小三中文詞語學習遊戲 (GitHub 數據版)</title>
+    <title>字詞小魔法師：小三中文詞語進度闖關版</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -70,6 +70,45 @@
             50% { transform: scale(1.05); background-color: #bbf7d0; }
         }
 
+        /* Boss hit animation */
+        @keyframes boss-hit {
+            0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            15% { transform: scale(1.35) rotate(-15deg); filter: brightness(2) drop-shadow(0 0 25px #ef4444); }
+            30% { transform: scale(0.85) rotate(15deg) translateX(-15px); }
+            45% { transform: scale(1.15) rotate(-10px) translateX(15px); }
+            60% { transform: scale(0.95) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+        }
+
+        .anim-boss-hit {
+            animation: boss-hit 0.75s ease-in-out !important;
+        }
+
+        /* Boss heal animation */
+        @keyframes boss-heal {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.25); filter: brightness(1.5) drop-shadow(0 0 25px #22c55e); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        .anim-boss-heal {
+            animation: boss-heal 0.8s ease-in-out !important;
+        }
+
+        /* Player hurt animation */
+        @keyframes player-hurt {
+            0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); transform: translate(0, 0); }
+            15% { box-shadow: inset 0 0 60px 20px rgba(239, 68, 68, 0.85); transform: translate(-8px, 6px); }
+            30% { box-shadow: inset 0 0 50px 15px rgba(239, 68, 68, 0.75); transform: translate(8px, -6px); }
+            45% { box-shadow: inset 0 0 40px 10px rgba(239, 68, 68, 0.6); transform: translate(-5px, 3px); }
+            60% { box-shadow: inset 0 0 25px 5px rgba(239, 68, 68, 0.4); transform: translate(5px, -3px); }
+            100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); transform: translate(0, 0); }
+        }
+
+        .anim-player-hurt {
+            animation: player-hurt 0.75s ease-in-out !important;
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -94,19 +133,27 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">字詞小魔法師</h1>
-                    <p class="text-xs text-emerald-100 hidden sm:block">小三中文課堂詞語輔導遊戲 (GitHub 雲端存儲版)</p>
+                    <p class="text-xs text-emerald-100 hidden sm:block">小三中文（第九～十六課）關卡解鎖版</p>
                 </div>
             </div>
 
             <!-- Accessibility & Student Status Toolbar -->
             <div class="flex items-center gap-2 sm:gap-3 bg-emerald-700/60 p-1.5 rounded-xl border border-emerald-500/30">
-                <div id="studentBadgeHeader" class="hidden text-xs bg-yellow-400 text-emerald-950 px-2 py-1 rounded-lg font-bold">
-                    <i class="fa-solid fa-user-graduate mr-1"></i><span id="headerStudentInfo">3A (01)</span>
+                <div id="studentBadgeHeader" class="hidden text-xs bg-yellow-400 text-emerald-950 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    <span id="headerStudentInfo">3A (01)</span>
                 </div>
 
-                <button id="teacherNavBtn" onclick="switchView('teacher')" title="教師控制台" class="hidden px-2.5 py-1 bg-amber-400 text-amber-950 hover:bg-amber-300 rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
+                <!-- Item Shop Shortcut Button -->
+                <button id="shopNavBtn" onclick="openShopModal()" class="hidden px-2.5 py-1 bg-amber-400 text-amber-950 hover:bg-amber-300 rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
+                    <i class="fa-solid fa-store"></i>
+                    <span class="hidden md:inline">魔法商店</span>
+                </button>
+
+                <!-- Teacher Navigation Button -->
+                <button id="teacherNavBtn" onclick="switchView('teacher')" title="教師控制台" class="hidden px-2.5 py-1 bg-purple-500 hover:bg-purple-400 text-white rounded-lg text-xs font-extrabold transition shadow flex items-center gap-1">
                     <i class="fa-solid fa-chalkboard-user"></i>
-                    <span class="hidden md:inline">教師管理面板</span>
+                    <span class="hidden md:inline">教師控制台</span>
                 </button>
 
                 <button onclick="toggleVoiceSpeed()" title="調整語音速度" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-900 rounded-lg text-xs flex items-center gap-1 transition">
@@ -125,28 +172,32 @@
                     <i class="fa-solid fa-circle-half-stroke text-yellow-300"></i>
                 </button>
 
-                <button id="reportNavBtn" onclick="switchView('report')" title="學習進度報告" class="hidden px-2.5 py-1 bg-yellow-400 text-emerald-950 hover:bg-yellow-300 rounded-lg text-xs font-bold transition shadow">
+                <button id="reportNavBtn" onclick="switchView('report')" title="學習進度報告" class="hidden px-2 py-1 bg-yellow-400 text-emerald-950 hover:bg-yellow-300 rounded-lg text-xs font-bold transition shadow">
                     <i class="fa-solid fa-trophy"></i>
-                    <span class="hidden md:inline ml-1">進度</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <main id="appContainer" class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 dyslexia-wide-spacing">
+    <main id="appContainer" class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 dyslexia-wide-spacing transition-all duration-300">
 
         <!-- ================= 0. 學生登入界面 ================= -->
         <section id="loginView" class="max-w-md mx-auto my-8 bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-xl bg-card">
             <div class="text-center mb-6">
                 <div class="text-5xl mb-2">🧙‍♂️</div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-emerald-800">字詞小魔法師</h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">小三中文課堂詞語輔導遊戲</p>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">小三中文課堂集數進度闖關</p>
+                
+                <div id="firebaseStatusBadge" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="firebaseStatusText">雲端數據庫連接中...</span>
+                </div>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <label for="studentClass" class="block text-sm font-bold text-slate-700 mb-1">選擇班別：</label>
-                    <select id="studentClass" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <select id="studentClass" onchange="checkTeacherClassSelection()" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="">-- 請選擇班別 --</option>
                         <option value="3A">3A</option>
                         <option value="3B">3B</option>
@@ -158,11 +209,16 @@
 
                 <div>
                     <label for="studentId" class="block text-sm font-bold text-slate-700 mb-1">輸入學號 (1-30)：</label>
-                    <input type="number" id="studentId" placeholder="例如：05" min="1" max="99" oninput="if(this.value.length>2)this.value=this.value.slice(0,2)" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <input type="number" id="studentId" placeholder="例如：05" min="1" max="99" oninput="if(this.value.length>2)this.value=this.value.slice(0,2); checkTeacherClassSelection();" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div id="teacherPasswordContainer" class="hidden">
+                    <label for="teacherPassword" class="block text-sm font-bold text-amber-800 mb-1">🔑 教師後台密碼：</label>
+                    <input type="password" id="teacherPassword" placeholder="請在此輸入密碼" class="w-full p-3 rounded-xl border border-amber-300 bg-amber-50 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
                 </div>
 
                 <button onclick="submitLogin()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-lg shadow-lg transition card-bounce flex items-center justify-center gap-2">
-                    <span>開始魔法挑戰 🌳📖</span>
+                    <span>進入魔法冒險 🌳📖</span>
                     <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
                 </button>
             </div>
@@ -170,107 +226,222 @@
             <div id="loginStatus" class="mt-4 hidden p-3 rounded-xl text-xs font-bold text-center"></div>
         </section>
 
-        <!-- ================= MAIN MENU VIEW ================= -->
+        <!-- ================= 1. EPISODE / LEVEL SELECTION VIEW ================= -->
         <section id="menuView" class="hidden space-y-6">
-            <!-- Welcome Banner -->
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-                <div class="relative z-10">
-                    <span class="bg-yellow-400 text-emerald-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">小學三年級</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 mb-2">歡迎來到漢字詞語森林！</h2>
-                    <p class="text-emerald-100 text-sm sm:text-base max-w-xl">
-                        梁老師為大家準備了全新詞語魔法挑戰！點擊關卡，每次將從課文題庫中隨機抽取 <strong>10 道題目</strong>，一起聽語音、學詞義與填空！
-                    </p>
-                    <button onclick="speakText('歡迎來到漢字詞語森林！請選擇你想挑戰的關卡，每次會為你隨機抽取十道題目。')" class="mt-4 bg-emerald-700/80 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-emerald-400/40 transition">
-                        <i class="fa-solid fa-volume-high text-yellow-300"></i> 聽取說明
+            <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <span class="bg-yellow-400 text-emerald-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">小三中文（第九～十六課）</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold mt-2">集數與三關闖關選單</h2>
+                        <p class="text-emerald-100 text-xs sm:text-sm mt-1 max-w-xl">
+                            每一集均包含「詞語填空」、「辨識錯別字」、「詞義對對碰」三個關卡！完成整集 3 個關卡即可解鎖下一集！
+                        </p>
+                    </div>
+
+                    <div class="bg-emerald-900/60 border border-emerald-400/40 p-3 rounded-2xl text-center flex sm:flex-col items-center justify-between gap-2 min-w-[140px]">
+                        <div class="text-xs text-yellow-300 font-bold"><i class="fa-solid fa-coins mr-1"></i>可用魔法積分</div>
+                        <div id="menuScoreDisplay" class="text-2xl font-black text-yellow-400">0 分</div>
+                        <button onclick="openShopModal()" class="mt-1 px-3 py-1 bg-yellow-400 hover:bg-yellow-300 text-emerald-950 rounded-xl text-xs font-black shadow transition">
+                            🛒 道具商店
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-emerald-600"></i>
+                        選擇學習集數：
+                    </h3>
+                    <span id="unlockedProgressLabel" class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                        已解鎖進度：第 1 集
+                    </span>
+                </div>
+
+                <div id="episodesContainer" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                </div>
+            </div>
+
+            <!-- Boss Level Special Banner -->
+            <div id="bossLevelBanner" class="mt-6 bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 shadow-2xl border-2 border-purple-500/40 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-purple-600/50 rounded-2xl flex items-center justify-center text-4xl border border-purple-400 shadow">
+                            👿
+                        </div>
+                        <div>
+                            <span class="bg-rose-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">終極隱藏關卡</span>
+                            <h3 class="text-xl font-black text-yellow-300 mt-1">第九關：暗黑魔王終極對決</h3>
+                            <p id="bossLockDesc" class="text-xs text-purple-200 mt-0.5">
+                                題目從第九課至第十六課全數隨機抽取！需通關前八集解鎖挑戰！
+                            </p>
+                        </div>
+                    </div>
+
+                    <button id="bossChallengeBtn" disabled onclick="startBossBattle()" class="w-full md:w-auto px-6 py-3.5 bg-slate-700 text-slate-400 font-extrabold rounded-2xl text-sm shadow-lg flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>鎖定中 (完成所有集數解鎖)</span>
                     </button>
                 </div>
-                <div class="absolute -right-4 -bottom-6 text-8xl opacity-20 pointer-events-none">
-                    🌳📖✨
-                </div>
-            </div>
-
-            <!-- Game Mode Cards -->
-            <div class="grid md:grid-cols-3 gap-5">
-                <!-- Level 1 -->
-                <div onclick="startGame(1)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
-                    <div>
-                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
-                            📝
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-1">第一關：詞語填空與句子辨識</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                            根據句子上下文，選出最合適的小三課文詞語填入括號中！（每次隨機抽 10 題）
-                        </p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg">語境運用</span>
-                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
-                    </div>
-                </div>
-
-                <!-- Level 2 -->
-                <div onclick="startGame(2)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
-                    <div>
-                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
-                            🔍
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-1">第二關：火眼辨形字與錯別字</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                            分辨容易混淆的形近字與同音字（例：「晴／睛」、「題／提」、「已／己」）！（每次隨機抽 10 題）
-                        </p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">視覺辨析</span>
-                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
-                    </div>
-                </div>
-
-                <!-- Level 3 -->
-                <div onclick="startGame(3)" class="bg-white rounded-2xl p-5 border-2 border-emerald-100 shadow-md card-bounce cursor-pointer flex flex-col justify-between bg-card">
-                    <div>
-                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-4 font-bold">
-                            💡
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-1">第三關：詞義解對對碰</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                            閱讀或聽取詞義解釋說明，選出正確對應的詞語！（每次隨機抽 10 題）
-                        </p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">詞義理解</span>
-                        <i class="fa-solid fa-circle-play text-emerald-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Guidance Box -->
-            <div class="bg-amber-50 rounded-2xl p-5 border border-amber-200 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="text-3xl">🔊</div>
-                    <div>
-                        <h4 class="font-bold text-amber-900 text-sm md:text-base">讀寫困難輔導提示（給家長與同學）</h4>
-                        <p class="text-xs text-amber-800 mt-0.5">所有題目均設有標準廣東話發音按鈕，配合「多感官學習法」，邊聽邊讀能顯著增強詞語記憶！</p>
-                    </div>
-                </div>
-                <button onclick="speakText('點擊任何喇叭圖示，都可以聽到標準廣東話發音，多聽多讀能加強記憶！')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition whitespace-nowrap shadow">
-                    <i class="fa-solid fa-volume-high"></i> 試聽語音
-                </button>
             </div>
         </section>
 
+        <!-- ================= SUB-LEVELS MODAL ================= -->
+        <div id="subLevelsModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-2 border-emerald-300 bg-card space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📖</span>
+                        <div>
+                            <h3 id="modalEpisodeTitle" class="text-xl font-black text-slate-800">第 1 集關卡選擇</h3>
+                            <p class="text-xs text-slate-500">請依序完成三個小關卡以順利通關本集！</p>
+                        </div>
+                    </div>
+                    <button onclick="closeSubLevelsModal()" class="text-slate-400 hover:text-slate-600 font-bold p-1 text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="subLevelsContainer" class="space-y-3">
+                </div>
+
+                <button onclick="closeSubLevelsModal()" class="w-full py-2.5 bg-slate-800 text-white rounded-xl font-bold text-xs mt-2">
+                    返回選單
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= ITEM SHOP MODAL ================= -->
+        <div id="shopModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-2 border-amber-300 bg-card space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">🛒</span>
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800">魔法道具商店</h3>
+                            <p class="text-xs text-slate-500">累積得分換取道具，可用於 Boss 戰役！</p>
+                        </div>
+                    </div>
+                    <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 font-bold p-1 text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="shopMessage" class="hidden text-xs font-bold p-2.5 rounded-xl text-center transition-all"></div>
+
+                <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-amber-900 block">目前可消費積分：</span>
+                        <span class="text-[11px] text-amber-700">(購買道具不扣減給老師參考的總累積積分)</span>
+                    </div>
+                    <span id="shopBalance" class="text-xl font-black text-amber-600">0 分</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-1">
+                    <div class="p-3 border-2 border-slate-200 rounded-2xl flex flex-col justify-between bg-slate-50">
+                        <div>
+                            <div class="text-3xl mb-1">🧪</div>
+                            <div class="font-bold text-sm text-slate-800">體力魔法藥水</div>
+                            <div class="text-[11px] text-slate-500 leading-tight mt-0.5">Boss 戰時恢復 30 點生命值 (HP)</div>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center pt-2 border-t border-slate-200">
+                            <span class="text-xs font-extrabold text-amber-600">30 分</span>
+                            <button onclick="buyItem('potion', 30)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition">
+                                購買
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border-2 border-slate-200 rounded-2xl flex flex-col justify-between bg-slate-50">
+                        <div>
+                            <div class="text-3xl mb-1">🛡️</div>
+                            <div class="font-bold text-sm text-slate-800">智慧防護盾</div>
+                            <div class="text-[11px] text-slate-500 leading-tight mt-0.5">阻擋接下來魔王一回合的攻擊</div>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center pt-2 border-t border-slate-200">
+                            <span class="text-xs font-extrabold text-amber-600">50 分</span>
+                            <button onclick="buyItem('shield', 50)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition">
+                                購買
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border-2 border-slate-200 rounded-2xl flex flex-col justify-between bg-slate-50">
+                        <div>
+                            <div class="text-3xl mb-1">🪄</div>
+                            <div class="font-bold text-sm text-slate-800">魔導士法杖</div>
+                            <div class="text-[11px] text-slate-500 leading-tight mt-0.5">召喚魔法強光，直接造成魔王 20 點傷害</div>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center pt-2 border-t border-slate-200">
+                            <span class="text-xs font-extrabold text-amber-600">80 分</span>
+                            <button onclick="buyItem('wand', 80)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition">
+                                購買
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border-2 border-slate-200 rounded-2xl flex flex-col justify-between bg-slate-50">
+                        <div>
+                            <div class="text-3xl mb-1">📜</div>
+                            <div class="font-bold text-sm text-slate-800">遠古禁忌卷軸</div>
+                            <div class="text-[11px] text-slate-500 leading-tight mt-0.5">觸發超級天雷擊，直接削弱 Boss 50 HP</div>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center pt-2 border-t border-slate-200">
+                            <span class="text-xs font-extrabold text-amber-600">120 分</span>
+                            <button onclick="buyItem('scroll', 120)" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition">
+                                購買
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 text-xs text-purple-900 font-bold">
+                    <div class="mb-2 flex justify-between items-center">
+                        <span>🎒 我的背包戰鬥物資：</span>
+                    </div>
+                    <div id="shopInventoryGrid" class="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="p-2 bg-white rounded-xl border border-purple-200 shadow-sm flex flex-col items-center">
+                            <span class="text-lg">🧪</span>
+                            <span class="text-[10px] text-slate-500 font-bold mt-0.5">藥水</span>
+                            <span id="invCountPotion" class="font-extrabold text-purple-800">0</span>
+                        </div>
+                        <div class="p-2 bg-white rounded-xl border border-purple-200 shadow-sm flex flex-col items-center">
+                            <span class="text-lg">🛡️</span>
+                            <span class="text-[10px] text-slate-500 font-bold mt-0.5">護盾</span>
+                            <span id="invCountShield" class="font-extrabold text-purple-800">0</span>
+                        </div>
+                        <div class="p-2 bg-white rounded-xl border border-purple-200 shadow-sm flex flex-col items-center">
+                            <span class="text-lg">🪄</span>
+                            <span class="text-[10px] text-slate-500 font-bold mt-0.5">法杖</span>
+                            <span id="invCountWand" class="font-extrabold text-purple-800">0</span>
+                        </div>
+                        <div class="p-2 bg-white rounded-xl border border-purple-200 shadow-sm flex flex-col items-center">
+                            <span class="text-lg">📜</span>
+                            <span class="text-[10px] text-slate-500 font-bold mt-0.5">卷軸</span>
+                            <span id="invCountScroll" class="font-extrabold text-purple-800">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="closeShopModal()" class="w-full py-2.5 bg-slate-800 text-white rounded-xl font-bold text-xs">
+                    完成關閉
+                </button>
+            </div>
+        </div>
+
         <!-- ================= GAMEPLAY ARENA VIEW ================= -->
         <section id="gameView" class="hidden space-y-6">
-            <!-- Top Game Bar -->
             <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm bg-card">
                 <button onclick="switchView('menu')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-arrow-left"></i> 主頁
+                    <i class="fa-solid fa-arrow-left"></i> 返回關卡選單
                 </button>
                 <div class="flex items-center gap-3 sm:gap-4">
                     <div class="text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">
-                        <span id="levelTitle">關卡名稱</span>
+                        <span id="levelTitle">第 1 集：第九課《自然與動物》</span>
                     </div>
                     <div class="text-xs sm:text-sm font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-lg">
-                        <span id="progressText">第 1 / 10 題</span>
+                        <span id="progressText">第 1 / 5 題</span>
                     </div>
                     <div class="text-xs sm:text-sm font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg flex items-center gap-1">
                         <i class="fa-solid fa-star text-amber-400"></i>
@@ -279,37 +450,26 @@
                 </div>
             </div>
 
-            <!-- Question Card Area -->
             <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-100 shadow-lg text-center relative bg-card">
-                
-                <!-- Audio Cue Button for Question -->
                 <div class="mb-4 flex justify-center">
                     <button id="readQuestionBtn" onclick="readCurrentQuestion()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-4 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 border border-emerald-300 shadow-sm transition">
                         <i class="fa-solid fa-volume-high text-emerald-600 text-lg"></i>
-                        <span>點擊聽題 (廣東話)</span>
+                        <span>點擊聽題 (廣東話朗讀)</span>
                     </button>
                 </div>
 
-                <!-- Dynamic Question Text -->
                 <div id="questionPrompt" class="text-xl sm:text-2xl font-bold text-slate-800 my-4 leading-relaxed">
-                    <!-- Injected dynamically -->
                 </div>
 
-                <!-- Visual Hint Box -->
                 <div id="hintBox" class="hidden mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-xs sm:text-sm text-yellow-800">
-                    <!-- Injected dynamically -->
                 </div>
 
-                <!-- Interactive Game Play Area -->
                 <div id="gameInteractiveArea" class="my-6">
-                    <!-- Options buttons injected dynamically -->
                 </div>
 
-                <!-- Feedback Message Box -->
                 <div id="feedbackBox" class="min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2">
                 </div>
 
-                <!-- Action Button Container -->
                 <div class="mt-6 flex justify-center gap-3">
                     <button id="hintBtn" onclick="showHint()" class="px-4 py-2 bg-amber-100 text-amber-800 hover:bg-amber-200 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1">
                         <i class="fa-solid fa-lightbulb"></i> 魔法提示
@@ -321,63 +481,256 @@
             </div>
         </section>
 
-        <!-- ================= REPORT / PROGRESS VIEW ================= -->
+        <!-- ================= LEVEL COMPLETE VIEW ================= -->
+        <section id="levelCompleteView" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-8 sm:p-10 border-2 border-yellow-300 shadow-2xl text-center bg-card max-w-xl mx-auto space-y-6">
+                <div class="text-7xl animate-bounce">🏆</div>
+                <div>
+                    <span class="bg-yellow-400 text-amber-950 font-black text-xs px-3 py-1 rounded-full uppercase tracking-widest">Congratulations!</span>
+                    <h2 id="completeLevelTitle" class="text-2xl sm:text-3xl font-black text-slate-800 mt-2">恭喜完成關卡！</h2>
+                    <p id="completeLevelDesc" class="text-sm text-slate-600 mt-1">你展現了超凡的中文詞語魔法！獲得了豐富的魔法積分！</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-50 to-yellow-100 border border-yellow-300 p-4 rounded-2xl flex justify-around items-center">
+                    <div>
+                        <div class="text-xs text-amber-800 font-bold">目前可用積分</div>
+                        <div id="completeEarnedScore" class="text-2xl font-black text-amber-600">0 分</div>
+                    </div>
+                    <div class="h-8 w-px bg-amber-300"></div>
+                    <div>
+                        <div class="text-xs text-amber-800 font-bold">累積總得分</div>
+                        <div id="completeTotalScore" class="text-2xl font-black text-emerald-600">0 分</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <button id="btnNextLevelAction" onclick="goToNextSubLevel()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold rounded-2xl text-base shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                        <span>進入下一個關卡 🚀</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="switchView('menu')" class="py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-sm transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-house"></i> 回到主頁
+                        </button>
+                        <button onclick="switchView('report')" class="py-3 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-2xl text-sm transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-trophy"></i> 查看成就
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BOSS BATTLE ARENA ================= -->
+        <section id="bossView" class="hidden space-y-6">
+            <div id="bossBattleCard" class="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white border-2 border-purple-500/50 shadow-2xl relative overflow-hidden transition-all duration-300">
+                <div class="flex justify-between items-center mb-4 border-b border-purple-800/60 pb-3">
+                    <button onclick="switchView('menu')" class="px-3 py-1.5 bg-purple-950 text-purple-200 hover:bg-purple-900 rounded-xl text-xs font-bold border border-purple-700">
+                        <i class="fa-solid fa-arrow-left"></i> 離開戰場
+                    </button>
+                    <span class="text-xs font-black bg-rose-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">
+                        ⚔️ 終極隱藏 Boss 回合戰
+                    </span>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-6 bg-slate-800/80 p-4 rounded-2xl border border-purple-800/60 relative">
+                    <div id="playerHealthContainer" class="relative">
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-emerald-400">🧙‍♂️ 玩家血量 (HP)</span>
+                            <span id="playerHpText" class="text-emerald-300">100 / 100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-3.5 border border-emerald-500/40 p-0.5">
+                            <div id="playerHpBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div id="bossHealthContainer" class="relative">
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-rose-400">👿 暗黑魔王血量 (HP)</span>
+                            <span id="bossHpText" class="text-yellow-300">100 / 100</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-3.5 border border-rose-500/40 p-0.5">
+                            <div id="bossHpBar" class="bg-gradient-to-r from-rose-600 to-amber-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center space-y-3">
+                    <div class="inline-block relative">
+                        <div id="bossAvatar" class="text-7xl my-1 transition-transform duration-300">👿</div>
+                        <div id="bossShieldBadge" class="hidden absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow">
+                            🛡️ 護盾保護中
+                        </div>
+                    </div>
+
+                    <p id="bossBattleMessage" class="text-sm font-bold text-purple-200 bg-purple-950/80 p-3 rounded-2xl border border-purple-800 max-w-lg mx-auto min-h-[55px] flex items-center justify-center text-center">
+                        提示：題目來自第九課至第十六課全數課程隨機抽取！請謹慎應對！
+                    </p>
+
+                    <div class="space-y-2 max-w-xl mx-auto pt-2">
+                        <div class="text-xs font-bold text-purple-300 flex justify-between px-1">
+                            <span>🎒 背包道具：</span>
+                            <span id="turnStatusLabel" class="text-yellow-400 font-extrabold">✨ 玩家回合</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <button id="btnBossPotion" onclick="useBossItem('potion')" class="p-2.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 rounded-2xl text-xs font-bold space-y-1 transition disabled:opacity-40">
+                                <div class="text-xl">🧪</div>
+                                <div>體力藥水</div>
+                                <div id="bossPotionCount" class="text-[10px] text-yellow-300">剩餘: 0</div>
+                            </button>
+
+                            <button id="btnBossShield" onclick="useBossItem('shield')" class="p-2.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 rounded-2xl text-xs font-bold space-y-1 transition disabled:opacity-40">
+                                <div class="text-xl">🛡️</div>
+                                <div>智慧防護盾</div>
+                                <div id="bossShieldCount" class="text-[10px] text-yellow-300">剩餘: 0</div>
+                            </button>
+
+                            <button id="btnBossWand" onclick="useBossItem('wand')" class="p-2.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 rounded-2xl text-xs font-bold space-y-1 transition disabled:opacity-40">
+                                <div class="text-xl">🪄</div>
+                                <div>魔導士法杖</div>
+                                <div id="bossWandCount" class="text-[10px] text-yellow-300">剩餘: 0</div>
+                            </button>
+
+                            <button id="btnBossScroll" onclick="useBossItem('scroll')" class="p-2.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 rounded-2xl text-xs font-bold space-y-1 transition disabled:opacity-40">
+                                <div class="text-xl">📜</div>
+                                <div>禁忌卷軸</div>
+                                <div id="bossScrollCount" class="text-[10px] text-yellow-300">剩餘: 0</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3">
+                        <button id="btnBossAttack" onclick="triggerBossQuestionAttack()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-black rounded-2xl text-base shadow-xl transition card-bounce border border-rose-400">
+                            ⚔️ 普通攻擊 (回答跨課文隨機問題)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOSS QUESTION ATTACK MODAL -->
+        <div id="bossQuestionModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-2 border-purple-500 bg-card space-y-4 text-center">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span id="bossQuestionOriginBadge" class="bg-purple-100 text-purple-900 font-extrabold text-xs px-3 py-1 rounded-full">
+                        ⚔️ 隨機題庫抽取中
+                    </span>
+                    <span class="text-xs text-slate-400 font-bold">答對擊中魔王 | 答錯可重試</span>
+                </div>
+
+                <div id="bossQuestionPrompt" class="text-lg font-extrabold text-slate-800 my-4 leading-relaxed">
+                </div>
+
+                <div id="bossQuestionOptions" class="grid grid-cols-2 gap-3 my-4">
+                </div>
+
+                <div id="bossQuestionFeedback" class="hidden p-3 rounded-2xl text-sm font-bold"></div>
+            </div>
+        </div>
+
+        <!-- BOSS VICTORY MODAL -->
+        <div id="bossVictoryModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border-2 border-yellow-400 my-8 space-y-6 text-center relative overflow-hidden">
+                <div class="text-6xl sm:text-7xl animate-bounce">👑</div>
+                <div>
+                    <span class="bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                        🎉 討伐魔王成功・終極大勝利 🎉
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-yellow-300 mt-3">恭喜勇者！成功打敗暗黑魔王！</h2>
+                    <p class="text-xs sm:text-sm text-purple-200 mt-1">你展現了無與倫比的中文詞語魔法，成功拯救了字詞王國！</p>
+                </div>
+
+                <div class="bg-slate-800/90 border border-yellow-400/50 rounded-2xl p-4 sm:p-5 text-left space-y-3">
+                    <div class="flex justify-between items-center border-b border-purple-800/80 pb-2">
+                        <span class="text-xs text-purple-300 font-bold">🎓 勇者學生成績單結算</span>
+                        <span id="victoryStudentInfo" class="text-xs font-black text-yellow-400 bg-purple-900/80 px-2.5 py-0.5 rounded-lg border border-purple-700">3A (01)</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div class="bg-purple-950/80 border border-purple-700/60 p-3 rounded-xl text-center">
+                            <div class="text-[11px] text-purple-300 font-bold mb-1"><i class="fa-solid fa-coins text-yellow-400 mr-1"></i>累積總得分</div>
+                            <div id="victoryScore" class="text-2xl sm:text-3xl font-black text-yellow-400">0 分</div>
+                        </div>
+                        <div class="bg-purple-950/80 border border-purple-700/60 p-3 rounded-xl text-center">
+                            <div class="text-[11px] text-purple-300 font-bold mb-1"><i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>累計答對題數</div>
+                            <div id="victoryQuestions" class="text-2xl sm:text-3xl font-black text-emerald-400">0 題</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 text-left">
+                    <h3 class="text-sm font-extrabold text-yellow-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-medal text-amber-400"></i>
+                        獲得的所有魔法榮譽徽章：
+                    </h3>
+                    <div id="victoryBadgesContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-48 overflow-y-auto pr-1">
+                    </div>
+                </div>
+
+                <div class="space-y-2.5 pt-2">
+                    <button onclick="saveStudentProgressToCloud(); closeBossVictoryModal(); switchView('report');" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-2xl text-sm shadow-xl transition card-bounce flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-base"></i>
+                        <span>同步成績至雲端 & 查看詳細進度</span>
+                    </button>
+                    <button onclick="closeBossVictoryModal(); switchView('menu');" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-2xl text-xs transition">
+                        返回關卡選單
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= REPORT / PROGRESS VIEW WITH BADGES ================= -->
         <section id="reportView" class="hidden space-y-6">
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg bg-card">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <h2 class="text-2xl font-extrabold text-emerald-800 flex items-center gap-2">
-                            <i class="fa-solid fa-award text-yellow-500"></i> 我的學習魔法徽章
+                            <i class="fa-solid fa-award text-yellow-500"></i> 我的學習魔法徽章與進度
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">
                             學生記錄：<span id="reportStudentInfo" class="font-bold text-emerald-700">-- 班 -- 號</span>
                         </p>
                     </div>
                     <button onclick="switchView('menu')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
-                        <i class="fa-solid fa-arrow-left"></i> 返回主頁
+                        <i class="fa-solid fa-arrow-left"></i> 返回關卡選單
                     </button>
                 </div>
 
-                <div class="grid sm:grid-cols-3 gap-4 mb-8">
+                <div class="grid sm:grid-cols-3 gap-4 mb-6">
                     <div class="bg-emerald-50 p-4 rounded-2xl text-center border border-emerald-100">
                         <div class="text-xs text-emerald-600 font-bold mb-1">完成題數</div>
                         <div id="totalQuestionsAnswered" class="text-3xl font-extrabold text-emerald-900">0</div>
                     </div>
                     <div class="bg-amber-50 p-4 rounded-2xl text-center border border-amber-100">
-                        <div class="text-xs text-amber-600 font-bold mb-1">累積得分</div>
+                        <div class="text-xs text-amber-600 font-bold mb-1">累積總魔法積分</div>
                         <div id="totalScoreAccumulated" class="text-3xl font-extrabold text-amber-900">0</div>
                     </div>
                     <div class="bg-purple-50 p-4 rounded-2xl text-center border border-purple-100">
-                        <div class="text-xs text-purple-600 font-bold mb-1">獲得魔法稱號</div>
-                        <div id="magicTitle" class="text-lg font-extrabold text-purple-900 mt-2">詞語小見習生</div>
+                        <div class="text-xs text-purple-600 font-bold mb-1">解鎖集數進度</div>
+                        <div id="reportUnlockedEpisode" class="text-lg font-extrabold text-purple-900 mt-2">第 1 集</div>
                     </div>
                 </div>
 
-                <h3 class="text-lg font-bold text-slate-800 mb-3">已解鎖徽章</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="badgesContainer">
-                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
-                        <div class="text-3xl mb-1">📝</div>
-                        <div class="text-xs font-bold text-slate-600">語句運用達人</div>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
-                        <div class="text-3xl mb-1">🔍</div>
-                        <div class="text-xs font-bold text-slate-600">火眼辨形星</div>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
-                        <div class="text-3xl mb-1">💡</div>
-                        <div class="text-xs font-bold text-slate-600">詞義解讀大師</div>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center opacity-50">
-                        <div class="text-3xl mb-1">🌟</div>
-                        <div class="text-xs font-bold text-slate-600">小三詞語學霸</div>
+                <div class="border-t border-slate-100 pt-6">
+                    <h3 class="text-lg font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-medal text-amber-500"></i>
+                        獲得的魔法榮譽徽章：
+                    </h3>
+
+                    <div id="badgesContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     </div>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
-                        <button id="uploadBtn" onclick="uploadDataToGitHub()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
-                            <i class="fa-brands fa-github text-yellow-300 text-lg"></i>
-                            <span>同步 / 上載成績</span>
+                        <button id="uploadBtn" onclick="saveStudentProgressToCloud()" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-extrabold text-sm shadow-lg transition card-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-yellow-300 text-lg"></i>
+                            <span>同步成績進度至 Firebase 雲端</span>
+                        </button>
+                        <button onclick="copyStudentReportText()" class="w-full sm:w-auto px-5 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-extrabold text-sm shadow-md transition card-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-copy text-yellow-200"></i>
+                            <span>複製成績摘要 (貼至 Classroom)</span>
                         </button>
                     </div>
                     <div id="uploadStatus" class="hidden max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold"></div>
@@ -385,27 +738,26 @@
             </div>
         </section>
 
-        <!-- 3A99 TEACHER DASHBOARD VIEW -->
+        <!-- ================= TEACHER DASHBOARD VIEW ================= -->
         <section id="teacherView" class="hidden space-y-6">
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-300 shadow-xl bg-card">
-                
-                <!-- Dashboard Top Title Bar -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-purple-300 shadow-xl bg-card">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-200">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="bg-amber-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">3A99 專用</span>
+                            <span class="bg-purple-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">教師專用控制台</span>
                             <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-                                🎓教師管理控制台 (全班成績總覽)
+                                🎓 教師管理控制台 (雲端進度與解鎖控制)
                             </h2>
                         </div>
-                        <p class="text-xs text-slate-500 mt-1">
-                            實時讀取 GitHub 雲端數據庫 (<code class="text-amber-700 font-mono">scores.json</code>) 的所有學生學習紀錄
+                        <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                            老師可在此即時查看學生雲端數據（顯示不隨道具減少的累積總積分），並手動協助調整同學的集數解鎖進度
                         </p>
                     </div>
                     
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <button onclick="refreshTeacherDashboard()" class="flex-1 md:flex-initial px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-rotate text-sm"></i> 重新整理數據
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <button onclick="fetchTeacherCloudRecords()" class="flex-1 md:flex-initial px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate text-sm"></i> 重新載入雲端數據
                         </button>
                         <button onclick="switchView('menu')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
                             <i class="fa-solid fa-house mr-1"></i> 返回主頁
@@ -413,31 +765,10 @@
                     </div>
                 </div>
 
-                <!-- Stats Overview Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center">
-                        <div class="text-xs font-bold text-emerald-700">總學習人數</div>
-                        <div id="statStudentCount" class="text-2xl md:text-3xl font-extrabold text-emerald-900 mt-1">0</div>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
-                        <div class="text-xs font-bold text-blue-700">平均完成題數</div>
-                        <div id="statAvgQuestions" class="text-2xl md:text-3xl font-extrabold text-blue-900 mt-1">0</div>
-                    </div>
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-center">
-                        <div class="text-xs font-bold text-amber-700">平均得分</div>
-                        <div id="statAvgScore" class="text-2xl md:text-3xl font-extrabold text-amber-900 mt-1">0</div>
-                    </div>
-                    <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl text-center">
-                        <div class="text-xs font-bold text-purple-700">最高得分同學</div>
-                        <div id="statTopStudent" class="text-lg md:text-xl font-extrabold text-purple-900 mt-2 truncate">--</div>
-                    </div>
-                </div>
-
-                <!-- Search and Filter Controls -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6">
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <label for="teacherClassFilter" class="text-xs font-bold text-slate-700 whitespace-nowrap">班別篩選：</label>
-                        <select id="teacherClassFilter" onchange="filterTeacherTable()" class="p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <select id="teacherClassFilter" onchange="filterTeacherTable()" class="p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
                             <option value="ALL">全部班別 (3A - 3E)</option>
                             <option value="3A">3A 班</option>
                             <option value="3B">3B 班</option>
@@ -448,839 +779,1604 @@
                     </div>
 
                     <div class="relative w-full sm:w-64">
-                        <input type="text" id="teacherSearchInput" onkeyup="filterTeacherTable()" placeholder="搜尋學號 (例如：05)..." class="w-full pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <input type="text" id="teacherSearchInput" onkeyup="filterTeacherTable()" placeholder="搜尋學號 (例如：05)..." class="w-full pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
                         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
                     </div>
                 </div>
 
-                <!-- Students Score Table -->
                 <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
-                    <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
-                            <tr>
-                                <th class="py-3 px-4">班別</th>
-                                <th class="py-3 px-4">學號</th>
-                                <th class="py-3 px-4 text-center">完成題數</th>
-                                <th class="py-3 px-4 text-center">累積得分</th>
-                                <th class="py-3 px-4">魔法稱號</th>
-                                <th class="py-3 px-4 text-center">資料來源</th>
+                    <table class="w-full text-left border-collapse min-w-[650px]">
+                        <thead>
+                            <tr class="bg-purple-100/70 text-purple-950 text-xs font-black uppercase border-b border-purple-200">
+                                <th class="p-3">學生班別學號</th>
+                                <th class="p-3">累積總積分 (不減)</th>
+                                <th class="p-3">可消費餘額</th>
+                                <th class="p-3">完成題數</th>
+                                <th class="p-3">雲端解鎖集數進度</th>
+                                <th class="p-3 text-center">教師遠端調整動作</th>
                             </tr>
                         </thead>
-                        <tbody id="teacherTableBody" class="divide-y divide-slate-100 font-semibold text-slate-800 bg-white">
-                            <!-- Injected dynamically via JS -->
+                        <tbody id="teacherTableBody" class="divide-y divide-slate-100 text-xs font-bold text-slate-700">
                         </tbody>
                     </table>
                 </div>
-
-                <div id="teacherTableEmpty" class="hidden text-center py-8 text-slate-400 text-xs">
-                    <i class="fa-solid fa-folder-open text-3xl mb-2 block"></i>
-                    暫無符合條件的學生學習記錄
-                </div>
-
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 bg-card">
-        <p>專為小學三年級讀寫困難/障礙學生設計 | 嚴格依據小三課文詞語編寫 | 支援 GitHub API 雲端自動同步 | 版本 1.1</p>
-    </footer>
+    <!-- Custom Modal Notification Alert -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm w-full bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-emerald-500/50 flex items-center gap-3 pointer-events-none">
+        <div id="toastIcon" class="text-2xl">✨</div>
+        <div>
+            <h4 id="toastTitle" class="text-sm font-extrabold text-yellow-300">系統通知</h4>
+            <p id="toastMessage" class="text-xs text-slate-200 mt-0.5">訊息內容</p>
+        </div>
+    </div>
 
-    <script>
-        let isLoggedIn = false;
-        let isTeacherMode = false;
-        let currentStudentClass = '';
-        let currentStudentId = '';
-        let totalAnsweredCount = 0;
-        let score = 0;
-        let speechSlowMode = false;
-        let fontSizeLevel = 0;
-        let currentLevel = 1;
-        let currentQuestionIndex = 0;
-        let currentQuestions = [];
-        let allStudentsDataList = [];
+    <!-- Firebase Script Module -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://gstatic.com";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, getDocs } from "https://gstatic.com";
 
-        // GitHub Storage Configurations
-        // 老師如有 GitHub Token，可直接寫在下方 token 變數中（例如 'ghp_xxxxx'）
-        let GH_CONFIG = {
-            owner: localStorage.getItem('gh_owner') || 'leungcw-git',
-            repo: localStorage.getItem('gh_repo') || 'SEN-Chinese-Game-P3-2-',
-            branch: localStorage.getItem('gh_branch') || 'main',
-            filePath: localStorage.getItem('gh_path') || 'scores.json',
-            token: localStorage.getItem('gh_token') || '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'
+        // Global parameters provided by iframe environment or default fallbacks
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'primary3-chinese-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "AIzaSyAp93kAWiCiWWq0wZM9U8NAcxdkRxPvhEc",
+                authDomain: "://firebaseapp.com",
+                projectId: "p3cge1",
+                storageBucket: "p3cge1.firebasestorage.app",
+                messagingSenderId: "12083008936",
+                appId: "1:12083008936:web:3f32269d3b129341a2399d",
+                measurementId: "G-3K3F2NNY7N"
         };
 
-        function refreshGhConfigFromStorage() {
-            GH_CONFIG.owner = localStorage.getItem('gh_owner') || GH_CONFIG.owner;
-            GH_CONFIG.repo = localStorage.getItem('gh_repo') || GH_CONFIG.repo;
-            GH_CONFIG.branch = localStorage.getItem('gh_branch') || GH_CONFIG.branch;
-            GH_CONFIG.filePath = localStorage.getItem('gh_path') || GH_CONFIG.filePath;
-            GH_CONFIG.token = localStorage.getItem('gh_token') || GH_CONFIG.token;
-        }
+        let app, db, auth;
+        let currentUser = null;
 
-        function speakText(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-HK';
-            utterance.rate = speechSlowMode ? 0.7 : 0.95;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function shuffleArray(array) {
-            const arr = [...array];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
-
-        function getRandomQuestions(bank, count = 10) {
-            const shuffled = shuffleArray(bank);
-            return shuffled.slice(0, Math.min(count, shuffled.length));
-        }
-
-        // ================= Question Banks =================
-        const level1Bank = [
-            { sentence: "經過一個月的努力，小明【（ ）】考取了優異的成績。", correct: "終於", options: ["終於", "總是", "經常", "突然"], hint: "表示經過一番努力或長時間後，預期的結果實現了。" },
-            { sentence: "花園裡開滿了【（ ）】的花朵，非常吸引人。", correct: "五顏六色", options: ["五顏六色", "七上八下", "三心兩意", "一心一意"], hint: "形容色彩繁多絢麗。" },
-            { sentence: "媽媽提醒我要【（ ）】時間，不要沉迷打機。", correct: "珍惜", options: ["珍惜", "浪費", "破壞", "丟棄"], hint: "重視並愛惜資源或光陰。" },
-            { sentence: "警察叔叔【（ ）】地維護社區的治安與秩序。", correct: "勇敢", options: ["勇敢", "膽小", "懶惰", "隨便"], hint: "不怕困難、危險或挑戰。" },
-            { sentence: "圖書館內非常【（ ）】，大家都在安靜地閱讀。", correct: "靜謐", options: ["靜謐", "熱鬧", "吵鬧", "喧嘩"], hint: "形容極度安靜。" },
-            { sentence: "小狗見到主人回家，高興地【（ ）】著尾巴。", correct: "搖晃", options: ["搖晃", "停止", "冰凍", "飛翔"], hint: "擺動、搖動。" },
-            { sentence: "我們應該多吃蔬菜水果，保持健康的【（ ）】。", correct: "體魄", options: ["體魄", "衣服", "玩具", "名譽"], hint: "指身體與體格。" },
-            { sentence: "同學們在課堂上【（ ）】發言，討論氣氛十分熱烈。", correct: "踴躍", options: ["踴躍", "冷淡", "沉沒", "悄悄"], hint: "反應熱烈，爭先恐後。" },
-            { sentence: "這座新建的大樓造型【（ ）】，吸引不少人拍照。", correct: "獨特", options: ["獨特", "普通", "常見", "陳舊"], hint: "獨一無二，別具特色。" },
-            { sentence: "老師【（ ）】地指導同學如何改寫文章。", correct: "耐心", options: ["耐心", "急躁", "生氣", "冷酷"], hint: "不急躁、不厭煩地對待事物。" },
-            { sentence: "雨後的彩虹【（ ）】在天空中，美麗極了。", correct: "懸掛", options: ["懸掛", "沉沒", "藏匿", "跌落"], hint: "吊掛在空中。" },
-            { sentence: "這本字典內容【（ ）】，是學習語文的好幫手。", correct: "豐富", options: ["豐富", "貧乏", "單調", "簡陋"], hint: "種類多，內容充實。" }
-        ];
-
-        const level2Bank = [
-            { sentence: "今天天氣十分（ ）朗，非常適合去郊遊。", correct: "晴", options: ["晴", "睛", "晶", "清"], hint: "與天氣日光有關，字旁是「日」。" },
-            { sentence: "老師提出了一個有趣的（ ）目，大家都在認真思考。", correct: "題", options: ["題", "提", "堤", "緹"], hint: "代表題目、問題，右邊是「頁」。" },
-            { sentence: "我（ ）經完成了今天的中文科功課。", correct: "已", options: ["已", "己", "巳", "巴"], hint: "表示已經完成，半封口為「已」。" },
-            { sentence: "做事情要有（ ）心，不能半途而廢。", correct: "恆", options: ["恆", "桓", "垣", "宣"], hint: "持久不變的心，字旁是「忄」（心部）。" },
-            { sentence: "小狗在花園裡高興地（ ）跑。", correct: "奔", options: ["奔", "卉", "莽", "弄"], hint: "快速奔跑，上面是「大」。" },
-            { sentence: "這包洋芋片的味（ ）非常香辣。", correct: "道", options: ["道", "首", "導", "導"], hint: "味道、道理，字包含「辶」旁。" },
-            { sentence: "請你幫我（ ）起地上的鉛筆。", correct: "撿", options: ["撿", "檢", "劍", "臉"], hint: "用手拾起，字旁是手部「扌」。" },
-            { sentence: "這本故事書的（ ）頁畫著一隻可愛的小熊。", correct: "扉", options: ["扉", "飛", "非", "緋"], hint: "指門扇或書頁，字頭是戶部「戶」。" },
-            { sentence: "我們應該養成（ ）擇健康食物的好習慣。", correct: "選", options: ["選", "先", "冼", "眩"], hint: "挑選，字包含「辶」旁。" },
-            { sentence: "經過長途跋涉，我們（ ）於到達了山頂。", correct: "終", options: ["終", "鐘", "眾", "衷"], hint: "最後、最終，字旁是「纟」（絞絲旁）。" }
-        ];
-
-        const level3Bank = [
-            { definition: "形容對事物充滿好奇，迫不及待想要了解或學習的心情。", correct: "求知慾", options: ["求知慾", "同理心", "勝負欲", "好奇心"], hint: "與追求知識的慾望有關。" },
-            { definition: "指態度誠懇，對人不虛偽。", correct: "真誠", options: ["真誠", "虛偽", "驕傲", "冷淡"], hint: "真心實意，沒有偽裝。" },
-            { definition: "形容彼此關係非常親密，沒有隔閡。", correct: "親密", options: ["親密", "疏遠", "陌生", "敵對"], hint: "感情深厚，關係接近。" },
-            { definition: "遇到困難或危險時不害怕，能勇敢面對。", correct: "堅強", options: ["堅強", "軟弱", "膽小", "退縮"], hint: "意志堅定不屈。" },
-            { definition: "指做事情很有秩序，不混亂。", correct: "井井有條", options: ["井井有條", "亂七八糟", "七手八腳", "雜亂無章"], hint: "條理分明，整齊有序。" },
-            { definition: "形容色彩豐富繁多，非常漂亮。", correct: "五彩繽紛", options: ["五彩繽紛", "黑白分明", "暗淡無光", "千篇一律"], hint: "顏色多樣精彩。" },
-            { definition: "用心照顧、愛護，使健康成長。", correct: "呵護", options: ["呵護", "打擊", "冷落", "破壞"], hint: "精心愛護照顧。" },
-            { definition: "指時間過得極快，轉眼即逝。", correct: "光陰似箭", options: ["光陰似箭", "度日如年", "漫長歲月", "持之以恆"], hint: "形容時光如飛箭過隙。" }
-        ];
-
-        // ================= Local & GitHub Storage Logic =================
-
-        function saveStudentLocalData() {
-            if (!currentStudentClass || !currentStudentId) return;
-            const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
-            const data = {
-                studentClass: currentStudentClass,
-                studentId: currentStudentId,
-                totalAnsweredCount: totalAnsweredCount,
-                score: score,
-                updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        function loadStudentLocalData() {
-            if (!currentStudentClass || !currentStudentId) return;
-            const key = `magic_student_${currentStudentClass}_${currentStudentId}`;
-            const saved = localStorage.getItem(key);
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    totalAnsweredCount = Math.max(totalAnsweredCount, data.totalAnsweredCount || 0);
-                    score = Math.max(score, data.score || 0);
-                } catch (e) {
-                    console.error("Error reading local data", e);
-                }
-            }
-        }
-
-        // Fetch scores.json from GitHub
-        async function fetchGitHubScoresFile() {
-            refreshGhConfigFromStorage();
-            if (!GH_CONFIG.owner || !GH_CONFIG.repo) {
-                return [];
-            }
-
+        // 修正點 1：將初始化邏輯封裝在 async 立即執行函數 (IIFE) 中，確保 await 合法
+        (async function initFirebase() {
             try {
-                const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
-                const headers = { 'Accept': 'application/vnd.github.v3+json' };
-                if (GH_CONFIG.token) headers['Authorization'] = `token ${GH_CONFIG.token}`;
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
-                const apiRes = await fetch(apiUrl + (GH_CONFIG.token ? '' : `&_=${Date.now()}`), { headers, cache: 'no-store' });
-                if (apiRes.ok) {
-                    const fileData = await apiRes.json();
-                    const content = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
-                    const json = JSON.parse(content);
-                    return Array.isArray(json) ? json : [];
-                }
-            } catch (err) {
-                console.warn("GitHub API Fetch failed, fallback to raw...", err);
-            }
+                // Auth 狀態監聽設定
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        window.firebaseDB = db;
+                        window.firebaseAuth = auth;
+                        window.appId = appId;
+                        window.isFirebaseReady = true;
 
-            try {
-                const rawUrl = `https://raw.githubusercontent.com/${GH_CONFIG.owner}/${GH_CONFIG.repo}/${GH_CONFIG.branch}/${GH_CONFIG.filePath}?_=` + Date.now();
-                const res = await fetch(rawUrl, { cache: 'no-store' });
-                if (res.ok) {
-                    const json = await res.json();
-                    return Array.isArray(json) ? json : [];
-                }
-            } catch (err) {
-                console.error("Failed to fetch GitHub raw scores", err);
-            }
-
-            return [];
-        }
-
-        // Synchronize or upload data directly to GitHub scores.json via REST API
-        async function uploadDataToGitHub(isAuto = false) {
-            const uploadBtn = document.getElementById('uploadBtn');
-            const uploadStatus = document.getElementById('uploadStatus');
-
-            if (!currentStudentClass || !currentStudentId) return;
-
-            saveStudentLocalData();
-            refreshGhConfigFromStorage();
-
-            if (uploadBtn) {
-                uploadBtn.disabled = true;
-                uploadBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i> 正在自動同步數據...';
-            }
-
-            if (!GH_CONFIG.owner || !GH_CONFIG.repo || !GH_CONFIG.token) {
-                if (uploadStatus) {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成績已成功儲存於本機！`;
-                    uploadStatus.classList.remove('hidden');
-                }
-                triggerConfetti();
-
-                if (uploadBtn) {
-                    uploadBtn.disabled = false;
-                    uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績</span>';
-                }
-                return;
-            }
-
-            try {
-                // 1. Fetch current file content and sha
-                const apiUrl = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}?ref=${GH_CONFIG.branch}`;
-                const getRes = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${GH_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    cache: 'no-store'
-                });
-
-                let sha = '';
-                let currentScoresList = [];
-
-                if (getRes.ok) {
-                    const fileInfo = await getRes.json();
-                    sha = fileInfo.sha;
-                    try {
-                        const content = decodeURIComponent(escape(atob(fileInfo.content.replace(/\s/g, ''))));
-                        currentScoresList = JSON.parse(content);
-                        if (!Array.isArray(currentScoresList)) currentScoresList = [];
-                    } catch (e) {
-                        currentScoresList = [];
-                    }
-                }
-
-                // 2. Update or insert current student record
-                const targetClass = currentStudentClass.toUpperCase().trim();
-                const targetId = currentStudentId.toString().padStart(2, '0').trim();
-
-                const existingIdx = currentScoresList.findIndex(item => 
-                    item.studentClass && item.studentClass.toUpperCase().trim() === targetClass &&
-                    item.studentId && item.studentId.toString().padStart(2, '0').trim() === targetId
-                );
-
-                if (existingIdx >= 0) {
-                    currentScoresList[existingIdx].totalAnsweredCount = Math.max(currentScoresList[existingIdx].totalAnsweredCount || 0, totalAnsweredCount);
-                    currentScoresList[existingIdx].score = Math.max(currentScoresList[existingIdx].score || 0, score);
-                    currentScoresList[existingIdx].updatedAt = new Date().toISOString();
-                } else {
-                    currentScoresList.push({
-                        studentClass: targetClass,
-                        studentId: targetId,
-                        totalAnsweredCount: totalAnsweredCount,
-                        score: score,
-                        updatedAt: new Date().toISOString()
-                    });
-                }
-
-                currentScoresList.sort((a, b) => {
-                    if (a.studentClass !== b.studentClass) return a.studentClass.localeCompare(b.studentClass);
-                    return parseInt(a.studentId, 10) - parseInt(b.studentId, 10);
-                });
-
-                // 3. Encode back to UTF-8 base64
-                const updatedJSONStr = JSON.stringify(currentScoresList, null, 2);
-                const base64Content = btoa(unescape(encodeURIComponent(updatedJSONStr)));
-
-                // 4. PUT commit to GitHub REST API
-                const putBody = {
-                    message: `Update score for ${targetClass} (${targetId}) - Score: ${score}`,
-                    content: base64Content,
-                    branch: GH_CONFIG.branch
-                };
-                if (sha) putBody.sha = sha;
-
-                const putRes = await fetch(`https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.filePath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GH_CONFIG.token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(putBody)
-                });
-
-                if (putRes.ok) {
-                    if (uploadStatus) {
-                        uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                        uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 已自動同步至 GitHub 雲端！(${targetClass} 班 ${targetId} 號 - 得分: ${score})`;
-                        uploadStatus.classList.remove('hidden');
-                    }
-                    if (!isAuto) speakText(`已成功同步至 GitHub！`);
-                    triggerConfetti();
-                }
-
-            } catch (err) {
-                console.error("GitHub Sync error:", err);
-                if (uploadStatus) {
-                    uploadStatus.className = 'max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border border-amber-300';
-                    uploadStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 成績已成功儲存於本機！`;
-                    uploadStatus.classList.remove('hidden');
-                }
-            } finally {
-                if (uploadBtn) {
-                    uploadBtn.disabled = false;
-                    uploadBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    uploadBtn.innerHTML = '<i class="fa-brands fa-github text-yellow-300 text-lg"></i> <span>同步 / 上載成績</span>';
-                }
-            }
-        }
-
-        async function fetchAllStudentsForTeacher() {
-            const studentMap = new Map();
-
-            // 1. Load LocalStorage snapshots first
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('magic_student_')) {
-                    try {
-                        const item = JSON.parse(localStorage.getItem(key));
-                        if (item && item.studentClass && item.studentId) {
-                            const rawClass = item.studentClass.toUpperCase().trim();
-                            const rawId = item.studentId.toString().padStart(2, '0').trim();
-                            if (rawId === '99') continue;
-                            const uniqueKey = `${rawClass}_${rawId}`;
-                            studentMap.set(uniqueKey, {
-                                studentClass: rawClass,
-                                studentId: rawId,
-                                totalAnsweredCount: parseInt(item.totalAnsweredCount, 10) || 0,
-                                score: parseInt(item.score, 10) || 0,
-                                source: '本機快照 (Local)'
-                            });
+                        const statusBadge = document.getElementById('firebaseStatusBadge');
+                        const statusText = document.getElementById('firebaseStatusText');
+                        if (statusBadge && statusText) {
+                            statusBadge.className = "mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-200";
+                            if(statusBadge.querySelector('span')) statusBadge.querySelector('span').className = "w-2 h-2 rounded-full bg-emerald-500";
+                            statusText.innerText = "雲端 Firestore 數據庫已就緒";
                         }
-                    } catch (e) {}
-                }
-            }
 
-            // 2. Fetch remote scores from GitHub scores.json
-            const remoteScores = await fetchGitHubScoresFile();
-            if (remoteScores && Array.isArray(remoteScores)) {
-                remoteScores.forEach(item => {
-                    if (item.studentClass && item.studentId) {
-                        const rawClass = item.studentClass.toUpperCase().trim();
-                        const rawId = item.studentId.toString().padStart(2, '0').trim();
-                        if (rawId === '99') return;
-
-                        const uniqueKey = `${rawClass}_${rawId}`;
-                        const count = parseInt(item.totalAnsweredCount, 10) || 0;
-                        const studentScore = parseInt(item.score, 10) || 0;
-
-                        const existing = studentMap.get(uniqueKey);
-                        if (!existing || studentScore >= existing.score) {
-                            studentMap.set(uniqueKey, {
-                                studentClass: rawClass,
-                                studentId: rawId,
-                                totalAnsweredCount: Math.max(count, existing ? existing.totalAnsweredCount : 0),
-                                score: Math.max(studentScore, existing ? existing.score : 0),
-                                source: 'GitHub (scores.json)'
-                            });
-                        }
+                        // Setup real-time listener
+                        setupStudentRecordsListener();
                     }
                 });
-            }
 
-            allStudentsDataList = Array.from(studentMap.values()).sort((a, b) => {
-                if (a.studentClass !== b.studentClass) {
-                    return a.studentClass.localeCompare(b.studentClass);
-                }
-                return parseInt(a.studentId, 10) - parseInt(b.studentId, 10);
-            });
-
-            renderTeacherTable();
-        }
-
-        function renderTeacherTable() {
-            const tableBody = document.getElementById('teacherTableBody');
-            const emptyNotice = document.getElementById('teacherTableEmpty');
-            const filterClass = document.getElementById('teacherClassFilter').value;
-            const searchInput = document.getElementById('teacherSearchInput').value.trim().toLowerCase();
-
-            let filteredList = allStudentsDataList.filter(s => {
-                const matchClass = (filterClass === 'ALL' || s.studentClass === filterClass);
-                const matchSearch = (!searchInput || s.studentId.includes(searchInput) || `${s.studentClass}${s.studentId}`.toLowerCase().includes(searchInput));
-                return matchClass && matchSearch;
-            });
-
-            document.getElementById('statStudentCount').innerText = filteredList.length;
-
-            if (filteredList.length > 0) {
-                const totalQ = filteredList.reduce((acc, cur) => acc + cur.totalAnsweredCount, 0);
-                const totalS = filteredList.reduce((acc, cur) => acc + cur.score, 0);
-                const avgQ = (totalQ / filteredList.length).toFixed(1);
-                const avgS = Math.round(totalS / filteredList.length);
-
-                document.getElementById('statAvgQuestions').innerText = avgQ;
-                document.getElementById('statAvgScore').innerText = avgS;
-
-                const topStudent = [...filteredList].sort((a, b) => b.score - a.score)[0];
-                document.getElementById('statTopStudent').innerText = `${topStudent.studentClass} (${topStudent.studentId}) - ${topStudent.score}分`;
-            } else {
-                document.getElementById('statAvgQuestions').innerText = '0';
-                document.getElementById('statAvgScore').innerText = '0';
-                document.getElementById('statTopStudent').innerText = '--';
-            }
-
-            if (filteredList.length === 0) {
-                tableBody.innerHTML = '';
-                emptyNotice.classList.remove('hidden');
-                return;
-            }
-
-            emptyNotice.classList.add('hidden');
-            tableBody.innerHTML = filteredList.map(s => {
-                let titleBadge = '🌱 詞語小見習生';
-                if (s.score >= 1000) titleBadge = '🧙‍♂️ 詞語大魔法師';
-                else if (s.score >= 500) titleBadge = '⭐ 詞語探險家';
-
-                const sourceBadge = s.source.includes('GitHub') 
-                    ? `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`
-                    : `<span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-bold">${s.source}</span>`;
-
-                return `
-                    <tr class="hover:bg-amber-50/50 transition">
-                        <td class="py-3 px-4 font-bold text-emerald-800">${s.studentClass} 班</td>
-                        <td class="py-3 px-4 font-bold">${s.studentId} 號</td>
-                        <td class="py-3 px-4 text-center font-bold text-blue-700">${s.totalAnsweredCount} 題</td>
-                        <td class="py-3 px-4 text-center font-extrabold text-amber-600">${s.score} 分</td>
-                        <td class="py-3 px-4">${titleBadge}</td>
-                        <td class="py-3 px-4 text-center">${sourceBadge}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function filterTeacherTable() {
-            renderTeacherTable();
-        }
-
-        async function refreshTeacherDashboard() {
-            speakText("正在刷新所有同學的學習進度數據！");
-            await fetchAllStudentsForTeacher();
-        }
-
-        function exportScoresJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allStudentsDataList, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "scores.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            speakText("已導出成績檔案 scores.json！");
-        }
-
-        function importScoresJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedList = JSON.parse(e.target.result);
-                    if (Array.isArray(importedList)) {
-                        importedList.forEach(item => {
-                            if (item.studentClass && item.studentId) {
-                                const key = `magic_student_${item.studentClass.toUpperCase().trim()}_${item.studentId.toString().padStart(2, '0').trim()}`;
-                                const existing = localStorage.getItem(key);
-                                let count = item.totalAnsweredCount || 0;
-                                let sc = item.score || 0;
-                                if (existing) {
-                                    const exData = JSON.parse(existing);
-                                    count = Math.max(count, exData.totalAnsweredCount || 0);
-                                    sc = Math.max(sc, exData.score || 0);
-                                }
-                                localStorage.setItem(key, JSON.stringify({
-                                    studentClass: item.studentClass.toUpperCase().trim(),
-                                    studentId: item.studentId.toString().padStart(2, '0').trim(),
-                                    totalAnsweredCount: count,
-                                    score: sc,
-                                    updatedAt: new Date().toISOString()
-                                }));
-                            }
-                        });
-                        alert("成功導入成績數據！");
-                        refreshTeacherDashboard();
-                    }
-                } catch (err) {
-                    alert("JSON 格式不正確，請檢查檔案！");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // ================= Navigation & User Actions =================
-
-        async function submitLogin() {
-            const classSelect = document.getElementById('studentClass');
-            const idInput = document.getElementById('studentId');
-            const loginStatus = document.getElementById('loginStatus');
-
-            const selectedClass = classSelect.value.trim();
-            const rawId = idInput.value.trim();
-
-            if (!selectedClass || !rawId) {
-                loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-300';
-                loginStatus.innerText = '請選擇班別並輸入學號（1-30）！';
-                loginStatus.classList.remove('hidden');
-                speakText('請選擇班別並輸入學號！');
-                return;
-            }
-
-            const formattedId = rawId.padStart(2, '0');
-
-            currentStudentClass = selectedClass;
-            currentStudentId = formattedId;
-            isLoggedIn = true;
-
-            if (selectedClass === '3A' && formattedId === '99') {
-                isTeacherMode = true;
-                loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-900 border border-amber-300 animate-pulse';
-                loginStatus.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-1 text-amber-600"></i> 正在開啟教師管理控制台...`;
-                loginStatus.classList.remove('hidden');
-
-                document.getElementById('headerStudentInfo').innerText = `3A99 (教師版)`;
-                document.getElementById('studentBadgeHeader').classList.remove('hidden');
-                document.getElementById('teacherNavBtn').classList.remove('hidden');
-                document.getElementById('reportNavBtn').classList.remove('hidden');
-
-                await fetchAllStudentsForTeacher();
-                speakText(`已進入教師管理控制台！`);
-                switchView('teacher');
-                return;
-            }
-
-            isTeacherMode = false;
-            document.getElementById('teacherNavBtn').classList.add('hidden');
-
-            loginStatus.className = 'mt-4 p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse';
-            loginStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> 正在載入 ${selectedClass} 班 ${formattedId} 號 的學習記錄...`;
-            loginStatus.classList.remove('hidden');
-
-            await fetchStudentScoresOnLogin();
-
-            document.getElementById('headerStudentInfo').innerText = `${currentStudentClass} (${currentStudentId})`;
-            document.getElementById('studentBadgeHeader').classList.remove('hidden');
-            document.getElementById('reportNavBtn').classList.remove('hidden');
-            document.getElementById('reportStudentInfo').innerText = `${currentStudentClass} 班 ${currentStudentId} 號`;
-
-            speakText(`歡迎 ${currentStudentClass} 班 ${formattedId} 號同學！讓我們開始魔法挑戰吧！`);
-            switchView('menu');
-        }
-
-        function switchView(viewName) {
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('menuView').classList.add('hidden');
-            document.getElementById('gameView').classList.add('hidden');
-            document.getElementById('reportView').classList.add('hidden');
-            document.getElementById('teacherView').classList.add('hidden');
-
-            if (viewName === 'login') {
-                document.getElementById('loginView').classList.remove('hidden');
-            } else if (viewName === 'menu') {
-                if (!isLoggedIn) {
-                    document.getElementById('loginView').classList.remove('hidden');
+                // Auth 登入操作
+                const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (initialToken) {
+                    await signInWithCustomToken(auth, initialToken);
                 } else {
-                    document.getElementById('menuView').classList.remove('hidden');
+                    await signInAnonymously(auth);
                 }
-            } else if (viewName === 'game') {
-                document.getElementById('gameView').classList.remove('hidden');
-            } else if (viewName === 'report') {
-                updateReportUI();
-                document.getElementById('reportView').classList.remove('hidden');
-            } else if (viewName === 'teacher') {
-                if (isTeacherMode) {
-                    refreshTeacherDashboard();
-                    document.getElementById('teacherView').classList.remove('hidden');
-                } else {
-                    switchView('menu');
+
+            } catch (e) {
+                console.warn("Firebase initialization notice:", e);
+                window.isFirebaseReady = false;
+                const statusBadge = document.getElementById('firebaseStatusBadge');
+                const statusText = document.getElementById('firebaseStatusText');
+                if (statusBadge && statusText) {
+                    statusBadge.className = "mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200";
+                    if(statusBadge.querySelector('span')) statusBadge.querySelector('span').className = "w-2 h-2 rounded-full bg-slate-400";
+                    statusText.innerText = "單機模式 (不支援雲端備份)";
                 }
             }
-        }
+        })();
 
-        function toggleVoiceSpeed() {
-            speechSlowMode = !speechSlowMode;
-            const btnLabel = document.getElementById('speedLabel');
-            btnLabel.innerText = speechSlowMode ? "慢速語音 (已啟動)" : "正常語音";
-            speakText(speechSlowMode ? "已切換至慢速朗讀模式" : "已切換至正常語音模式");
-        }
-
-        function adjustFontSize(delta) {
-            fontSizeLevel = Math.max(-1, Math.min(2, fontSizeLevel + delta));
-            const app = document.getElementById('appContainer');
-            app.classList.remove('dyslexia-large-text', 'dyslexia-xlarge-text');
+        // Real-time listener for public student progress collection
+        function setupStudentRecordsListener() {
+            if (!db || !currentUser) return;
             
-            if (fontSizeLevel === 1) {
-                app.classList.add('dyslexia-large-text');
-            } else if (fontSizeLevel === 2) {
-                app.classList.add('dyslexia-xlarge-text');
+            // 最佳化建議提示：這裡如果能改成只監聽特定學生的 doc 效能會更好。目前維持你原本的集合監聽邏輯：
+            const recordsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'student_records');
+
+            onSnapshot(recordsColRef, (snapshot) => {
+                const records = {};
+                snapshot.forEach((docSnap) => {
+                    records[docSnap.id] = docSnap.data();
+                });
+                window.cloudStudentRecords = records;
+
+                // 修正點 2：同步當前學生進度時，確保 window.currentStudent 存在，否則在外部建立輪詢或主動呼叫機制
+                if (window.currentStudent) {
+                    const studentKey = `${window.currentStudent.className}_${window.currentStudent.id}`;
+                    if (records[studentKey]) {
+                        syncLocalDataFromCloud(records[studentKey]);
+                    }
+                }
+
+                // If teacher view is active, update table
+                if (window.currentView === 'teacher' && typeof window.renderTeacherTable === 'function') {
+                    window.renderTeacherTable();
+                }
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+            });
+        }
+
+        // Save progress function
+        window.saveStudentProgressToCloud = async function() {
+            if (!window.isFirebaseReady || !db || !currentUser || !window.currentStudent) {
+                if (typeof showToast === 'function') showToast("雲端儲存提示", "數據已儲存在本機記憶體中");
+                return;
             }
+
+            const studentKey = `${window.currentStudent.className}_${window.currentStudent.id}`;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_records', studentKey);
+
+            const recordData = {
+                className: window.currentStudent.className,
+                studentId: window.currentStudent.id,
+                unlockedEpisode: window.state.unlockedEpisode,
+                completedSubLevels: window.state.completedSubLevels,
+                score: window.state.score, 
+                totalScore: window.state.totalScore, 
+                questionsAnswered: window.state.questionsAnswered,
+                inventory: window.state.inventory,
+                badges: window.state.badges,
+                lastUpdated: new Date().toISOString()
+            };
+
+            try {
+                await setDoc(docRef, recordData, { merge: true });
+                if (typeof showToast === 'function') showToast("雲端同步成功", "成績與進度已即時更新至 Firestore！");
+                
+                const statusEl = document.getElementById('uploadStatus');
+                if (statusEl) {
+                    statusEl.innerText = "✅ 已於 " + new Date().toLocaleTimeString() + " 成功同步至 Firestore 雲端數據庫！";
+                    statusEl.className = "max-w-md mx-auto text-center p-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                    statusEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("Save to Firestore error:", err);
+                if (typeof showToast === 'function') showToast("同步失敗", "無法連接雲端，已儲存於本機");
+            }
+        };
+
+        // Load progress function
+        window.loadStudentProgressFromCloud = async function(className, studentId) {
+            if (!window.isFirebaseReady || !db || !currentUser) return null;
+
+            const studentKey = `${className}_${studentId}`;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_records', studentKey);
+
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+            } catch (err) {
+                console.error("Load from Firestore error:", err);
+            }
+            return null;
+        };
+
+        // Teacher override function
+        window.teacherOverrideStudentEpisode = async function(studentKey, targetEpisode) {
+            if (!window.isFirebaseReady || !db || !currentUser) {
+                if (typeof showToast === 'function') showToast("無法操作", "雲端數據庫未連線");
+                return;
+            }
+
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_records', studentKey);
+            try {
+                await setDoc(docRef, { unlockedEpisode: parseInt(targetEpisode) }, { merge: true });
+                if (typeof showToast === 'function') showToast("修改成功", `學生 ${studentKey} 的進度已調整至第 ${targetEpisode} 集`);
+            } catch (err) {
+                console.error("Teacher override error:", err);
+                if (typeof showToast === 'function') showToast("修改失敗", "更新雲端數據庫失敗");
+            }
+        };
+
+        function syncLocalDataFromCloud(cloudData) {
+            if (!cloudData) return;
+            
+            // 提示：若未來要解決新舊覆蓋衝突，可在最外層加上 cloudData.lastUpdated 的時間戳比對
+            if (cloudData.unlockedEpisode && cloudData.unlockedEpisode > window.state.unlockedEpisode) {
+                window.state.unlockedEpisode = cloudData.unlockedEpisode;
+            }
+            if (cloudData.score !== undefined && cloudData.score > window.state.score) {
+                window.state.score = cloudData.score;
+            }
+            if (cloudData.totalScore !== undefined) {
+                if (cloudData.totalScore > window.state.totalScore) {
+                    window.state.totalScore = cloudData.totalScore;
+                }
+            } else if (cloudData.score !== undefined && cloudData.score > window.state.totalScore) {
+                window.state.totalScore = cloudData.score;
+            }
+            if (cloudData.questionsAnswered && cloudData.questionsAnswered > window.state.questionsAnswered) {
+                window.state.questionsAnswered = cloudData.questionsAnswered;
+            }
+            if (cloudData.completedSubLevels) {
+                window.state.completedSubLevels = Array.from(new Set([...window.state.completedSubLevels, ...cloudData.completedSubLevels]));
+            }
+            if (cloudData.inventory) {
+                window.state.inventory = { ...window.state.inventory, ...cloudData.inventory };
+            }
+            if (cloudData.badges) {
+                window.state.badges = Array.from(new Set([...window.state.badges, ...cloudData.badges]));
+            }
+            
+            if (typeof window.updateUIHeaderAndMenu === 'function') {
+                window.updateUIHeaderAndMenu();
+            }
+        }
+    </script>
+
+
+    <script>
+        // EPISODE / LESSON DATASET FOR PRIMARY 3 CHINESE (Lessons 9 to 16)
+        const EPISODES_DATA = [
+            {
+                id: 1,
+                title: "第九課《交換》",
+                desc: "學習關於社交互動、態度與情感的詞語。",
+                icon: "🌿",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "聖誕節聯歡會上，同學們互相_____禮物。", answer: "交換", options: ["交換", "拒絕", "要求", "施捨"], hint: "指彼此都把自己的東西給對方或指相互調換。" },
+                            { text: "只要_____硬幣，郵票就會自動出來。", answer: "投進", options: ["投進", "跌落", "掏出", "跌倒"], hint: "放進去或扔進去。" },
+                            { text: "她_____地接過獎狀，便急匆匆地返回座位。", answer: "羞澀", options: ["羞澀", "神氣", "大言不慚", "得意忘形"], hint: "因為害羞而態度不自然。" },
+                            { text: "一聽見腳步聲，偉華便_____離開。", answer: "慌忙", options: ["慌忙", "冷靜", "悠閒", "舒舒服服"], hint: "慌張匆忙。" },
+                            { text: "美芳堅決_____我們的幫忙，要憑自己的力量完成任務。", answer: "拒絕", options: ["拒絕", "接受", "要求", "贊助"], hint: "不接受或不答應。" },
+                            { text: "爸爸答應我的_____，給我參加夏令營。", answer: "要求", options: ["要求", "拒絕", "施捨", "報酬"], hint: "指提出的具體請求。" },
+                            { text: "即使失去工作能力，志深仍然不願意接受_____。", answer: "施捨", options: ["施捨", "贊助", "報酬", "貢獻"], hint: "指無條件地送給窮人或出家人的財物。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "同學們在聖誕派對上互相『交渙』禮物。", wrongWord: "交渙", correctWord: "交換", options: ["交渙", "交換", "交煥", "交換"], hint: "「換」字是手字旁。" },
+                            { text: "請把硬幣『投進』自動售賣機內。", wrongWord: "投進", correctWord: "投進", options: ["投近", "投進", "投盡", "頭進"], hint: "「進」代表進入。" },
+                            { text: "她個性害羞，說話時顯得十分『羞涉』。", wrongWord: "羞涉", correctWord: "羞澀", options: ["羞涉", "羞澀", "修澀", "羞色"], hint: "「澀」字是水字旁。" },
+                            { text: "火警發生後，住客『慌茫』地逃難。", wrongWord: "慌茫", correctWord: "慌忙", options: ["慌茫", "慌忙", "荒忙", "慌芒"], hint: "「忙」字代表急忙。" },
+                            { text: "他婉轉地『鉅絕』了對方的邀請。", wrongWord: "鉅絕", correctWord: "拒絕", options: ["鉅絕", "拒絕", "距絕", "具絕"], hint: "「拒」字是手字旁。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "交換", meaning: "彼此都把自己的東西給對方或相互調換" },
+                            { word: "羞澀", meaning: "因為害羞而態度不自然" },
+                            { word: "慌忙", meaning: "慌張匆忙" },
+                            { word: "拒絕", meaning: "不接受或不答應" },
+                            { word: "施捨", meaning: "無條件地送給窮人或出家人的財物" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "第十課《雪孩子》",
+                desc: "描繪冬日景色、無私奉獻與溫暖人心之情。",
+                icon: "❤️",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "當我_____的時候，就會聽音樂解悶。", answer: "寂寞", options: ["寂寞", "歡悅", "神氣", "熱鬧"], hint: "孤單冷清。" },
+                            { text: "露營時，燒烤爐的火_____，大家的氣氛也熱烈起來。", answer: "愈燒愈旺", options: ["愈燒愈旺", "漸漸撲滅", "水淋淋", "慢慢融化"], hint: "指火勢愈來愈熾熱、猛烈。" },
+                            { text: "儲物室裡堆滿了_____，需要好好清理。", answer: "雜物", options: ["雜物", "兵器", "掃帚", "柱子"], hint: "眾多零星的物品。" },
+                            { text: "春天來了，高山上的積雪開始_____了。", answer: "融化", options: ["融化", "點燃", "撲滅", "跌落"], hint: "固體受熱變為液體，多指冰、雪變成水。" },
+                            { text: "電影結束後，觀眾_____離場。", answer: "紛紛", options: ["紛紛", "匆忙", "慌忙", "依依"], hint: "接二連三地。" },
+                            { text: "岳飛是著名的民族_____，事蹟永垂不朽。", answer: "英雄", options: ["英雄", "騙子", "小販", "官員"], hint: "指才能超羣、具遠大抱負、造福民眾的人。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "獨自留在家中，他感到十分『寂漠』。", wrongWord: "寂漠", correctWord: "寂寞", options: ["寂漠", "寂寞", "積寞", "寂莫"], hint: "「寞」字下面是莫。" },
+                            { text: "火勢『愈燒愈汪』，消防員趕來撲救。", wrongWord: "愈燒愈汪", correctWord: "愈燒愈旺", options: ["愈燒愈汪", "愈燒愈旺", "愈燒愈往", "愈燒愈望"], hint: "「旺」字代表火勢興旺。" },
+                            { text: "房間裡放滿了『雜物』，顯得十分混亂。", wrongWord: "雜物", correctWord: "雜物", options: ["砸物", "雜物", "雜物", "雜勿"], hint: "注意「雜」字的寫法。" },
+                            { text: "太陽出來後，地上的冰塊迅速『融化』了。", wrongWord: "融化", correctWord: "融化", options: ["熔化", "融化", "溶化", "榮化"], hint: "冰雪受熱變成水用「融」化。" },
+                            { text: "下課後，同學們『紛紛』走出教室。", wrongWord: "紛紛", correctWord: "紛紛", options: ["紛紛", "紛紛", "芬芬", "紛紛"], hint: "「紛」字是絞絲旁。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "寂寞", meaning: "孤單冷清" },
+                            { word: "愈燒愈旺", meaning: "指火勢愈來愈熾熱、猛烈" },
+                            { word: "雜物", meaning: "眾多零星的物品" },
+                            { word: "融化", meaning: "固體受熱變為液體，多指冰雪變成水" },
+                            { word: "英雄", meaning: "才能超羣、不畏艱險、造福民眾的人" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "第十一課《慧娟怎樣長大》",
+                desc: "體會家庭日常生活、生活習慣與長大成人的過程。",
+                icon: "🏫",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "祖父年紀大了，要戴上老花_____才能看清報紙上的字。", answer: "眼鏡", options: ["眼鏡", "項鏈", "圍巾", "掃帚"], hint: "以矯正視力或保護眼睛的透鏡。" },
+                            { text: "天氣寒冷，出門前記得圍上一條溫暖的_____。", answer: "圍巾", options: ["圍巾", "項鏈", "衣袖", "掃帚"], hint: "圍在脖子上保暖或作裝飾的織物。" },
+                            { text: "小蟲子爬到了她的_____上，讓她覺得癢癢的。", answer: "頸項", options: ["頸項", "肩膀", "手腕", "腳踝"], hint: "脖子。" },
+                            { text: "這條珍珠_____是媽媽送給她的生日禮物。", answer: "項鏈", options: ["項鏈", "圍巾", "手鐲", "戒指"], hint: "掛在頸項上裝飾用的鏈子。" },
+                            { text: "你們不要在課堂上_____，要專心聽講。", answer: "胡鬧", options: ["胡鬧", "高聲", "請教", "議論"], hint: "行動沒有道理，胡為鬧事。" },
+                            { text: "清潔工幫手拿起_____打掃街道上的落葉。", answer: "掃帚", options: ["掃帚", "竹竿", "大秤", "柱子"], hint: "用竹枝、草等紥成的有柄的掃地工具。" },
+                            { text: "媽媽在_____擺放了一盆鮮花，讓家裡增添生氣。", answer: "客廳", options: ["客廳", "酒樓", "巿集", "餐廳"], hint: "接待客人的廳堂。" },
+                            { text: "這間房間很久沒有人住，到處積滿了_____。", answer: "灰塵", options: ["灰塵", "雜物", "落葉", "垃圾"], hint: "塵埃、塵土。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "他戴上『眼鏡』後，視野變得清晰了。", wrongWord: "眼鏡", correctWord: "眼鏡", options: ["眼競", "眼鏡", "眼竟", "眼鏡"], hint: "「鏡」字是金字旁。" },
+                            { text: "冬天的風很大，她繫上了一條『圍金』。", wrongWord: "圍金", correctWord: "圍巾", options: ["圍金", "圍巾", "圍今", "圍緊"], hint: "「巾」代表織物。" },
+                            { text: "這條金『項鏈』非常精緻美麗。", wrongWord: "項鏈", correctWord: "項鏈", options: ["項練", "項鏈", "項鍊", "項連"], hint: "「鏈」字代表金屬鏈條。" },
+                            { text: "小孩子不應該在公共場所『胡鬧』。", wrongWord: "胡鬧", correctWord: "胡鬧", options: ["胡鬧", "胡鬧", "胡鬧", "胡惱"], hint: "「鬧」字包著市。" },
+                            { text: "用『掃草』打掃房間可以去除塵埃。", wrongWord: "掃草", correctWord: "掃帚", options: ["掃草", "掃帚", "掃宙", "掃帚"], hint: "「帚」是掃地的工具。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "圍巾", meaning: "圍在脖子上保暖或作裝飾的織物" },
+                            { word: "頸項", meaning: "脖子" },
+                            { word: "胡鬧", meaning: "行動沒有道理，胡為鬧事" },
+                            { word: "掃帚", meaning: "用竹枝、草等紥成的工具" },
+                            { word: "灰塵", meaning: "塵埃、塵土" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "第十二課《小凡請客》",
+                desc: "感受宴客歡聚、孝順長輩與人際關懷的溫情。",
+                icon: "🔬",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "祖父喜歡在早晨到_____飲茶吃點心。", answer: "酒樓", options: ["酒樓", "客廳", "巿集", "學校"], hint: "提供吃喝的粵式餐館。" },
+                            { text: "志明非常_____父母，經常體貼他們的辛勞。", answer: "孝順", options: ["孝順", "神氣", "大言不慚", "得意忘形"], hint: "盡心侍奉父母，順從父母。" },
+                            { text: "小明穿上新衣服，模樣看起來十分_____。", answer: "神氣", options: ["神氣", "慌忙", "羞澀", "寂寞"], hint: "精神飽滿或得意、傲慢的樣子。" },
+                            { text: "用餐完畢後，爸爸走到櫃檯_____。", answer: "結賬", options: ["結賬", "請客", "贊助", "宣佈"], hint: "結算帳目。" },
+                            { text: "這家餐廳的_____態度親切，服務週到。", answer: "服務員", options: ["服務員", "小販", "顧客", "官員"], hint: "機構、商店或飲食業中服務的人員。" },
+                            { text: "這份禮物雖然便宜，但包含了孩子的一片_____。", answer: "孝心", options: ["孝心", "信心", "勇氣", "恆心"], hint: "孝順父母的心意。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "我們一家人到『酒樓』吃晚飯。", wrongWord: "酒樓", correctWord: "酒樓", options: ["九樓", "酒樓", "酒婁", "酒樓"], hint: "「酒」是三點水。" },
+                            { text: "他是一個孝順長輩的『孝順』孩子。", wrongWord: "孝順", correctWord: "孝順", options: ["教順", "孝順", "孝旬", "考順"], hint: "「孝」上面是老字頭，下面是子。" },
+                            { text: "運動員獲獎後，神采飛揚，十分『神氣』。", wrongWord: "神氣", correctWord: "神氣", options: ["神奇", "神氣", "神訖", "甚氣"], hint: "「氣」代表精神氣概。" },
+                            { text: "吃完飯後，請到服務台『結帳』。", wrongWord: "結帳", correctWord: "結賬", options: ["結張", "結賬", "結障", "結帳"], hint: "與財貨帳目有關用「賬」。" },
+                            { text: "這間店鋪的『服務員』很有禮貌。", wrongWord: "服務員", correctWord: "服務員", options: ["伏務員", "服務員", "服誤員", "服務圓"], hint: "「服」是月字旁。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "酒樓", meaning: "提供吃喝的粵式餐館" },
+                            { word: "孝順", meaning: "盡心侍奉父母，順從父母" },
+                            { word: "神氣", meaning: "精神飽滿或得意、傲慢的樣子" },
+                            { word: "結賬", meaning: "結算帳目" },
+                            { word: "孝心", meaning: "孝順父母的心意" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "第十三課《濫竽充數》",
+                desc: "學習經典成語故事，明辨真偽與處事誠信。",
+                icon: "🏮",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "_____是古代一種用來吹奏的簧管樂器。", answer: "竽", options: ["竽", "掃帚", "竹竿", "兵器"], hint: "古代一種用來吹奏的簧管樂器。" },
+                            { text: "美芳各科成績都很優秀，數學_____突出。", answer: "尤其", options: ["尤其", "究竟", "到底", "任何"], hint: "格外。" },
+                            { text: "這家商店是_____售賣傳統工藝品的。", answer: "專門", options: ["專門", "慌忙", "匆忙", "隨意"], hint: "表示專為某種目的而做某件事。" },
+                            { text: "音樂家在台上優雅地_____長笛。", answer: "吹奏", options: ["吹奏", "灌水", "指揮", "議論"], hint: "演奏管樂器。" },
+                            { text: "他辛勤工作，獲得了應得的_____。", answer: "報酬", options: ["報酬", "雜物", "孝心", "貢獻"], hint: "對做事的人所提供的金錢或物品的回饋。" },
+                            { text: "公司提供了非常_____的薪酬待遇。", answer: "優厚", options: ["優厚", "堅固", "鋒利", "狹窄"], hint: "優裕、豐厚。" },
+                            { text: "演員們在台上_____地表演，獲得陣陣掌聲。", answer: "賣力", options: ["賣力", "胡鬧", "高聲", "慌忙"], hint: "盡量使出自己的力量。" },
+                            { text: "騙子的說話前後不一，終於_____了。", answer: "露出馬腳", options: ["露出馬腳", "自相矛盾", "得意忘形", "濫竽充數"], hint: "暴露了隱蔽的事實真相或漏洞。" },
+                            { text: "街頭_____利用花言巧語騙取老人的財物。", answer: "騙子", options: ["騙子", "顧客", "小販", "英雄"], hint: "用狡猾的手段欺騙別人的人。" },
+                            { text: "小偷趁著人不注意，偷偷地_____了。", answer: "溜走", options: ["溜走", "滾進", "趕來", "奔跑"], hint: "悄悄地走開。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "古代樂師擅長吹奏『竽』這種樂器。", wrongWord: "竽", correctWord: "竽", options: ["竿", "竽", "芋", "宇"], hint: "「竽」是竹字頭加于。" },
+                            { text: "這道菜非常美味，『由其』是醬汁更是一絕。", wrongWord: "由其", correctWord: "尤其", options: ["由其", "尤其", "尤奇", "郵其"], hint: "「尤」字沒有點在頭上。" },
+                            { text: "他是『專門』負責維修電腦的技術人員。", wrongWord: "專門", correctWord: "專門", options: ["磚門", "專門", "專們", "轉門"], hint: "「專」字書寫規範。" },
+                            { text: "音樂家在台上『吹湊』出動聽的樂曲。", wrongWord: "吹湊", correctWord: "吹奏", options: ["吹湊", "吹奏", "吹湊", "吹走"], hint: "「奏」字代表演奏。" },
+                            { text: "工作完成後，他獲得了一筆豐厚的『報銷』。", wrongWord: "報銷", correctWord: "報酬", options: ["報銷", "報酬", "報仇", "報籌"], hint: "「酬」字是酉字旁。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "專門", meaning: "表示專為某種目的而做某件事" },
+                            { word: "報酬", meaning: "對做事的人所提供的金錢或物品的回饋" },
+                            { word: "優厚", meaning: "優裕、豐厚" },
+                            { word: "賣力", meaning: "盡量使出自己的力量" },
+                            { word: "露出馬腳", meaning: "暴露了隱蔽的事實真相或漏洞" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 6,
+                title: "第十四課《自相矛盾》",
+                desc: "理解邏輯推論，學習說話做事要前後一致。",
+                icon: "🦊",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "熱鬧的_____上擺滿了各式各樣的攤檔。", answer: "巿集", options: ["巿集", "酒樓", "客廳", "學校"], hint: "買賣貨物的巿場。" },
+                            { text: "街頭的_____正在賣力地叫賣新鮮水果。", answer: "小販", options: ["小販", "顧客", "官員", "服務員"], hint: "在街道上或巿集裏售賣貨物的人。" },
+                            { text: "店舖裡挤滿了選購貨物的_____。", answer: "顧客", options: ["顧客", "小販", "騙子", "英雄"], hint: "商店或服務行業對購物客人或服務對象的稱呼。" },
+                            { text: "矛和盾都是古代戰士常用的_____。", answer: "兵器", options: ["兵器", "雜物", "掃帚", "柱子"], hint: "即武器，作戰鬥用的器具。" },
+                            { text: "你找了這麼久，_____把鑰匙放在哪裡了？", answer: "究竟", options: ["究竟", "尤其", "任何", "依照"], hint: "用於疑問句，表示追問「到底」。" },
+                            { text: "他明明做錯了事，還在台上_____，令人反感。", answer: "大言不慚", options: ["大言不慚", "得意忘形", "自相矛盾", "濫竽充數"], hint: "妄言誇大而不知道羞愧。" },
+                            { text: "只要我們團結一致，_____困難都能克服。", answer: "任何", options: ["任何", "究竟", "尤其", "到底"], hint: "指示代詞，指無論甚麼。" },
+                            { text: "這部寓言喜劇主要是在_____社會的不良風氣。", answer: "諷刺", options: ["諷刺", "議論", "宣佈", "請教"], hint: "用比喻、誇張等手法指責和嘲笑。" },
+                            { text: "拾金不昧是一種值得讚賞的善良_____。", answer: "行為", options: ["行為", "要求", "志向", "辦法"], hint: "表現於外在的舉止動作。" },
+                            { text: "他的說詞前後_____，讓人無法相信。", answer: "抵觸", options: ["抵觸", "融化", "贊助", "繼承"], hint: "互相矛盾。" },
+                            { text: "台下的_____都被表演者的精湛演出吸引了。", answer: "觀眾", options: ["觀眾", "顧客", "官員", "小販"], hint: "看表演、比賽、展覽、電影或電視的人。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "假期時，『市集』裡擠滿了採購的人潮。", wrongWord: "市集", correctWord: "巿集", options: ["柿集", "巿集", "示集", "是集"], hint: "注意「巿」字的寫法。" },
+                            { text: "街邊的『小販』正在熱情地招攬生意。", wrongWord: "小販", correctWord: "小販", options: ["小板", "小販", "小飯", "小販"], hint: "「販」字是貝字旁。" },
+                            { text: "這家店的產品深受『顧客』歡迎。", wrongWord: "顧客", correctWord: "顧客", options: ["顧客", "顧客", "故客", "雇客"], hint: "「客」字是寶蓋頭。" },
+                            { text: "展覽館展示了許多古代的『兵器』。", wrongWord: "兵器", correctWord: "兵器", options: ["兵氣", "兵器", "乒器", "兵泣"], hint: "「器」字有四個口。" },
+                            { text: "你『究竟』決定好要選哪一個了嗎？", wrongWord: "究竟", correctWord: "究竟", options: ["究竟", "究竟", "究競", "九竟"], hint: "「竟」代表到底。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "顧客", meaning: "商店或服務行業對購物客人或服務對象的稱呼" },
+                            { word: "大言不慚", meaning: "妄言誇大而不知道羞愧" },
+                            { word: "諷刺", meaning: "用比喻、誇張等手法指責和嘲笑" },
+                            { word: "行為", meaning: "表現於外在的舉止動作" },
+                            { word: "抵觸", meaning: "互相矛盾" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 7,
+                title: "第十五課《文彥博灌水浮球》",
+                desc: "體會古人智慧，運用觀察力與科學原理解決問題。",
+                icon: "🍁",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "蘇軾是中國_____著名的文學家和詩人。", answer: "宋朝", options: ["宋朝", "唐朝", "漢朝", "明朝"], hint: "朝代名（西元960-1279年）。" },
+                            { text: "在古代，_____是輔助國君處理政務的最高官員。", answer: "宰相", options: ["宰相", "官員", "英雄", "小販"], hint: "輔助帝王掌管國事的最高官員。" },
+                            { text: "小男孩的眼睛_____地轉，想出了一個好主意。", answer: "骨碌碌", options: ["骨碌碌", "水淋淋", "舒舒服服", "七嘴八舌"], hint: "轉動得很快的樣子。" },
+                            { text: "洗手前，他先把內衣的_____捲起來。", answer: "衣袖", options: ["衣袖", "圍巾", "肩膀", "項鏈"], hint: "衣服的袖子。" },
+                            { text: "爺爺用一根堅固的_____做成晾衣竿。", answer: "竹竿", options: ["竹竿", "柱子", "掃帚", "兵器"], hint: "用削去枝葉的竹做成的竿子。" },
+                            { text: "我們每個人都應該為建設和諧_____盡一份力。", answer: "社會", options: ["社會", "巿集", "客廳", "酒樓"], hint: "由人們集合形成的羣體。" },
+                            { text: "大家最大的願望就是國家繁榮、生活_____。", answer: "安定", options: ["安定", "神氣", "熱鬧", "慌忙"], hint: "平穩正常。" },
+                            { text: "這名科學家對人類的醫學發展作出了巨大的_____。", answer: "貢獻", options: ["貢獻", "要求", "報酬", "贊助"], hint: "對公眾、社會有益的事。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "『宋朝』誕生了許多偉大的詩人與詞人。", wrongWord: "宋朝", correctWord: "宋朝", options: ["送朝", "宋朝", "頌朝", "宋潮"], hint: "「宋」字上面是寶蓋頭。" },
+                            { text: "諸葛亮是古代著名的『梓相』。", wrongWord: "梓相", correctWord: "宰相", options: ["梓相", "宰相", "宰想", "滓相"], hint: "「宰」字代表主管、主宰。" },
+                            { text: "小皮球『骨綠綠』地滾下了山坡。", wrongWord: "骨綠綠", correctWord: "骨碌碌", options: ["骨綠綠", "骨碌碌", "骨鹿鹿", "骨六六"], hint: "「碌」字是石字旁。" },
+                            { text: "做事時請先把『衣軸』捲起來。", wrongWord: "衣軸", correctWord: "衣袖", options: ["衣軸", "衣袖", "衣宙", "依袖"], hint: "「袖」字是衣字旁。" },
+                            { text: "他拿著『竹竿』嘗試把樹上的羽毛球撥下來。", wrongWord: "竹竿", correctWord: "竹竿", options: ["竹干", "竹竿", "竹矸", "竺竿"], hint: "「竿」字是竹字頭。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "宰相", meaning: "輔助帝王掌管國事的最高官員" },
+                            { word: "骨碌碌", meaning: "轉動得很快的樣子" },
+                            { word: "衣袖", meaning: "衣服的袖子" },
+                            { word: "安定", meaning: "平穩正常" },
+                            { word: "貢獻", meaning: "對公眾、社會有益的事" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 8,
+                title: "第十六課《曹沖稱象》",
+                desc: "學習靈活變通的思考方式與智慧解決難題。",
+                icon: "🚀",
+                subLevels: [
+                    {
+                        type: 'fill',
+                        name: "關卡 1：詞語填空",
+                        questions: [
+                            { text: "在_____，人們主要依靠馬車作為交通工具。", answer: "古時候", options: ["古時候", "社會", "將來", "現代"], hint: "過去久遠的時代。" },
+                            { text: "許多政府_____出席了這次國際會議。", answer: "官員", options: ["官員", "顧客", "小販", "服務員"], hint: "經過任命，具一定職級的政府工作人員。" },
+                            { text: "這座大殿由四根粗壯的_____支撐著。", answer: "柱子", options: ["柱子", "竹竿", "掃帚", "兵器"], hint: "建築物中起支撐作用的直立構件。" },
+                            { text: "你吞吞吐吐的，_____想要表達甚麼？", answer: "到底", options: ["到底", "究竟", "尤其", "任何"], hint: "用於疑問句時，表示追問究竟。" },
+                            { text: "古代稱量大象等重物需要使用特製的_____。", answer: "大秤", options: ["大秤", "掃帚", "柱子", "兵器"], hint: "衡量物體重量的大器具。" },
+                            { text: "屠夫在農場裡_____了一頭豬來準備宴席。", answer: "宰", options: ["宰", "割", "插", "撥"], hint: "屠殺、分割。" },
+                            { text: "請用刀子把這塊牛肉_____成幾小塊。", answer: "割", options: ["割", "宰", "摸", "掏"], hint: "用刀切開。" },
+                            { text: "請_____小路一直走，就能看到海邊了。", answer: "沿着", options: ["沿着", "依照", "順便", "圍繞"], hint: "順着。" },
+                            { text: "大浪重重地擊打在_____上，發出巨大聲響。", answer: "船舷", options: ["船舷", "客廳", "柱子", "牆壁"], hint: "船身的兩邊。" }
+                        ]
+                    },
+                    {
+                        type: 'error',
+                        name: "關卡 2：辨識錯別字",
+                        questions: [
+                            { text: "『古時侯』的人們沒有手機和電腦。", wrongWord: "古時侯", correctWord: "古時候", options: ["古時侯", "古時候", "古時後", "古時厚"], hint: "「候」代表時間、時候。" },
+                            { text: "許多高級『官員』出席了今日的開幕典禮。", wrongWord: "官員", correctWord: "官員", options: ["管員", "官員", "館員", "棺員"], hint: "「官」字代表官方。" },
+                            { text: "這建築物由幾根石『柱子』穩穩支撐。", wrongWord: "柱子", correctWord: "柱子", options: ["住子", "柱子", "注子", "駐子"], hint: "「柱」字是木字旁。" },
+                            { text: "這件事的真相『到低』是甚麼？", wrongWord: "到低", correctWord: "到底", options: ["到低", "到底", "到砥", "倒底"], hint: "「底」代表底細、終點。" },
+                            { text: "商家用『大秤』來計量貨物的重量。", wrongWord: "大秤", correctWord: "大秤", options: ["大稱", "大秤", "大成", "大橙"], hint: "「秤」是衡量重量的工具。" }
+                        ]
+                    },
+                    {
+                        type: 'match',
+                        name: "關卡 3：詞義對對碰",
+                        questions: [
+                            { word: "古時候", meaning: "過去久遠的時代" },
+                            { word: "官員", meaning: "經過任命，具一定職級的政府工作人員" },
+                            { word: "柱子", meaning: "建築物中起支撐作用的直立構件" },
+                            { word: "沿着", meaning: "順着" },
+                            { word: "船舷", meaning: "船身的兩邊" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // GLOBAL APP STATE
+        window.state = {
+            unlockedEpisode: 1, // Progress: 1 to 8 (9 means all clear, Boss unlocked)
+            completedSubLevels: [], // e.g. ["1-1", "1-2", "1-3"]
+            score: 0, // 可消費魔法積分
+            totalScore: 0, // 累積總得分 (不會因為學生購買道具而減少，專供老師參考)
+            questionsAnswered: 0,
+            inventory: {
+                potion: 1,
+                shield: 1,
+                wand: 0,
+                scroll: 0
+            },
+            badges: ["badge_starter"]
+        };
+
+        window.currentStudent = null; // { className: "3A", id: "05" }
+        window.currentView = "login";
+        window.activeEpisodeId = 1;
+        window.activeSubLevelIndex = 0; // 0, 1, 2
+        window.activeQuestionIndex = 0;
+        window.isVoiceSlow = true;
+
+        // Tracks if the student made a mistake on the current active question
+        window.isCurrentQuestionWrong = false;
+
+        // Accessibility controls
+        let baseFontSize = 16;
+        function adjustFontSize(delta) {
+            baseFontSize = Math.max(13, Math.min(22, baseFontSize + delta));
+            document.documentElement.style.fontSize = `${baseFontSize}px`;
         }
 
         function toggleContrast() {
             document.body.classList.toggle('high-contrast');
         }
 
-        // ================= Gameplay Logic =================
-
-        function startGame(level) {
-            currentLevel = level;
-            currentQuestionIndex = 0;
-
-            if (level === 1) {
-                currentQuestions = getRandomQuestions(level1Bank, 10);
-                document.getElementById('levelTitle').innerText = '第一關：詞語填空';
-            } else if (level === 2) {
-                currentQuestions = getRandomQuestions(level2Bank, 10);
-                document.getElementById('levelTitle').innerText = '第二關：火眼辨形字';
-            } else if (level === 3) {
-                currentQuestions = getRandomQuestions(level3Bank, 10);
-                document.getElementById('levelTitle').innerText = '第三關：詞義解對對碰';
-            }
-
-            switchView('game');
-            renderQuestion();
+        function toggleVoiceSpeed() {
+            window.isVoiceSlow = !window.isVoiceSlow;
+            document.getElementById('speedLabel').innerText = window.isVoiceSlow ? "慢速語音" : "標準語音";
+            showToast("語音設定", window.isVoiceSlow ? "已切換至慢速朗讀 (適合 SpLD 學習者)" : "已切換至標準速度朗讀");
         }
 
-        function renderQuestion() {
-            const q = currentQuestions[currentQuestionIndex];
-            const promptBox = document.getElementById('questionPrompt');
-            const interactiveArea = document.getElementById('gameInteractiveArea');
-            const feedbackBox = document.getElementById('feedbackBox');
-            const hintBox = document.getElementById('hintBox');
-            const nextBtn = document.getElementById('nextBtn');
-            const progressText = document.getElementById('progressText');
+        // 播放單個選項文字的語音
+        function readOptionText(text, event) {
+            // 防止點擊語音按鈕時觸發選項本身的選擇事件
+            if (event) event.stopPropagation();
 
-            q.shuffledOptions = shuffleArray(q.options);
-            progressText.innerText = `第 ${currentQuestionIndex + 1} / ${currentQuestions.length} 題`;
-
-            feedbackBox.innerHTML = '';
-            feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2';
-            hintBox.classList.add('hidden');
-            nextBtn.classList.add('hidden');
-
-            if (currentLevel === 1) {
-                promptBox.innerHTML = `
-                    <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
-                        ${q.sentence.replace('【（ ）】', '<span class="inline-block border-b-4 border-amber-500 px-3 text-amber-600 font-extrabold">【 ？ 】</span>')}
-                    </div>
-                `;
-
-                interactiveArea.innerHTML = `
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
-                        ${q.shuffledOptions.map(opt => `
-                            <button onclick="checkAnswer('${opt}')" class="py-3.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-950 border-2 border-amber-200 rounded-2xl text-lg font-bold shadow card-bounce flex items-center justify-center gap-2">
-                                <span>🔊</span> ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-
-            } else if (currentLevel === 2) {
-                promptBox.innerHTML = `
-                    <div id="sentenceDisplay" class="text-base sm:text-xl leading-relaxed text-slate-800">
-                        ${q.sentence.replace('（ ）', '<span class="inline-block border-b-4 border-blue-500 px-3 text-blue-600 font-extrabold">（ ？ ）</span>')}
-                    </div>
-                `;
-
-                interactiveArea.innerHTML = `
-                    <div class="flex flex-wrap justify-center gap-4 my-6">
-                        ${q.shuffledOptions.map(opt => `
-                            <button onclick="checkAnswer('${opt}')" class="px-6 py-4 bg-white border-2 border-blue-200 hover:border-blue-500 text-blue-950 rounded-2xl text-xl font-bold shadow-md card-bounce bg-card flex items-center gap-2">
-                                <span>🔊</span> ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-
-            } else if (currentLevel === 3) {
-                promptBox.innerHTML = `
-                    <div class="text-lg sm:text-xl leading-relaxed text-purple-900 bg-purple-50 p-4 rounded-2xl border border-purple-200">
-                        ${q.definition}
-                    </div>
-                `;
-
-                interactiveArea.innerHTML = `
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
-                        ${q.shuffledOptions.map(opt => `
-                            <button onclick="checkAnswer('${opt}')" class="py-3.5 px-4 bg-purple-50 hover:bg-purple-100 text-purple-950 border-2 border-purple-200 rounded-2xl text-lg font-bold shadow card-bounce flex items-center justify-center gap-2">
-                                <span>🔊</span> ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // 停止當前正在播放的語音
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-HK'; // 廣東話發音
+                utterance.rate = window.isVoiceSlow ? 0.75 : 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("語音提示", "您的瀏覽器暫不支援語音朗讀功能");
             }
         }
 
-        function checkAnswer(selected) {
-            const q = currentQuestions[currentQuestionIndex];
-            speakText(selected);
+        // View Router
+        function switchView(viewName) {
+            window.currentView = viewName;
+            const views = ["loginView", "menuView", "gameView", "levelCompleteView", "bossView", "reportView", "teacherView"];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
 
-            const isCorrect = (selected === q.correct);
+            const target = document.getElementById(viewName + 'View');
+            if (target) target.classList.remove('hidden');
 
-            const sentenceEl = document.getElementById('sentenceDisplay');
-            if (sentenceEl) {
-                const badgeColor = isCorrect 
-                    ? 'border-emerald-600 bg-emerald-100 text-emerald-800' 
-                    : 'border-rose-500 bg-rose-100 text-rose-800';
+            // Header buttons control
+            const isLoggedIn = window.currentStudent !== null;
+            document.getElementById('studentBadgeHeader').classList.toggle('hidden', !isLoggedIn);
+            document.getElementById('shopNavBtn').classList.toggle('hidden', !isLoggedIn);
+            document.getElementById('reportNavBtn').classList.toggle('hidden', !isLoggedIn);
+            
+            // Show teacher nav button if teacher logged in
+            const isTeacher = window.currentStudent && window.currentStudent.className === '3A' && window.currentStudent.id === '99';
+            document.getElementById('teacherNavBtn').classList.toggle('hidden', !isTeacher);
 
-                if (q.sentence.includes('【（ ）】')) {
-                    sentenceEl.innerHTML = q.sentence.replace('【（ ）】', `<span class="inline-block border-b-4 ${badgeColor} px-3 font-extrabold rounded-lg animate-pulse">【 ${selected} 】</span>`);
-                } else if (q.sentence.includes('（ ）')) {
-                    sentenceEl.innerHTML = q.sentence.replace('（ ）', `<span class="inline-block border-b-4 ${badgeColor} px-3 font-extrabold rounded-lg animate-pulse">（ ${selected} ）</span>`);
+            if (viewName === 'menu') {
+                renderEpisodesMenu();
+            } else if (viewName === 'report') {
+                renderReportPage();
+            } else if (viewName === 'teacher') {
+                renderTeacherTable();
+            }
+        }
+
+        // Toast alert helper
+        function showToast(title, message, icon = "✨") {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+            document.getElementById('toastIcon').innerText = icon;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Check if teacher selected
+        function checkTeacherClassSelection() {
+            const cls = document.getElementById('studentClass').value;
+            const id = document.getElementById('studentId').value;
+            const pwdContainer = document.getElementById('teacherPasswordContainer');
+            if (cls === '3A' && id === '99') {
+                pwdContainer.classList.remove('hidden');
+            } else {
+                pwdContainer.classList.add('hidden');
+            }
+        }
+
+        // Submit Login
+        async function submitLogin() {
+            const cls = document.getElementById('studentClass').value;
+            const idInput = document.getElementById('studentId').value;
+
+            if (!cls || !idInput) {
+                showToast("登入提示", "請完整選擇班別並輸入學號！", "⚠️");
+                return;
+            }
+
+            const formattedId = idInput.padStart(2, '0');
+
+            // Teacher check
+            if (cls === '3A' && formattedId === '99') {
+                const pwd = document.getElementById('teacherPassword').value;
+                if (pwd !== '3A99admin') {
+                    showToast("密碼錯誤", "教師控制台密碼不正確！", "❌");
+                    return;
                 }
             }
 
-            if (isCorrect) {
-                showFeedback(true, `完全正確！答案就是「${selected}」！`);
-                speakText(`Yeah！你答啱喇！`);
-                score += 10;
-                totalAnsweredCount++;
-                saveStudentLocalData();
-                triggerConfetti();
+            window.currentStudent = { className: cls, id: formattedId };
+            document.getElementById('headerStudentInfo').innerText = `${cls} (${formattedId})`;
+            document.getElementById('reportStudentInfo').innerText = `${cls} 班 (${formattedId}) 號`;
+
+            // Attempt to load cloud data if ready
+            if (window.loadStudentProgressFromCloud) {
+                const cloudData = await window.loadStudentProgressFromCloud(cls, formattedId);
+                if (cloudData) {
+                    if (cloudData.unlockedEpisode) window.state.unlockedEpisode = cloudData.unlockedEpisode;
+                    if (cloudData.completedSubLevels) window.state.completedSubLevels = cloudData.completedSubLevels;
+                    if (cloudData.score !== undefined) window.state.score = cloudData.score;
+                    if (cloudData.totalScore !== undefined) window.state.totalScore = cloudData.totalScore;
+                    else window.state.totalScore = window.state.score;
+                    if (cloudData.questionsAnswered) window.state.questionsAnswered = cloudData.questionsAnswered;
+                    if (cloudData.inventory) window.state.inventory = cloudData.inventory;
+                    if (cloudData.badges) window.state.badges = cloudData.badges;
+                    showToast("雲端同步成功", `已讀取 ${cls} (${formattedId}) 號的進度！`);
+                }
+            }
+
+            if (cls === '3A' && formattedId === '99') {
+                switchView('teacher');
             } else {
-                showFeedback(false, `想一想，「${selected}」填在這裡合適嗎？再試一次吧！`);
-                speakText(`想一想，${selected}填在這裡合適嗎？再試一次吧！`);
+                switchView('menu');
             }
         }
 
-        function showFeedback(isCorrect, message) {
-            const feedbackBox = document.getElementById('feedbackBox');
-            const nextBtn = document.getElementById('nextBtn');
-            document.getElementById('scoreText').innerText = `得分: ${score}`;
+        // Render Episode Grid in Menu View
+        function renderEpisodesMenu() {
+            const container = document.getElementById('episodesContainer');
+            container.innerHTML = '';
 
-            if (isCorrect) {
-                feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300 p-2 correct-anim';
-                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-2 text-xl"></i> ${message}`;
-                nextBtn.classList.remove('hidden');
+            document.getElementById('menuScoreDisplay').innerText = `${window.state.score} 分`;
+            document.getElementById('unlockedProgressLabel').innerText = `已解鎖進度：第 ${Math.min(8, window.state.unlockedEpisode)} 集`;
+
+            EPISODES_DATA.forEach(ep => {
+                const isUnlocked = ep.id <= window.state.unlockedEpisode;
+                
+                // Calculate completion count for this episode (3 sub-levels max)
+                let subCompletedCount = 0;
+                ep.subLevels.forEach((sub, idx) => {
+                    if (window.state.completedSubLevels.includes(`${ep.id}-${idx}`)) {
+                        subCompletedCount++;
+                    }
+                });
+
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-3xl border-2 transition-all duration-300 flex flex-col justify-between bg-card ${
+                    isUnlocked 
+                        ? 'border-emerald-300 bg-white shadow-md hover:shadow-xl card-bounce cursor-pointer' 
+                        : 'border-slate-200 bg-slate-100 opacity-60'
+                }`;
+
+                card.onclick = () => {
+                    if (isUnlocked) {
+                        openSubLevelsModal(ep.id);
+                    } else {
+                        showToast("關卡鎖定中", `需要先完成第 ${ep.id - 1} 集的所有關卡才能解鎖！`, "🔒");
+                    }
+                };
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-3xl">${ep.icon}</span>
+                            <span class="text-xs font-black px-2.5 py-1 rounded-full ${
+                                isUnlocked 
+                                    ? (subCompletedCount === 3 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') 
+                                    : 'bg-slate-200 text-slate-500'
+                            }">
+                                ${isUnlocked ? (subCompletedCount === 3 ? '已完美通關 ✨' : `已進行 ${subCompletedCount}/3 關`) : '未解鎖 🔒'}
+                            </span>
+                        </div>
+                        <h4 class="font-extrabold text-base text-slate-800">第 ${ep.id} 集</h4>
+                        <p class="text-xs font-bold text-emerald-700 mt-0.5">${ep.title}</p>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">${ep.desc}</p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <span class="text-[11px] text-slate-400 font-bold">含 3 個小關卡</span>
+                        <span class="text-xs font-black ${isUnlocked ? 'text-emerald-600' : 'text-slate-400'}">
+                            ${isUnlocked ? '點擊選擇關卡 ➔' : '鎖定'}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Boss challenge button state
+            const bossBtn = document.getElementById('bossChallengeBtn');
+            const allEpisodesCompleted = window.state.unlockedEpisode > 8 || window.state.completedSubLevels.length >= 24;
+            
+            if (allEpisodesCompleted) {
+                bossBtn.disabled = false;
+                bossBtn.className = "w-full md:w-auto px-6 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition card-bounce cursor-pointer";
+                bossBtn.innerHTML = `<span>⚔️ 立即挑戰暗黑魔王！</span>`;
+                document.getElementById('bossLockDesc').innerText = "🎉 太棒了！你已通關前八集全 24 個小關卡！隨時可與魔王決一死戰！";
             } else {
-                feedbackBox.className = 'min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl bg-rose-100 text-rose-800 border border-rose-300 p-2';
-                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 mr-2 text-xl"></i> ${message}`;
+                bossBtn.disabled = true;
+                bossBtn.className = "w-full md:w-auto px-6 py-3.5 bg-slate-700 text-slate-400 font-extrabold rounded-2xl text-sm shadow-lg flex items-center justify-center gap-2 cursor-not-allowed";
+                bossBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>鎖定中 (完成所有 8 集 24 關解鎖)</span>`;
+            }
+        }
+
+        // Sub-levels Modal controls
+        function openSubLevelsModal(epId) {
+            window.activeEpisodeId = epId;
+            const episode = EPISODES_DATA.find(e => e.id === epId);
+            document.getElementById('modalEpisodeTitle').innerText = `第 ${epId} 集：${episode.title}`;
+
+            const container = document.getElementById('subLevelsContainer');
+            container.innerHTML = '';
+
+            episode.subLevels.forEach((sub, subIdx) => {
+                const subKey = `${epId}-${subIdx}`;
+                const isSubCompleted = window.state.completedSubLevels.includes(subKey);
+
+                // Check sub-level unlocking
+                const isSubUnlocked = subIdx === 0 || window.state.completedSubLevels.includes(`${epId}-${subIdx - 1}`);
+
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-2xl border-2 flex justify-between items-center transition ${
+                    isSubUnlocked 
+                        ? 'border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 cursor-pointer' 
+                        : 'border-slate-200 bg-slate-50 opacity-60'
+                }`;
+
+                item.onclick = () => {
+                    if (isSubUnlocked) {
+                        closeSubLevelsModal();
+                        startGameplay(epId, subIdx);
+                    } else {
+                        showToast("關卡鎖定", "請先按順序完成前一個小關卡！", "🔒");
+                    }
+                };
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${
+                            isSubCompleted ? 'bg-emerald-500 text-white' : (isSubUnlocked ? 'bg-yellow-400 text-slate-900' : 'bg-slate-300 text-slate-600')
+                        }">
+                            ${isSubCompleted ? '✓' : (subIdx + 1)}
+                        </div>
+                        <div>
+                            <h5 class="font-extrabold text-sm text-slate-800">${sub.name}</h5>
+                            <p class="text-xs text-slate-500">題目數量：${sub.questions.length} 題</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-xl ${
+                            isSubCompleted ? 'bg-emerald-200 text-emerald-900' : (isSubUnlocked ? 'bg-emerald-600 text-white shadow' : 'bg-slate-200 text-slate-500')
+                        }">
+                            ${isSubCompleted ? '已完成' : (isSubUnlocked ? '開始闖關 ➔' : '未解鎖')}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            document.getElementById('subLevelsModal').classList.remove('hidden');
+        }
+
+        function closeSubLevelsModal() {
+            document.getElementById('subLevelsModal').classList.add('hidden');
+        }
+
+        // Shop Modal controls
+        function openShopModal() {
+            document.getElementById('shopBalance').innerText = `${window.state.score} 分`;
+            document.getElementById('invCountPotion').innerText = window.state.inventory.potion || 0;
+            document.getElementById('invCountShield').innerText = window.state.inventory.shield || 0;
+            document.getElementById('invCountWand').innerText = window.state.inventory.wand || 0;
+            document.getElementById('invCountScroll').innerText = window.state.inventory.scroll || 0;
+            document.getElementById('shopModal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shopModal').classList.add('hidden');
+        }
+
+        // Buying items reduces spendable 'score', but DOES NOT decrease 'totalScore'!
+        function buyItem(itemType, cost) {
+            const msgEl = document.getElementById('shopMessage');
+            if (window.state.score < cost) {
+                msgEl.innerText = "❌ 魔法積分不足，快去挑戰課文關卡賺取更多積分吧！";
+                msgEl.className = "text-xs font-bold p-2.5 rounded-xl text-center transition-all bg-rose-100 text-rose-800 border border-rose-300";
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            window.state.score -= cost; // Only deduct spendable balance
+            // Note: window.state.totalScore is untouched!
+            window.state.inventory[itemType] = (window.state.inventory[itemType] || 0) + 1;
+
+            msgEl.innerText = "🎉 購買成功！道具已放入你的戰鬥背包中！（總累積積分不受影響）";
+            msgEl.className = "text-xs font-bold p-2.5 rounded-xl text-center transition-all bg-emerald-100 text-emerald-800 border border-emerald-300";
+            msgEl.classList.remove('hidden');
+
+            openShopModal();
+            updateUIHeaderAndMenu();
+            saveStudentProgressToCloud();
+        }
+
+        function updateUIHeaderAndMenu() {
+            const scoreEl = document.getElementById('menuScoreDisplay');
+            if (scoreEl) scoreEl.innerText = `${window.state.score} 分`;
+        }
+
+        // START GAMEPLAY FOR A SPECIFIC SUB-LEVEL
+        function startGameplay(epId, subIdx) {
+            window.activeEpisodeId = epId;
+            window.activeSubLevelIndex = subIdx;
+            window.activeQuestionIndex = 0;
+
+            const episode = EPISODES_DATA.find(e => e.id === epId);
+            const subLevel = episode.subLevels[subIdx];
+
+            document.getElementById('levelTitle').innerText = `第 ${epId} 集：${subLevel.name}`;
+            switchView('game');
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            // Reset question retry flag for current question
+            window.isCurrentQuestionWrong = false;
+
+            const episode = EPISODES_DATA.find(e => e.id === window.activeEpisodeId);
+            const subLevel = episode.subLevels[window.activeSubLevelIndex];
+            const qData = subLevel.questions[window.activeQuestionIndex];
+
+            document.getElementById('progressText').innerText = `第 ${window.activeQuestionIndex + 1} / ${subLevel.questions.length} 題`;
+            document.getElementById('scoreText').innerText = `得分: ${window.state.score}`;
+
+            const promptEl = document.getElementById('questionPrompt');
+            const interactiveEl = document.getElementById('gameInteractiveArea');
+            const feedbackEl = document.getElementById('feedbackBox');
+            const hintBox = document.getElementById('hintBox');
+
+            feedbackEl.className = "min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2";
+            feedbackEl.innerText = '';
+            hintBox.classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            if (subLevel.type === 'fill') {
+                promptEl.innerHTML = qData.text.replace('_____', '<span class="inline-block border-b-4 border-emerald-500 px-3 py-1 font-black text-emerald-700 bg-emerald-50 rounded-lg mx-1">_____</span>');
+                
+                interactiveEl.innerHTML = '';
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-2 gap-3 max-w-md mx-auto";
+
+                // Shuffle options
+                const shuffledOpts = [...qData.options].sort(() => Math.random() - 0.5);
+                shuffledOpts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "py-3.5 px-4 bg-slate-50 hover:bg-emerald-100 border-2 border-slate-200 hover:border-emerald-400 rounded-2xl font-black text-base text-slate-800 transition card-bounce flex items-center justify-between gap-2";
+                    
+                    // 文字 + 語音喇叭按鈕
+                    btn.innerHTML = `
+                        <span class="flex-grow text-center">${opt}</span>
+                        <span onclick="readOptionText('${opt}', event)" title="聽讀音" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </span>
+                    `;
+                    btn.onclick = () => checkQuestionAnswer(opt, qData.answer, btn);
+                    grid.appendChild(btn);
+                });
+                interactiveEl.appendChild(grid);
+
+            } else if (subLevel.type === 'error') {
+                promptEl.innerHTML = `請圈出句子中的錯別字，並選擇正確字詞：<br><span class="text-xl text-purple-900 mt-2 block bg-purple-50 p-4 rounded-2xl border border-purple-200">${qData.text}</span>`;
+                
+                interactiveEl.innerHTML = '';
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-2 gap-3 max-w-md mx-auto";
+
+                qData.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "py-3.5 px-4 bg-slate-50 hover:bg-emerald-100 border-2 border-slate-200 hover:border-emerald-400 rounded-2xl font-black text-base text-slate-800 transition card-bounce flex items-center justify-between gap-2";
+                    
+                    btn.innerHTML = `
+                        <span class="flex-grow text-center">${opt}</span>
+                        <span onclick="readOptionText('${opt}', event)" title="聽讀音" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </span>
+                    `;
+                    btn.onclick = () => checkQuestionAnswer(opt, qData.correctWord, btn);
+                    grid.appendChild(btn);
+
+                    interactiveEl.appendChild(grid);
+                    
+                });
+
+            } else if (subLevel.type === 'match') {
+                promptEl.innerHTML = `請將詞語「<span class="text-emerald-700 font-black">${qData.word}</span>」與最合適的解釋配對：`;
+
+                interactiveEl.innerHTML = '';
+                const stack = document.createElement('div');
+                stack.className = "space-y-3 max-w-lg mx-auto";
+
+                const allMeanings = subLevel.questions.map(q => q.meaning).sort(() => Math.random() - 0.5);
+                allMeanings.forEach(m => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 bg-slate-50 hover:bg-emerald-100 border-2 border-slate-200 hover:border-emerald-400 rounded-2xl font-bold text-sm text-slate-800 transition card-bounce flex items-center justify-between gap-2";
+                    
+                    btn.innerHTML = `
+                        <span class="flex-grow">${m}</span>
+                        <span onclick="readOptionText('${m}', event)" title="聽讀音" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-xs transition flex-shrink-0">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </span>
+                    `;
+                    btn.onclick = () => checkQuestionAnswer(m, qData.meaning, btn);
+                    stack.appendChild(btn);
+                });
+                interactiveEl.appendChild(stack);
+            }
+        }
+
+        // Requirement 1: Incorrect answer does NOT reveal the correct answer. Allows retry, but no points added!
+        // Requirement 2: Both spendable score AND totalScore (cumulative) are incremented upon first-time correct answer.
+        function checkQuestionAnswer(selected, correct, btnEl) {
+            const feedbackEl = document.getElementById('feedbackBox');
+
+            if (selected === correct) {
+                // Disable all option buttons once correct answer is chosen
+                const allBtns = document.querySelectorAll('#gameInteractiveArea button');
+                allBtns.forEach(b => b.disabled = true);
+
+                btnEl.className = btnEl.className.replace('bg-slate-50', 'bg-emerald-500').replace('hover:bg-emerald-100', 'bg-emerald-500') + " text-white border-emerald-600 correct-anim";
+
+                if (!window.isCurrentQuestionWrong) {
+                    // First try correct! Award +10 points to BOTH spendable score and totalScore!
+                    window.state.score += 10;
+                    window.state.totalScore += 10;
+                    window.state.questionsAnswered += 1;
+                    
+                    feedbackEl.innerText = "🎉 一次答對！太棒了！ (+10 分)";
+                    feedbackEl.className = "min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2 bg-emerald-100 text-emerald-800 border border-emerald-300";
+                } else {
+                    // Answered correctly after retry: Do not award points
+                    window.state.questionsAnswered += 1;
+
+                    feedbackEl.innerText = "🎉 答對了！繼續加油！ (經過重試不給予積分)";
+                    feedbackEl.className = "min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2 bg-amber-100 text-amber-800 border border-amber-300";
+                }
+
+                document.getElementById('scoreText').innerText = `得分: ${window.state.score}`;
+
+                // Confetti burst on correct answer
+                try { confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } }); } catch(e){}
+
+                document.getElementById('nextBtn').classList.remove('hidden');
+
+            } else {
+                // Incorrect answer: DO NOT reveal answer! Disable only this button, allow retry!
+                window.isCurrentQuestionWrong = true;
+                btnEl.disabled = true;
+                btnEl.className = "py-3.5 px-4 bg-rose-100 border-2 border-rose-300 text-rose-500 font-bold rounded-2xl opacity-60 cursor-not-allowed transition line-through";
+
+                feedbackEl.innerText = "❌ 答案不太對喔！請再試一次！";
+                feedbackEl.className = "min-h-[50px] flex items-center justify-center font-bold text-lg rounded-2xl transition-all p-2 bg-rose-100 text-rose-800 border border-rose-300";
             }
         }
 
         function showHint() {
-            const q = currentQuestions[currentQuestionIndex];
+            const episode = EPISODES_DATA.find(e => e.id === window.activeEpisodeId);
+            const subLevel = episode.subLevels[window.activeSubLevelIndex];
+            const qData = subLevel.questions[window.activeQuestionIndex];
+
             const hintBox = document.getElementById('hintBox');
-            hintBox.innerHTML = `<strong>💡 魔法提示：</strong> ${q.hint}`;
+            hintBox.innerText = `💡 魔法提示：${qData.hint || '發揮記憶力，聯想課文中學過的詞語！'}`;
             hintBox.classList.remove('hidden');
-            speakText(`提示：${q.hint}`);
         }
 
         function readCurrentQuestion() {
-            const q = currentQuestions[currentQuestionIndex];
-            if (q.sentence) {
-                let textToRead = q.sentence
-                    .replace('【（ ）】', '什麼')
-                    .replace('（ ）', '什麼');
-                speakText(textToRead);
-            } else if (q.definition) {
-                speakText(q.definition);
+            const episode = EPISODES_DATA.find(e => e.id === window.activeEpisodeId);
+            const subLevel = episode.subLevels[window.activeSubLevelIndex];
+            const qData = subLevel.questions[window.activeQuestionIndex];
+
+            let textToRead = "";
+            if (subLevel.type === 'fill') textToRead = qData.text.replace('_____', '什麼');
+            else if (subLevel.type === 'error') textToRead = qData.text;
+            else if (subLevel.type === 'match') textToRead = `請匹配詞語 ${qData.word} 的意思`;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.lang = 'zh-HK';
+                utterance.rate = window.isVoiceSlow ? 0.75 : 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("語音提示", "您的瀏覽器暫不支援語音朗讀功能");
             }
         }
 
         function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < currentQuestions.length) {
-                renderQuestion();
+            const episode = EPISODES_DATA.find(e => e.id === window.activeEpisodeId);
+            const subLevel = episode.subLevels[window.activeSubLevelIndex];
+
+            if (window.activeQuestionIndex < subLevel.questions.length - 1) {
+                window.activeQuestionIndex++;
+                renderCurrentQuestion();
             } else {
-                speakText('恭喜你完成了這十道題目！已自動為你儲存成績！');
-                uploadDataToGitHub(true);
-                switchView('report');
+                // 完成當前小關卡
+                const subKey = `${window.activeEpisodeId}-${window.activeSubLevelIndex}`;
+                if (!window.state.completedSubLevels.includes(subKey)) {
+                    window.state.completedSubLevels.push(subKey);
+                }
+
+                // 檢查該集 3 個小關卡是否全數完成
+                const epSubKeys = [`${window.activeEpisodeId}-0`, `${window.activeEpisodeId}-1`, `${window.activeEpisodeId}-2`].sort();
+                const hasCompletedEp = epSubKeys.every(k => window.state.completedSubLevels.includes(k));
+
+                if (hasCompletedEp && window.state.unlockedEpisode === window.activeEpisodeId) {
+                    window.state.unlockedEpisode = Math.min(9, window.activeEpisodeId + 1);
+                }
+
+                checkAndAwardBadges();
+                if (typeof window.saveStudentProgressToCloud === 'function') {
+                    window.saveStudentProgressToCloud();
+                }
+
+                // 顯示通關畫面並滾動至頂部
+                document.getElementById('completeLevelTitle').innerText = `恭喜通關！${subLevel.name}`;
+                document.getElementById('completeEarnedScore').innerText = `${window.state.score} 分`;
+                document.getElementById('completeTotalScore').innerText = `${window.state.totalScore} 分`;
+
+                switchView('levelComplete');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        function triggerConfetti() {
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 45, spread: 55, origin: { y: 0.7 } });
-            }
-        }
-
-        function updateReportUI() {
-            document.getElementById('totalQuestionsAnswered').innerText = totalAnsweredCount;
-            document.getElementById('totalScoreAccumulated').innerText = score;
-
-            const titleEl = document.getElementById('magicTitle');
-            if (score >= 1000) {
-                titleEl.innerText = "🧙‍♂️ 詞語大魔法師";
-            } else if (score >= 500) {
-                titleEl.innerText = "⭐ 詞語探險家";
+        window.goToNextSubLevel = function() {
+            if (window.activeSubLevelIndex < 2) {
+                startGameplay(window.activeEpisodeId, window.activeSubLevelIndex + 1);
+            } else if (window.activeEpisodeId < 8) {
+                openSubLevelsModal(window.activeEpisodeId + 1);
             } else {
-                titleEl.innerText = "🌱 詞語小見習生";
+                switchView('menu');
             }
-
-            const badges = document.getElementById('badgesContainer').children;
-            if (score >= 200) badges[0].classList.remove('opacity-50');
-            if (score >= 500) badges[1].classList.remove('opacity-50');
-            if (score >= 800) badges[2].classList.remove('opacity-50');
-            if (score >= 1000) badges[3].classList.remove('opacity-50');
-        }
-
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = function() {
-                window.speechSynthesis.getVoices();
-            };
-        }
-
-        window.onload = function() {
-            switchView('login');
         };
+
+        // DYNAMIC AGGREGATOR FOR BOSS BATTLE QUESTIONS
+        // Pulls randomly from ALL 8 episodes across ALL sub-level types!
+        function getAllQuestionsFromAllLessons() {
+            const allQs = [];
+            EPISODES_DATA.forEach(ep => {
+                ep.subLevels.forEach((sub, subIdx) => {
+                    sub.questions.forEach(q => {
+                        allQs.push({
+                            ...q,
+                            episodeId: ep.id,
+                            episodeTitle: ep.title,
+                            subType: sub.type
+                        });
+                    });
+                });
+            });
+            return allQs;
+        }
+
+        // BOSS BATTLE STATE
+        window.bossState = {
+            playerHp: 100,
+            bossHp: 200,
+            turn: 'player',
+            isShieldActive: false,
+            currentBossQuestion: null,
+            isBossQuestionWrong: false
+        };
+
+        function startBossBattle() {
+            window.bossState.playerHp = 100;
+            window.bossState.bossHp = 100;
+            window.bossState.turn = 'player';
+            window.bossState.isShieldActive = false;
+
+            updateBossBattleUI();
+            switchView('boss');
+            showToast("魔王降臨", "暗黑魔王登場！使用道具或回答問題攻擊魔王！", "👿");
+        }
+
+        function updateBossBattleUI() {
+            document.getElementById('playerHpText').innerText = `${window.bossState.playerHp} / 100`;
+            document.getElementById('playerHpBar').style.width = `${Math.max(0, window.bossState.playerHp)}%`;
+
+            document.getElementById('bossHpText').innerText = `${window.bossState.bossHp} / 100`;
+            document.getElementById('bossHpBar').style.width = `${Math.max(0, window.bossState.bossHp)}%`;
+
+            document.getElementById('bossShieldBadge').classList.toggle('hidden', !window.bossState.isShieldActive);
+
+            document.getElementById('bossPotionCount').innerText = `剩餘: ${window.state.inventory.potion || 0}`;
+            document.getElementById('bossShieldCount').innerText = `剩餘: ${window.state.inventory.shield || 0}`;
+            document.getElementById('bossWandCount').innerText = `剩餘: ${window.state.inventory.wand || 0}`;
+            document.getElementById('bossScrollCount').innerText = `剩餘: ${window.state.inventory.scroll || 0}`;
+
+            document.getElementById('btnBossPotion').disabled = (window.state.inventory.potion || 0) <= 0 || window.bossState.turn !== 'player';
+            document.getElementById('btnBossShield').disabled = (window.state.inventory.shield || 0) <= 0 || window.bossState.turn !== 'player' || window.bossState.isShieldActive;
+            document.getElementById('btnBossWand').disabled = (window.state.inventory.wand || 0) <= 0 || window.bossState.turn !== 'player';
+            document.getElementById('btnBossScroll').disabled = (window.state.inventory.scroll || 0) <= 0 || window.bossState.turn !== 'player';
+            document.getElementById('btnBossAttack').disabled = window.bossState.turn !== 'player';
+
+            document.getElementById('turnStatusLabel').innerText = window.bossState.turn === 'player' ? "✨ 勇者回合" : "👿 魔王回合";
+        }
+
+        function useBossItem(itemType) {
+            if (window.bossState.turn !== 'player') return;
+            if ((window.state.inventory[itemType] || 0) <= 0) return;
+
+            window.state.inventory[itemType]--;
+
+            const msgEl = document.getElementById('bossBattleMessage');
+            if (itemType === 'potion') {
+                window.bossState.playerHp = Math.min(100, window.bossState.playerHp + 30);
+                msgEl.innerText = "🧪 你喝下了體力藥水，恢復了 30 點生命值！";
+            } else if (itemType === 'shield') {
+                window.bossState.isShieldActive = true;
+                msgEl.innerText = "🛡️ 智慧防護盾已展開！將完全張開防護擋下魔王下一輪攻擊！";
+            } else if (itemType === 'wand') {
+                window.bossState.bossHp = Math.max(0, window.bossState.bossHp - 8);
+                msgEl.innerText = "🪄 揮舞魔導士法杖！施放聖光術造成魔王 8 點傷害！";
+                animateBossHit();
+            } else if (itemType === 'scroll') {
+                window.bossState.bossHp = Math.max(0, window.bossState.bossHp - 20);
+                msgEl.innerText = "📜 撕開遠古禁忌卷軸！召喚九天玄雷直接削弱魔王 20 點血量！";
+                animateBossHit();
+            }
+
+            updateBossBattleUI();
+
+            if (window.bossState.bossHp <= 0) {
+                endBossBattle(true);
+            } else {
+                bossTurnCounterAttack();
+            }
+        }
+
+        function triggerBossQuestionAttack() {
+            if (window.bossState.turn !== 'player') return;
+
+            window.bossState.isBossQuestionWrong = false; // Reset attempt flag
+
+            const allQs = getAllQuestionsFromAllLessons();
+            const randomQ = allQs[Math.floor(Math.random() * allQs.length)];
+            window.bossState.currentBossQuestion = randomQ;
+
+            document.getElementById('bossQuestionOriginBadge').innerText = `⚔️ 題庫來源：${randomQ.episodeTitle}`;
+            
+            const promptEl = document.getElementById('bossQuestionPrompt');
+            const optionsEl = document.getElementById('bossQuestionOptions');
+            const feedbackEl = document.getElementById('bossQuestionFeedback');
+            feedbackEl.classList.add('hidden');
+
+            if (randomQ.subType === 'fill') {
+                promptEl.innerText = randomQ.text.replace('_____', '（ ? ）');
+            } else if (randomQ.subType === 'error') {
+                promptEl.innerText = `請選出句子中的正確字詞：${randomQ.text}`;
+            } else if (randomQ.subType === 'match') {
+                promptEl.innerText = `「${randomQ.word}」的意思是？`;
+            }
+
+            optionsEl.innerHTML = '';
+            let choices = [];
+            let correctAns = "";
+
+            if (randomQ.subType === 'fill') {
+                choices = [...randomQ.options];
+                correctAns = randomQ.answer;
+            } else if (randomQ.subType === 'error') {
+                choices = [...randomQ.options];
+                correctAns = randomQ.correctWord;
+            } else if (randomQ.subType === 'match') {
+                correctAns = randomQ.meaning;
+                choices = [randomQ.meaning];
+                const otherQs = allQs.filter(q => q.meaning && q.meaning !== correctAns);
+                while (choices.length < 4 && otherQs.length > 0) {
+                    const randM = otherQs[Math.floor(Math.random() * otherQs.length)].meaning;
+                    if (!choices.includes(randM)) choices.push(randM);
+                }
+            }
+
+            choices.sort(() => Math.random() - 0.5);
+
+            choices.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-2xl font-bold text-xs text-purple-900 transition card-bounce";
+                btn.innerText = opt;
+                btn.onclick = () => checkBossQuestionAnswer(opt, correctAns, btn);
+                optionsEl.appendChild(btn);
+            });
+
+            document.getElementById('bossQuestionModal').classList.remove('hidden');
+        }
+
+        function checkBossQuestionAnswer(selected, correct, btnEl) {
+            const feedbackEl = document.getElementById('bossQuestionFeedback');
+
+            if (selected === correct) {
+                // Disable options
+                const allBtns = document.querySelectorAll('#bossQuestionOptions button');
+                allBtns.forEach(b => b.disabled = true);
+
+                btnEl.className = btnEl.className.replace('bg-purple-50', 'bg-emerald-500').replace('hover:bg-purple-100', 'bg-emerald-500') + " text-white border-emerald-600 correct-anim";
+                
+                const dmga = Math.floor(Math.random() * 12) +3;
+                feedbackEl.innerText = `🎉 答對了！成功對魔王造成 ${dmga} 點魔法痛擊！`;
+                feedbackEl.className = "p-3 rounded-2xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 block";
+
+                if (!window.bossState.isBossQuestionWrong) {
+                    // Award bonus score on first try correct in boss fight
+                    window.state.score += 15;
+                    window.state.totalScore += 15;
+                    window.state.questionsAnswered += 1;
+                } else {
+                    window.state.questionsAnswered += 1;
+                }
+
+                window.bossState.bossHp = Math.max(0, window.bossState.bossHp - dmga);
+                animateBossHit();
+
+                setTimeout(() => {
+                    document.getElementById('bossQuestionModal').classList.add('hidden');
+                    updateBossBattleUI();
+
+                    if (window.bossState.bossHp <= 0) {
+                        endBossBattle(true);
+                    } else {
+                        bossTurnCounterAttack();
+                    }
+                }, 1500);
+
+            } else {
+                // Wrong answer in boss battle: DO NOT reveal answer! Disable only this button, allow retry!
+                window.bossState.isBossQuestionWrong = true;
+                btnEl.disabled = true;
+                btnEl.className = "p-3 bg-rose-100 border-2 border-rose-300 text-rose-500 font-bold rounded-2xl opacity-60 cursor-not-allowed transition line-through";
+
+                feedbackEl.innerText = "❌ 答錯了！請再試一次！";
+                feedbackEl.className = "p-3 rounded-2xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 block";
+            }
+        }
+
+        function animateBossHit() {
+            const avatar = document.getElementById('bossAvatar');
+            avatar.classList.add('anim-boss-hit');
+            setTimeout(() => avatar.classList.remove('anim-boss-hit'), 800);
+        }
+
+        function bossTurnCounterAttack() {
+            window.bossState.turn = 'boss';
+            updateBossBattleUI();
+
+            const msgEl = document.getElementById('bossBattleMessage');
+            msgEl.innerText = "👿 魔王正在蓄力反擊...";
+
+            setTimeout(() => {
+                if (window.bossState.isShieldActive) {
+                    window.bossState.isShieldActive = false;
+                    msgEl.innerText = "🛡️ 智慧防護盾發揮效果！完美抵擋了魔王的反擊！";
+                } else {
+                    const dmg = Math.floor(Math.random() * 10) + 15; // 15 to 25 damage
+                    window.bossState.playerHp = Math.max(0, window.bossState.playerHp - dmg);
+                    msgEl.innerText = `💥 魔王發動錯別字黑暗波！造成你 ${dmg} 點傷害！`;
+                    
+                    const card = document.getElementById('bossBattleCard');
+                    card.classList.add('anim-player-hurt');
+                    setTimeout(() => card.classList.remove('anim-player-hurt'), 800);
+                }
+
+                if (window.bossState.playerHp <= 0) {
+                    endBossBattle(false);
+                } else {
+                    window.bossState.turn = 'player';
+                    updateBossBattleUI();
+                }
+            }, 1800);
+        }
+
+        function endBossBattle(isVictory) {
+            if (isVictory) {
+                // Reward for boss victory
+                window.state.score += 100;
+                window.state.totalScore += 100;
+                
+                checkAndAwardBadges();
+                saveStudentProgressToCloud();
+
+                document.getElementById('victoryStudentInfo').innerText = `${window.currentStudent.className} (${window.currentStudent.id})`;
+                document.getElementById('victoryScore').innerText = `${window.state.totalScore} 分`;
+                document.getElementById('victoryQuestions').innerText = `${window.state.questionsAnswered} 題`;
+
+                renderVictoryBadges();
+                document.getElementById('bossVictoryModal').classList.remove('hidden');
+                
+                try { confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } }); } catch(e){}
+            } else {
+                showToast("戰敗提示", "不好了，血量歸零！再裝備一些藥水和防護盾重新挑戰吧！", "💔");
+                switchView('menu');
+            }
+        }
+
+        function closeBossVictoryModal() {
+            document.getElementById('bossVictoryModal').classList.add('hidden');
+        }
+
+        // BADGES DEFINITION
+        const BADGES_LIST = [
+            { id: "badge_starter", name: "魔法新手", icon: "🌱", desc: "踏入字詞魔法世界" },
+            { id: "badge_ep1", name: "自然觀察家", icon: "🌿", desc: "完成第 1 集全數關卡" },
+            { id: "badge_ep4", name: "科學探險家", icon: "🔬", desc: "完成第 4 集關卡挑戰" },
+            { id: "badge_ep8", name: "字詞大導師", icon: "🎓", desc: "通關前 8 集所有小關卡" },
+            { id: "badge_boss", name: "魔王剋星", icon: "👑", desc: "成功擊敗終極暗黑錯別字魔王" },
+            { id: "badge_score1000", name: "千分勇者", icon: "💯", desc: "累積總得分達到 1000 分以上" }
+        ];
+
+        function checkAndAwardBadges() {
+            if (!window.state.badges.includes("badge_starter")) window.state.badges.push("badge_starter");
+
+            if (window.state.completedSubLevels.includes("1-0") && window.state.completedSubLevels.includes("1-1") && window.state.completedSubLevels.includes("1-2")) {
+                if (!window.state.badges.includes("badge_ep1")) window.state.badges.push("badge_ep1");
+            }
+
+            if (window.state.completedSubLevels.includes("4-0") && window.state.completedSubLevels.includes("4-1") && window.state.completedSubLevels.includes("4-2")) {
+                if (!window.state.badges.includes("badge_ep4")) window.state.badges.push("badge_ep4");
+            }
+
+            if (window.state.completedSubLevels.length >= 24) {
+                if (!window.state.badges.includes("badge_ep8")) window.state.badges.push("badge_ep8");
+            }
+
+            if (window.bossState && window.bossState.bossHp <= 0) {
+                if (!window.state.badges.includes("badge_boss")) window.state.badges.push("badge_boss");
+            }
+
+            if (window.state.totalScore >= 1000) {
+                if (!window.state.badges.includes("badge_score1000")) window.state.badges.push("badge_score1000");
+            }
+        }
+
+        function renderReportPage() {
+            document.getElementById('totalQuestionsAnswered').innerText = window.state.questionsAnswered;
+            document.getElementById('totalScoreAccumulated').innerText = `${window.state.totalScore} 分`;
+            document.getElementById('reportUnlockedEpisode').innerText = `第 ${Math.min(8, window.state.unlockedEpisode)} 集`;
+
+            const container = document.getElementById('badgesContainer');
+            container.innerHTML = '';
+
+            BADGES_LIST.forEach(b => {
+                const isEarned = window.state.badges.includes(b.id);
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border-2 text-center transition ${
+                    isEarned ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-yellow-100 shadow-sm' : 'border-slate-200 bg-slate-50 opacity-50'
+                }`;
+
+                card.innerHTML = `
+                    <div class="text-3xl mb-1">${b.icon}</div>
+                    <div class="font-extrabold text-xs ${isEarned ? 'text-amber-950' : 'text-slate-600'}">${b.name}</div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">${b.desc}</div>
+                    <div class="mt-2 text-[10px] font-bold ${isEarned ? 'text-emerald-600' : 'text-slate-400'}">
+                        ${isEarned ? '✓ 已解鎖' : '未獲得'}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderVictoryBadges() {
+            const container = document.getElementById('victoryBadgesContainer');
+            container.innerHTML = '';
+
+            BADGES_LIST.forEach(b => {
+                if (window.state.badges.includes(b.id)) {
+                    const item = document.createElement('div');
+                    item.className = "p-2 bg-purple-900/80 border border-yellow-400/50 rounded-xl text-center text-xs";
+                    item.innerHTML = `<span class="text-lg">${b.icon}</span> <span class="font-bold text-yellow-300 ml-1">${b.name}</span>`;
+                    container.appendChild(item);
+                }
+            });
+        }
+
+        function copyStudentReportText() {
+            const text = `【字詞小魔法師學習報告】\n學生：${window.currentStudent.className} 班 (${window.currentStudent.id}) 號\n累積總魔法積分：${window.state.totalScore} 分\n完成答題數：${window.state.questionsAnswered} 題\n當前解鎖進度：第 ${Math.min(8, window.state.unlockedEpisode)} 集\n解鎖徽章數量：${window.state.badges.length} 個`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("複製成功", "成績摘要已複製到剪貼簿，可直接貼上至 Google Classroom！");
+            });
+        }
+
+        // TEACHER DASHBOARD LOGIC
+        function renderTeacherTable() {
+            const tbody = document.getElementById('teacherTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const records = window.cloudStudentRecords || {};
+
+            const classFilter = document.getElementById('teacherClassFilter')?.value || 'ALL';
+            const searchQuery = (document.getElementById('teacherSearchInput')?.value || '').trim();
+
+            const studentKeys = Object.keys(records).sort();
+
+            if (studentKeys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無雲端學生數據紀錄</td></tr>`;
+                return;
+            }
+
+            studentKeys.forEach(key => {
+                const rec = records[key];
+                if (!rec) return;
+
+                if (classFilter !== 'ALL' && rec.className !== classFilter) return;
+                if (searchQuery && !rec.studentId.includes(searchQuery)) return;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-purple-50/50 transition";
+
+                // Teacher table displays: TotalScore (permanent), Score (spendable balance), questionsAnswered, unlockedEpisode
+                const displayTotalScore = rec.totalScore !== undefined ? rec.totalScore : (rec.score || 0);
+                const displaySpendableScore = rec.score || 0;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-extrabold text-purple-900">${rec.className || '--'} 班 (${rec.studentId || '--'}) 號</td>
+                    <td class="p-3 font-black text-emerald-600">${displayTotalScore} 分</td>
+                    <td class="p-3 text-amber-600">${displaySpendableScore} 分</td>
+                    <td class="p-3 text-slate-600">${rec.questionsAnswered || 0} 題</td>
+                    <td class="p-3 font-bold text-purple-700">第 ${rec.unlockedEpisode || 1} 集</td>
+                    <td class="p-3 text-center">
+                        <select onchange="window.teacherOverrideStudentEpisode('${key}', this.value)" class="p-1.5 bg-white border border-purple-300 rounded-xl text-xs font-bold text-purple-900 focus:ring-2 focus:ring-purple-500">
+                            <option value="">-- 手動變更進度 --</option>
+                            <option value="1" ${rec.unlockedEpisode === 1 ? 'selected' : ''}>解鎖至 第 1 集</option>
+                            <option value="2" ${rec.unlockedEpisode === 2 ? 'selected' : ''}>解鎖至 第 2 集</option>
+                            <option value="3" ${rec.unlockedEpisode === 3 ? 'selected' : ''}>解鎖至 第 3 集</option>
+                            <option value="4" ${rec.unlockedEpisode === 4 ? 'selected' : ''}>解鎖至 第 4 集</option>
+                            <option value="5" ${rec.unlockedEpisode === 5 ? 'selected' : ''}>解鎖至 第 5 集</option>
+                            <option value="6" ${rec.unlockedEpisode === 6 ? 'selected' : ''}>解鎖至 第 6 集</option>
+                            <option value="7" ${rec.unlockedEpisode === 7 ? 'selected' : ''}>解鎖至 第 7 集</option>
+                            <option value="8" ${rec.unlockedEpisode === 8 ? 'selected' : ''}>解鎖至 第 8 集</option>
+                            <option value="9" ${rec.unlockedEpisode >= 9 ? 'selected' : ''}>完美全開 (解鎖 Boss)</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTeacherTable() {
+            renderTeacherTable();
+        }
+
+        function fetchTeacherCloudRecords() {
+            if (window.cloudStudentRecords) {
+                renderTeacherTable();
+                showToast("重新整理", "已刷新雲端學生數據庫數據");
+            }
+        }
     </script>
 </body>
 </html>
